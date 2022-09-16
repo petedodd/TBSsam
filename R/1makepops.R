@@ -198,7 +198,7 @@ for(fn in flz){
   ## version w/o correlations
   v <- matrix(nrow = nrow(v), ncol = length(DG))
   for(i in 1:ncol(v)) v[,i] <- rbeta(nrow(v),shape1 = ML[[i]]$shape1,shape2 = ML[[i]]$shape2)
- 
+
   FN <- gh('data/CR0_') + gsub('\\.csv','\\.txt',fn)
   cat(1e2*colMeans(abs(cor(v) - COR)),file=FN)
   colnames(v) <- nmz
