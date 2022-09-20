@@ -95,6 +95,14 @@ appendTBSscores <- function(D){
 }
 
 
-
-
-
+## WHO algorithm
+## NOTE this acts by side-effect
+WHO.algorithm <- function(D){
+  D[,ATT:=fcase(
+       !is.na(Xpert_res), ifelse(Xpert_res==1,1,0), #Xpert result available
+       is.na(Xpert_res) & itb_exp_con.factor==1, 1, #HH contact
+       is.na(Xpert_res) & itb_exp_con.factor==0 & CXR.avail==1, ifelse(score_X>10,1,0),
+       is.na(Xpert_res) & itb_exp_con.factor==0 & CXR.avail==0, ifelse(score_noX>10,1,0),
+       default=0
+     )]
+}

@@ -73,6 +73,8 @@ fwrite(sCFS,file=here('data/compare.summary.TBS.csv'))
 ## mixture of TB vs not TB
 ## HE outcomes
 
+## WHO algorithm
+CF[,CXR.avail:=1] #code as available
 
-
-
+## apply to data (appends ATT)
+WHO.algorithm(CF)
