@@ -7,10 +7,14 @@ gh <- function(x) glue(here(x))
 
 ## load dependencies
 source(gh('R/utils/scores.R')) #scores are coded in here
+source(gh('R/utils/costutils.R')) #scores are coded in here
 
 ## load synthetic populations
 load(file=gh('data/POPS.Rdata'))
 load(file=gh('data/POPS0.Rdata'))
+
+
+set.seed(2345)
 
 ## add in scores:
 
@@ -53,6 +57,7 @@ CFS <- CF[,.(CXR=mean(score_X),noCXR=mean(score_noX),
              CXR.sd=sd(score_X),noCXR.sd=sd(score_noX)),
           by=.(TB,method)][order(TB)] #very similar
 CFS
+
 fwrite(CFS,file=here('data/compare.summary.WHO.csv'))
 
 
@@ -61,20 +66,50 @@ sCFS <- sCF[,.(TBS1S=mean(TBS1S),TBS2Sa=mean(TBS2Sa),TBS2Sb=mean(TBS2Sb),
                TBS1S.sd=sd(TBS1S),TBS2Sa.sd=sd(TBS2Sa),TBS2Sb.sd=sd(TBS2Sb)),
           by=.(TB,method)][order(TB)] #very similar
 sCFS
+
 fwrite(sCFS,file=here('data/compare.summary.TBS.csv'))
+
+
+## === create cost data
+CD <- parsecosts(gh('data/TB-Speed_SAM_Costs.csv'))
+CD[,c('cost.mid','cost.sd'):=.((High+Low)/2,(High-Low)/3.92)]
+## model as gamma parameters
+CD[,theta:=cost.sd^2/cost.mid]
+CD[,k:=cost.mid/theta]
+CDL <- CD[rep(1:nrow(CD),nrow(pop)),.(NAME,country,k,theta)]
+CDL[,id:=rep(1:nrow(pop),each=nrow(CD))]
+CDL[,value := rgamma(n=nrow(CDL),shape=k,scale=theta)]
+CDL[is.na(value),value:=0.0]
+CDL #cost data PSA
+CDW <- dcast(CDL,country+id~NAME,value.var = 'value')
+
 
 ## https://tbksp.org/en/node/2032
 ## https://docs.google.com/presentation/d/1dTrmzyfHa0KAja2ODXiQvRnpTYj1xmD2/edit#slide=id.p8
 ## 
 ## TODO
-## cost data template
-## cost & treatment outcomes
 ## CFRs & DALYs
 ## mixture of TB vs not TB
-## HE outcomes
+## clarify soc vs WHO & check costs
+## prevalence of RS-TB, RR-TB
 
-## WHO algorithm
+## choose method (could continue but need to remember)
+CF <- CF[method=='copulas']
+cnz <- CD[,unique(country)]
+
+## extend across countries;
+CF <- CF[rep(1:nrow(CF),length(cnz))]
+CF[,country:=rep(cnz,each=nrow(CF)/length(cnz))]
+
+## === WHO algorithm
 CF[,CXR.avail:=1] #code as available
+CF[runif(nrow(CF))<0.6,Xpert_res:=NA] #for now assume that 40% have available Xpert results
+
+## merge in costs
+CF <- merge(CF,CDW,by=c('id','country'))
 
 ## apply to data (appends ATT)
 WHO.algorithm(CF)
+CF <- CF[,.(country,id,TB,who.ATT,who.cost)] #lose lots of info for now for simplicity
+
+summary(CF)

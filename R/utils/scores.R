@@ -1,4 +1,4 @@
-## the scores
+## the scores & algorithms
 
 ## function to compute WHO scores
 appendWHOscores <- function(D){
@@ -95,14 +95,39 @@ appendTBSscores <- function(D){
 }
 
 
+## c.s.soc.exam	SOC: initial clinical assessment
+## c.s.tbs2step.scre	INT: TB-Speed two-steps algo: screening: clinical exam + HIV test 
+## c.s.who.exam	INT: WHO algo: clinical exam + HIV test 
+## c.s.soc.CXR	SOC: CXR
+## c.s.who.examCXR	INT: WHO algo: clinical exam + CXR
+## c.s.soc.CXRxga	SOC: CXR + Xpert Ultra on GA [for all] + urine LAM
+## c.s.soc.reassessCXRxga	SOC: reassessment exam + CXR + Xpert Ultra on GA [for all] + urine LAM
+## c.s.tbs1step.diag	INT: TB-Speed one-step algo: clinical exam + HIV test + CXR + Xpert on NPA and stool + abdo US
+## c.s.tbs2step.diag	INT: TB-Speed two-steps algo: diagnostic: CXR + Xpert on NPA and stool + abdo US
+## c.s.who.xns	INT: WHO algo: Xpert Ultra on NPA & stool
+## c.s.who.hist	INT: WHO algo: assessment of TB contacts in the previous 12 months
+## c.s.rsATT	Rifampicin-sensitive anti-TB treatment in SAM children
+## c.s.rrATT	Rifampicin-resistant anti-TB treatment in SAM children
+
+
 ## WHO algorithm
 ## NOTE this acts by side-effect
 WHO.algorithm <- function(D){
-  D[,ATT:=fcase(
+  ## treatment decision
+  D[,who.ATT:=fcase(
        !is.na(Xpert_res), ifelse(Xpert_res==1,1,0), #Xpert result available
        is.na(Xpert_res) & itb_exp_con.factor==1, 1, #HH contact
        is.na(Xpert_res) & itb_exp_con.factor==0 & CXR.avail==1, ifelse(score_X>10,1,0),
        is.na(Xpert_res) & itb_exp_con.factor==0 & CXR.avail==0, ifelse(score_noX>10,1,0),
        default=0
      )]
+  ## costs
+  D[,who.cost:=c.s.who.exam]                             #everyone gets
+  D[!is.na(Xpert_res),who.cost:=who.cost + c.s.who.xns] #NOTE assumes not available=no cost
+  D[is.na(Xpert_res),who.cost:=who.cost + c.s.who.hist] #those w/o Xpert get history assesst
+  D[is.na(Xpert_res) & itb_exp_con.factor==0 & CXR.avail==1,
+    who.cost:=who.cost + c.s.who.examCXR]
+  D[is.na(Xpert_res) & itb_exp_con.factor==0 & CXR.avail==0,
+    who.cost:=who.cost + c.s.who.exam]
+  D[who.ATT==1,who.cost:=who.cost + c.s.rsATT] #ATT costs
 }
