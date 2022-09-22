@@ -83,15 +83,7 @@ CDL[is.na(value),value:=0.0]
 CDL #cost data PSA
 CDW <- dcast(CDL,country+id~NAME,value.var = 'value')
 
-
-## https://tbksp.org/en/node/2032
-## https://docs.google.com/presentation/d/1dTrmzyfHa0KAja2ODXiQvRnpTYj1xmD2/edit#slide=id.p8
-## 
-## TODO
-## CFRs & DALYs
-## mixture of TB vs not TB
-## clarify soc vs WHO & check costs
-## prevalence of RS-TB, RR-TB
+## === WHO algorithm
 
 ## choose method (could continue but need to remember)
 CF <- CF[method=='copulas']
@@ -101,7 +93,7 @@ cnz <- CD[,unique(country)]
 CF <- CF[rep(1:nrow(CF),length(cnz))]
 CF[,country:=rep(cnz,each=nrow(CF)/length(cnz))]
 
-## === WHO algorithm
+## --- WHO algorithm
 CF[,CXR.avail:=1] #code as available
 CF[runif(nrow(CF))<0.6,Xpert_res:=NA] #for now assume that 40% have available Xpert results
 
@@ -113,3 +105,56 @@ WHO.algorithm(CF)
 CF <- CF[,.(country,id,TB,who.ATT,who.cost)] #lose lots of info for now for simplicity
 
 summary(CF)
+
+
+## === TBS algorithms
+
+## choose method (could continue but need to remember)
+sCF <- sCF[method=='copulas']
+
+## extend across countries;
+sCF <- sCF[rep(1:nrow(sCF),length(cnz))]
+sCF[,country:=rep(cnz,each=nrow(sCF)/length(cnz))]
+
+## --- TBS1S algorithm
+sCF[,CXR.avail:=1] #code as available
+## assume Xpert available for all
+
+## merge in costs
+sCF <- merge(sCF,CDW,by=c('id','country'))
+
+## apply to data (appends ATT)
+TBS1s.algorithm(sCF)
+
+
+## --- TBS2S algorithm
+## apply to data (appends ATT)
+TBS2s.algorithm(sCF)
+
+
+
+
+sCF <- sCF[,.(country,id,TB,
+              tbs1.ATT,tbs1.cost,
+              tbs2.ATT,tbs2.cost)] #lose lots of info for now for simplicity
+
+summary(sCF)
+
+
+
+## NOTE
+## docs
+## https://tbksp.org/en/node/2032
+## https://docs.google.com/presentation/d/1dTrmzyfHa0KAja2ODXiQvRnpTYj1xmD2/edit#slide=id.p8
+
+
+## TODO
+## ATT despite score in TBS
+## RR-TB
+
+## 
+## TODO
+## CFRs & DALYs
+## mixture of TB vs not TB
+## clarify soc vs WHO & check costs
+## prevalence of RS-TB, RR-TB

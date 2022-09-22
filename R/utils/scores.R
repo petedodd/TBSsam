@@ -131,3 +131,29 @@ WHO.algorithm <- function(D){
     who.cost:=who.cost + c.s.who.exam]
   D[who.ATT==1,who.cost:=who.cost + c.s.rsATT] #ATT costs
 }
+
+
+## TBS 1-step algorithm
+## NOTE this acts by side-effect
+TBS1s.algorithm <- function(D){
+  ## treatment decision
+  D[,tbs1.ATT:=ifelse(TBS1S>10,1,0)]       #TODO include catch-up clinical
+  ## costs
+  D[,tbs1.cost:=c.s.tbs1step.diag]                             #everyone gets
+  D[tbs1.ATT==1,tbs1.cost:=tbs1.cost + c.s.rsATT] #ATT costs
+}
+
+
+## TBS 2-step algorithm
+## NOTE this acts by side-effect
+TBS2s.algorithm <- function(D){
+  ## treatment decision
+  D[,tbs2.ATT:=fcase(
+       TBS2Sa>10 & TBS2Sb>10, 1,
+       default=0
+     )]       #TODO include catch-up clinical
+  ## costs
+  D[,tbs2.cost:=c.s.tbs2step.scre]                             #everyone gets
+  D[TBS2Sa>10,tbs2.cost:=tbs2.cost + c.s.tbs2step.diag]        #only those @ s2 
+  D[tbs2.ATT==1,tbs2.cost:=tbs2.cost + c.s.rsATT] #ATT costs
+}
