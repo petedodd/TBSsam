@@ -1,0 +1,7 @@
+NAME,DISTRIBUTION,MEDIAN (IQR),DESCRIPTION,SOURCE,NOTES,CATEGORY,"WORKING NOTES, QUERIES, ACTIONS",NOTES - TBS STUDY
+ontx.u5,"LN( -3.963316,0.6457913)",0.019 (0.012 - 0.029),CFR children <5 on TB treatment (HIV-),Jenkins et al 2017,used in d.cfr.tx,Outcomes,,
+hivartOR:mn,"MVN: [2.6375681, -0.5683867]",,"ORs of death on TB treatment, (OR HIV+ vs -) x (ART -/+): mean","Jenkins et al 2017, Dodd et al 2017",used in d.cfr.tx,,,
+hivartOR:sg,"MVN: [[0.2325509,-0.2325509],[-0.2325509,0.6367345]]",,"ORs of death on TB treatment, (OR HIV+ vs -) x (ART -/+): variance","Jenkins et al 2017, Dodd et al 2017",used in d.cfr.tx,,,
+notx.u5,"LN(-0.830113,0.08035318)",0.436 (0.413 - 0.460),CFR children <5 without TB treatment (HIV-),Jenkins et al 2017,used in d.cfr.notx,,,
+notxH.u5,"B(77.13050,11.10817)",0.877 (0.852 - 0.899),CFR children <5 without TB treatment (HIV+/ART-),Dodd et al 2017,used in d.cfr.notx,,,
+notxHA.u5,"B(15.18683,12.87500)",0.542 (0.478 - 0.605),CFR children <5 without TB treatment (HIV+/ART+),Dodd et al 2017,used in d.cfr.notx,,,

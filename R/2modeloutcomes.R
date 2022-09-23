@@ -132,14 +132,56 @@ TBS1s.algorithm(sCF)
 TBS2s.algorithm(sCF)
 
 
-
-
 sCF <- sCF[,.(country,id,TB,
               tbs1.ATT,tbs1.cost,
               tbs2.ATT,tbs2.cost)] #lose lots of info for now for simplicity
 
 summary(sCF)
 
+
+## ======== outcomes
+source(here('R/utils/readyoutcomes.R')) #parameters & life-years
+AddCFRs(CF,algo='WHO')
+AddCFRs(sCF,algo='TBS')
+
+## LYS
+CF <- merge(CF,LYKc[,.(country,dLYS=LYS)],by='country',all.x=TRUE)
+CF <- merge(CF,LYK[,.(country,LYS)],by='country',all.x=TRUE) #undiscounted
+sCF <- merge(sCF,LYKc[,.(country,dLYS=LYS)],by='country',all.x=TRUE)
+sCF <- merge(sCF,LYK[,.(country,LYS)],by='country',all.x=TRUE) #undiscounted
+
+## ==== TB prevalence NOTE this needs thought
+## TB	104
+## Not TB 	431
+## Total	535
+tb <- runif(max(CF$id)) < 104/535
+WHO <- rbind(CF[TB=='TB'][id %in% which(tb)],
+             CF[TB=='not TB'][id %in% which(!tb)])
+TBS <- rbind(sCF[TB=='TB'][id %in% which(tb)],
+             sCF[TB=='not TB'][id %in% which(!tb)])
+
+
+## ======== CEA outputs
+
+## combined data
+ALL <- merge(
+  WHO[,.(country,id,who.cost,who.DALYs=who.cfr*dLYS)],
+  TBS[,.(country,id,
+         tbs1.cost,tbs1.DALYs=tbs1.cfr*dLYS,
+         tbs2.cost,tbs2.DALYs=tbs2.cfr*dLYS)],
+  by=c('country','id')
+)
+
+
+clz <- names(ALL)
+clz <- clz[-c(1,2)]
+MZ <- ALL[,lapply(.SD,mean),by=country,.SDcols=clz]
+
+## wrt WHO
+MZ[,c('Dcost1','Dcost2'):=.(tbs1.cost-who.cost,tbs2.cost-who.cost)]
+MZ[,c('Ddaly1','Ddaly2'):=.(tbs1.DALYs-who.DALYs,tbs2.DALYs-who.DALYs)]
+MZ[,c('ICER1','ICER2'):=.(-Dcost1/Ddaly1,-Dcost2/Ddaly2)]
+MZ[,.(country,Dcost1,Dcost2,Ddaly1,Ddaly2,ICER1,ICER2)]
 
 
 ## NOTE
@@ -151,10 +193,8 @@ summary(sCF)
 ## TODO
 ## ATT despite score in TBS
 ## RR-TB
-
-## 
-## TODO
-## CFRs & DALYs
+## HIV
+## SAM cfrs
 ## mixture of TB vs not TB
 ## clarify soc vs WHO & check costs
 ## prevalence of RS-TB, RR-TB
