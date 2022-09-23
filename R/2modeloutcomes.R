@@ -80,8 +80,8 @@ CDL <- CD[rep(1:nrow(CD),nrow(pop)),.(NAME,country,k,theta)]
 CDL[,id:=rep(1:nrow(pop),each=nrow(CD))]
 CDL[,value := rgamma(n=nrow(CDL),shape=k,scale=theta)]
 CDL[is.na(value),value:=0.0]
-CDL #cost data PSA
 CDW <- dcast(CDL,country+id~NAME,value.var = 'value')
+CDW
 
 ## === WHO algorithm
 
@@ -94,8 +94,8 @@ CF <- CF[rep(1:nrow(CF),length(cnz))]
 CF[,country:=rep(cnz,each=nrow(CF)/length(cnz))]
 
 ## --- WHO algorithm
-CF[,CXR.avail:=1] #code as available
-CF[runif(nrow(CF))<0.6,Xpert_res:=NA] #for now assume that 40% have available Xpert results
+CF[,CXR.avail:=1] #code as available NOTE
+CF[runif(nrow(CF))<0.6,Xpert_res:=NA] #for now assume that 40% have available Xpert results TODO
 
 ## merge in costs
 CF <- merge(CF,CDW,by=c('id','country'))
@@ -181,7 +181,7 @@ MZ <- ALL[,lapply(.SD,mean),by=country,.SDcols=clz]
 MZ[,c('Dcost1','Dcost2'):=.(tbs1.cost-who.cost,tbs2.cost-who.cost)]
 MZ[,c('Ddaly1','Ddaly2'):=.(tbs1.DALYs-who.DALYs,tbs2.DALYs-who.DALYs)]
 MZ[,c('ICER1','ICER2'):=.(-Dcost1/Ddaly1,-Dcost2/Ddaly2)]
-MZ[,.(country,Dcost1,Dcost2,Ddaly1,Ddaly2,ICER1,ICER2)]
+MZ[,.(country,Dcost1,Dcost2,Ddaly1,Ddaly2,ICER1,ICER2)] #TODO BUG Zambia DALY2?
 
 
 ## NOTE
