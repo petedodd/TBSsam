@@ -20,7 +20,7 @@ appendWHOscores <- function(D){
     if(cxr_pre_hil.factor==1) B <- B +17; #enlarged LNs
     if(cxr_pre_alv.factor==1) B <- B + 5; #opacities
     if(cxr_pre_mil.factor==1) B <- B +15; #Miliary
-    if(## cxr_pre_ple.factor==1 |            #effusion TODO variable not found
+    if(## cxr_pre_ple.factor==1 |            #effusion NOTE var included in other
       cxr_pre_eff.factor==1) B <- B + 8;
     ## == no CXR algorithm
     if(itb_cou_3==1) C <- C + 5;      #cough

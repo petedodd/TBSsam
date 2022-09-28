@@ -89,8 +89,8 @@ CDL <- CD[rep(1:nrow(CD),nrow(pop)),.(NAME,country,k,theta)]
 CDL[,id:=rep(1:nrow(pop),each=nrow(CD))]
 CDL[,value := rgamma(n=nrow(CDL),shape=k,scale=theta)]
 CDL[is.na(value),value:=0.0]
-CDL #cost data PSA
 CDW <- dcast(CDL,country+id~NAME,value.var = 'value')
+CDW
 
 ## extend across countries & append:
 AddAlgoParms(CF) #mainly/all for SOC
@@ -188,6 +188,7 @@ ALL <- merge(
 clz <- names(ALL)
 clz <- clz[-c(1,2)]
 MZ <- ALL[,lapply(.SD,mean),by=country,.SDcols=clz]
+
 
 ## wrt SOC
 MZ[,c('DC_TBS1','DC_TBS2','DC_WHO'):=.(tbs1.cost-soc.cost,tbs2.cost-soc.cost,who.cost-soc.cost)]
