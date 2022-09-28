@@ -32,6 +32,11 @@ popt <- appendWHOscores(popt)
 popt0 <- POPS0[["WHO_TB"]]
 popt0 <- appendWHOscores(popt0)
 
+## check se/sp
+pop[,1-mean(score_X>10)] #specificity =51%
+pop[,1-mean(score_noX>10)] #specificity =87%
+popt[,mean(score_X>10)] #sensitivity =71%
+popt[,mean(score_noX>10)] #sensitivity =39%
 
 ## --- TB Speed
 spop <- POPS[["TBS_notTB"]]
@@ -43,6 +48,11 @@ spopt <- appendTBSscores(spopt)
 spopt0 <- POPS0[["TBS_TB"]]
 spopt0 <- appendTBSscores(spopt0)
 
+## check se/sp
+spop[,1-mean(TBS1S>10)] #specificity =76%
+spop[,1-mean(TBS2Sa>10 & TBS2Sb>10)] #specificity =86%
+spopt[,mean(TBS1S>10)] #sensitivity =84%
+spopt[,mean(TBS2Sa>10 & TBS2Sb>10)] #sensitivity =63%
 
 ## compare
 pop0[,method:='no correlation']; spop0[,method:='no correlation']
@@ -157,7 +167,7 @@ CF <- merge(CF,LYK[,.(country,LYS)],by='country',all.x=TRUE) #undiscounted
 sCF <- merge(sCF,LYKc[,.(country,dLYS=LYS)],by='country',all.x=TRUE)
 sCF <- merge(sCF,LYK[,.(country,LYS)],by='country',all.x=TRUE) #undiscounted
 
-## TODO calculate sens/spec
+## TODO calculate sens/spec for WHO
 
 
 ## ==== TB prevalence NOTE this needs thought
