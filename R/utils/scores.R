@@ -95,20 +95,6 @@ appendTBSscores <- function(D){
 }
 
 
-## c.s.soc.exam	SOC: initial clinical assessment
-## c.s.tbs2step.scre	INT: TB-Speed two-steps algo: screening: clinical exam + HIV test 
-## c.s.who.exam	INT: WHO algo: clinical exam + HIV test 
-## c.s.soc.CXR	SOC: CXR
-## c.s.who.examCXR	INT: WHO algo: clinical exam + CXR
-## c.s.soc.CXRxga	SOC: CXR + Xpert Ultra on GA [for all] + urine LAM
-## c.s.soc.reassessCXRxga	SOC: reassessment exam + CXR + Xpert Ultra on GA [for all] + urine LAM
-## c.s.tbs1step.diag	INT: TB-Speed one-step algo: clinical exam + HIV test + CXR + Xpert on NPA and stool + abdo US
-## c.s.tbs2step.diag	INT: TB-Speed two-steps algo: diagnostic: CXR + Xpert on NPA and stool + abdo US
-## c.s.who.xns	INT: WHO algo: Xpert Ultra on NPA & stool
-## c.s.who.hist	INT: WHO algo: assessment of TB contacts in the previous 12 months
-## c.s.rsATT	Rifampicin-sensitive anti-TB treatment in SAM children
-## c.s.rrATT	Rifampicin-resistant anti-TB treatment in SAM children
-
 
 ## WHO algorithm
 ## NOTE this acts by side-effect
@@ -157,3 +143,42 @@ TBS2s.algorithm <- function(D){
   D[TBS2Sa>10,tbs2.cost:=tbs2.cost + c.s.tbs2step.diag]        #only those @ s2 
   D[tbs2.ATT==1,tbs2.cost:=tbs2.cost + c.s.rsATT] #ATT costs
 }
+
+
+## SOC
+## NOTE this acts by side-effect
+SOC.algorithm <- function(D){
+  ## treatment decision
+  D[,soc.ATT:=fcase(
+       ptb==0,0,                                    #if not considered presumptive
+       ptb==1 & testing.done==0,ifelse(TB=='TB',clin.sense,1-clin.spec), #clinical
+       ptb==1 & testing.done==1 & xray.only==1,ifelse(TB=='TB',clin.senseX,1-clin.specX), #clinical+X
+       ptb==1 & testing.done==1 & xray.only==0,ifelse(TB=='TB',clin.senseU,1-clin.specU), #inc. bac
+       default=0
+     )]
+  ## costs
+  D[,soc.cost:=c.s.soc.exam]                             #everyone gets
+  D[ptb==1 & testing.done==0,soc.cost:=soc.cost + 0] #clinical
+  D[ptb==1 & testing.done==1 & xray.only==1,soc.cost:=soc.cost + c.s.soc.CXR] #clinical+X
+  D[ptb==1 & testing.done==1 & xray.only==0,soc.cost:=soc.cost + c.s.soc.CXRxga] #inc. bac
+  D[soc.ATT==1,soc.cost:=soc.cost + c.s.rsATT] #ATT costs
+}
+
+## TODO: 1) cost soc clinical only? 2) use of reassess in soc?
+
+## c.s.soc.exam	SOC: initial clinical assessment
+## c.s.soc.CXR	SOC: CXR
+## c.s.soc.CXRxga	SOC: CXR + Xpert Ultra on GA [for all] + urine LAM
+## c.s.soc.reassessCXRxga	SOC: reassessment exam + CXR + Xpert Ultra on GA [for all] + urine LAM
+
+## c.s.who.examCXR	INT: WHO algo: clinical exam + CXR
+## c.s.who.exam	INT: WHO algo: clinical exam + HIV test 
+## c.s.who.xns	INT: WHO algo: Xpert Ultra on NPA & stool
+## c.s.who.hist	INT: WHO algo: assessment of TB contacts in the previous 12 months
+
+## c.s.tbs2step.scre	INT: TB-Speed two-steps algo: screening: clinical exam + HIV test 
+## c.s.tbs1step.diag	INT: TB-Speed one-step algo: clinical exam + HIV test + CXR + Xpert on NPA and stool + abdo US
+## c.s.tbs2step.diag	INT: TB-Speed two-steps algo: diagnostic: CXR + Xpert on NPA and stool + abdo US
+
+## c.s.rsATT	Rifampicin-sensitive anti-TB treatment in SAM children
+## c.s.rrATT	Rifampicin-resistant anti-TB treatment in SAM children
