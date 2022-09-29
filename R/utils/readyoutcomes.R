@@ -53,7 +53,7 @@ if(!file.exists(fn)){
 library(HEdtree)
 
 ## prior parameters
-PD0 <- read.csv(here('data/parameters.csv')) #read in
+PD0 <- read.csv(here('data/SAMparameters.csv')) #read in
 
 ## combine different parameter types
 P <- parse.parmtable(PD0)             #convert into parameter object
@@ -61,10 +61,16 @@ P <- parse.parmtable(PD0)             #convert into parameter object
 ## for now neglect HIV
 AddCFRs <- function(D,algo='WHO'){
   if(algo=='WHO'){
+    ## WHO version
     D[TB=='not TB' & who.ATT==0,who.cfr:=0]
     D[TB=='not TB' & who.ATT==1,who.cfr:=0]
     D[TB=='TB' & who.ATT==0,who.cfr:=P$notx.u5$r(sum(TB=='TB' & who.ATT==0))]
     D[TB=='TB' & who.ATT==1,who.cfr:=P$ontx.u5$r(sum(TB=='TB' & who.ATT==1))]
+    ## SOC
+    D[TB=='not TB' & soc.ATT==0,soc.cfr:=0]
+    D[TB=='not TB' & soc.ATT==1,soc.cfr:=0]
+    D[TB=='TB' & soc.ATT==0,soc.cfr:=P$notx.u5$r(sum(TB=='TB' & soc.ATT==0))]
+    D[TB=='TB' & soc.ATT==1,soc.cfr:=P$ontx.u5$r(sum(TB=='TB' & soc.ATT==1))]
   } else {
     ## 1 step
     D[TB=='not TB' & tbs1.ATT==0,tbs1.cfr:=0]
@@ -79,3 +85,18 @@ AddCFRs <- function(D,algo='WHO'){
   }
 }
 
+
+## note we have a stochastic model
+AddAlgoParms <- function(D){
+  ## coverage of elements
+  D[,ptb:=ifelse(P$s.soc.ptbcov$r(nrow(D))>0.5,1,0)]
+  D[,testing.done:=ifelse(P$s.soc.testingcov$r(nrow(D))>0.5,1,0)]
+  D[,xray.only:=ifelse(P$s.soc.CXRonly$r(nrow(D))>0.5,1,0)]
+  ## accuracy
+  D[,clin.sense:=ifelse(P$s.soc.clinsense$r(nrow(D))>0.5,1,0)]
+  D[,clin.spec:=ifelse(P$s.soc.clinspec$r(nrow(D))>0.5,1,0)]
+  D[,clin.senseX:=ifelse(P$s.soc.clinsenseX$r(nrow(D))>0.5,1,0)]
+  D[,clin.specX:=ifelse(P$s.soc.clinspecX$r(nrow(D))>0.5,1,0)]
+  D[,clin.senseU:=ifelse(P$s.soc.clinsenseU$r(nrow(D))>0.5,1,0)]
+  D[,clin.specU:=ifelse(P$s.soc.clinspecU$r(nrow(D))>0.5,1,0)]
+}

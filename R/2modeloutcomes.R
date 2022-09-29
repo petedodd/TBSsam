@@ -1,13 +1,18 @@
 ## modelling the scores on the synthetic populations
+rm(list=ls())
 library(here)
 library(glue)
 library(data.table)
 library(ggplot2)
 gh <- function(x) glue(here(x))
+cnz <- c("Cambodia","Cameroon","Côte d'Ivoire","Mozambique",
+         "Sierra Leone","Uganda","Zambia")
 
 ## load dependencies
 source(gh('R/utils/scores.R')) #scores are coded in here
 source(gh('R/utils/costutils.R')) #cost data parser
+source(here('R/utils/readyoutcomes.R')) #parameters & life-years
+
 
 ## load synthetic populations
 load(file=gh('data/POPS.Rdata'))
@@ -28,6 +33,11 @@ popt <- appendWHOscores(popt)
 popt0 <- POPS0[["WHO_TB"]]
 popt0 <- appendWHOscores(popt0)
 
+## check se/sp
+pop[,1-mean(score_X>10)] #specificity =51%
+pop[,1-mean(score_noX>10)] #specificity =87%
+popt[,mean(score_X>10)] #sensitivity =71%
+popt[,mean(score_noX>10)] #sensitivity =39%
 
 ## --- TB Speed
 spop <- POPS[["TBS_notTB"]]
@@ -39,6 +49,11 @@ spopt <- appendTBSscores(spopt)
 spopt0 <- POPS0[["TBS_TB"]]
 spopt0 <- appendTBSscores(spopt0)
 
+## check se/sp
+spop[,1-mean(TBS1S>10)] #specificity =76%
+spop[,1-mean(TBS2Sa>10 & TBS2Sb>10)] #specificity =86%
+spopt[,mean(TBS1S>10)] #sensitivity =84%
+spopt[,mean(TBS2Sa>10 & TBS2Sb>10)] #sensitivity =63%
 
 ## compare
 pop0[,method:='no correlation']; spop0[,method:='no correlation']
@@ -70,6 +85,11 @@ sCFS
 fwrite(sCFS,file=here('data/compare.summary.TBS.csv'))
 
 
+## choose method (could continue but need to remember)
+CF <- CF[method=='copulas']
+sCF <- sCF[method=='copulas']
+intersect(names(CF),names(sCF))
+
 ## === create cost data
 CD <- parsecosts(gh('data/TB-Speed_SAM_Costs.csv'))
 CD[,c('cost.mid','cost.sd'):=.((High+Low)/2,(High-Low)/3.92)]
@@ -83,34 +103,33 @@ CDL[is.na(value),value:=0.0]
 CDW <- dcast(CDL,country+id~NAME,value.var = 'value')
 CDW
 
-## === WHO algorithm
-
-## choose method (could continue but need to remember)
-CF <- CF[method=='copulas']
-cnz <- CD[,unique(country)]
+## extend across countries & append:
+AddAlgoParms(CF) #mainly/all for SOC
 
 ## extend across countries;
 CF <- CF[rep(1:nrow(CF),length(cnz))]
 CF[,country:=rep(cnz,each=nrow(CF)/length(cnz))]
 
-## --- WHO algorithm
-CF[,CXR.avail:=1] #code as available NOTE
-CF[runif(nrow(CF))<0.6,Xpert_res:=NA] #for now assume that 40% have available Xpert results TODO
+## TODO change para
+## === WHO algorithm
+CF[,CXR.avail:=1] #code as available
+CF[runif(nrow(CF))<0.6,Xpert_res:=NA] #for now assume that 40% have available Xpert results
 
 ## merge in costs
 CF <- merge(CF,CDW,by=c('id','country'))
 
 ## apply to data (appends ATT)
 WHO.algorithm(CF)
-CF <- CF[,.(country,id,TB,who.ATT,who.cost)] #lose lots of info for now for simplicity
 
+## === SOC algorithm
+SOC.algorithm(CF)
+
+## ditch most signs for simplificty
+CF <- CF[,.(country,id,TB,who.ATT,who.cost,soc.ATT,soc.cost)] #lose lots of info for now for simplicity
 summary(CF)
 
 
 ## === TBS algorithms
-
-## choose method (could continue but need to remember)
-sCF <- sCF[method=='copulas']
 
 ## extend across countries;
 sCF <- sCF[rep(1:nrow(sCF),length(cnz))]
@@ -140,8 +159,7 @@ summary(sCF)
 
 
 ## ======== outcomes
-source(here('R/utils/readyoutcomes.R')) #parameters & life-years
-AddCFRs(CF,algo='WHO')
+AddCFRs(CF,algo='WHO') #includes SOC
 AddCFRs(sCF,algo='TBS')
 
 ## LYS
@@ -149,6 +167,9 @@ CF <- merge(CF,LYKc[,.(country,dLYS=LYS)],by='country',all.x=TRUE)
 CF <- merge(CF,LYK[,.(country,LYS)],by='country',all.x=TRUE) #undiscounted
 sCF <- merge(sCF,LYKc[,.(country,dLYS=LYS)],by='country',all.x=TRUE)
 sCF <- merge(sCF,LYK[,.(country,LYS)],by='country',all.x=TRUE) #undiscounted
+
+## TODO calculate sens/spec for WHO
+
 
 ## ==== TB prevalence NOTE this needs thought
 ## TB	104
@@ -165,7 +186,9 @@ TBS <- rbind(sCF[TB=='TB'][id %in% which(tb)],
 
 ## combined data
 ALL <- merge(
-  WHO[,.(country,id,who.cost,who.DALYs=who.cfr*dLYS)],
+  WHO[,.(country,id,
+         who.cost,who.DALYs=who.cfr*dLYS,
+         soc.cost,soc.DALYs=soc.cfr*dLYS)],
   TBS[,.(country,id,
          tbs1.cost,tbs1.DALYs=tbs1.cfr*dLYS,
          tbs2.cost,tbs2.DALYs=tbs2.cfr*dLYS)],
@@ -177,11 +200,17 @@ clz <- names(ALL)
 clz <- clz[-c(1,2)]
 MZ <- ALL[,lapply(.SD,mean),by=country,.SDcols=clz]
 
-## wrt WHO
-MZ[,c('Dcost1','Dcost2'):=.(tbs1.cost-who.cost,tbs2.cost-who.cost)]
-MZ[,c('Ddaly1','Ddaly2'):=.(tbs1.DALYs-who.DALYs,tbs2.DALYs-who.DALYs)]
-MZ[,c('ICER1','ICER2'):=.(-Dcost1/Ddaly1,-Dcost2/Ddaly2)]
-MZ[,.(country,Dcost1,Dcost2,Ddaly1,Ddaly2,ICER1,ICER2)] #TODO BUG Zambia DALY2?
+
+## wrt SOC
+MZ[,c('DC_TBS1','DC_TBS2','DC_WHO'):=.(tbs1.cost-soc.cost,tbs2.cost-soc.cost,who.cost-soc.cost)]
+MZ[,c('DD_TBS1','DD_TBS2','DD_WHO'):=.(tbs1.DALYs-soc.DALYs,tbs2.DALYs-soc.DALYs,who.DALYs-soc.DALYs)]
+MZ[,c('ICER_TBS1','ICER_TBS2','ICER_WHO'):=.(-DC_TBS1/DD_TBS1,-DC_TBS2/DD_TBS2,-DC_WHO/DD_WHO)]
+
+
+MZ[,.(country,
+      DC_TBS1,DC_TBS2,DC_WHO,
+      DD_TBS1,DD_TBS2,DD_WHO,
+      ICER_TBS1,ICER_TBS2,ICER_WHO)]
 
 
 ## NOTE
@@ -191,6 +220,7 @@ MZ[,.(country,Dcost1,Dcost2,Ddaly1,Ddaly2,ICER1,ICER2)] #TODO BUG Zambia DALY2?
 
 
 ## TODO
+## sense/spec check
 ## ATT despite score in TBS
 ## RR-TB
 ## HIV
@@ -198,3 +228,6 @@ MZ[,.(country,Dcost1,Dcost2,Ddaly1,Ddaly2,ICER1,ICER2)] #TODO BUG Zambia DALY2?
 ## mixture of TB vs not TB
 ## clarify soc vs WHO & check costs
 ## prevalence of RS-TB, RR-TB
+
+## NOTE
+## presumptive TB same w/ & w/o TB - no info on spec
