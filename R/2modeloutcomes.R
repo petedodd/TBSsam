@@ -90,14 +90,20 @@ CF <- CF[method=='copulas']
 sCF <- sCF[method=='copulas']
 intersect(names(CF),names(sCF))
 
+## grow?
+Nfold <- 10
+CF <- CF[rep(1:nrow(CF),Nfold)]
+sCF <- sCF[rep(1:nrow(sCF),Nfold)]
+CF[,id:=1:nrow(CF)]; sCF[,id:=1:nrow(sCF)];
+
 ## === create cost data
 CD <- parsecosts(gh('data/TB-Speed_SAM_Costs.csv'))
 CD[,c('cost.mid','cost.sd'):=.((High+Low)/2,(High-Low)/3.92)]
 ## model as gamma parameters
 CD[,theta:=cost.sd^2/cost.mid]
 CD[,k:=cost.mid/theta]
-CDL <- CD[rep(1:nrow(CD),nrow(pop)),.(NAME,country,k,theta)]
-CDL[,id:=rep(1:nrow(pop),each=nrow(CD))]
+CDL <- CD[rep(1:nrow(CD),nrow(CF)),.(NAME,country,k,theta)]
+CDL[,id:=rep(1:nrow(CF),each=nrow(CD))]
 CDL[,value := rgamma(n=nrow(CDL),shape=k,scale=theta)]
 CDL[is.na(value),value:=0.0]
 CDW <- dcast(CDL,country+id~NAME,value.var = 'value')
@@ -110,10 +116,10 @@ AddAlgoParms(CF) #mainly/all for SOC
 CF <- CF[rep(1:nrow(CF),length(cnz))]
 CF[,country:=rep(cnz,each=nrow(CF)/length(cnz))]
 
-## TODO change para
+## TODO stool rather than GA params?
 ## === WHO algorithm
 CF[,CXR.avail:=1] #code as available
-CF[runif(nrow(CF))<0.6,Xpert_res:=NA] #for now assume that 40% have available Xpert results
+CF[P$s.soc.CXRonly$r(nrow(CF))>runif(nrow(CF)),Xpert_res:=NA] #for now assume same mWRD avail as via GA in SOC
 
 ## merge in costs
 CF <- merge(CF,CDW,by=c('id','country'))
@@ -124,9 +130,13 @@ WHO.algorithm(CF)
 ## === SOC algorithm
 SOC.algorithm(CF)
 
+## NOTE
 ## ditch most signs for simplificty
 CF <- CF[,.(country,id,TB,who.ATT,who.cost,soc.ATT,soc.cost)] #lose lots of info for now for simplicity
 summary(CF)
+
+## se/sp of algs
+CF[,.(who=mean(who.ATT),soc=mean(soc.ATT)),by=TB]
 
 
 ## === TBS algorithms
@@ -168,14 +178,9 @@ CF <- merge(CF,LYK[,.(country,LYS)],by='country',all.x=TRUE) #undiscounted
 sCF <- merge(sCF,LYKc[,.(country,dLYS=LYS)],by='country',all.x=TRUE)
 sCF <- merge(sCF,LYK[,.(country,LYS)],by='country',all.x=TRUE) #undiscounted
 
-## TODO calculate sens/spec for WHO
-
 
 ## ==== TB prevalence NOTE this needs thought
-## TB	104
-## Not TB 	431
-## Total	535
-tb <- runif(max(CF$id)) < 104/535
+tb <- runif(max(CF$id)) < P$s.TBprev$r(max(CF$id))
 WHO <- rbind(CF[TB=='TB'][id %in% which(tb)],
              CF[TB=='not TB'][id %in% which(!tb)])
 TBS <- rbind(sCF[TB=='TB'][id %in% which(tb)],

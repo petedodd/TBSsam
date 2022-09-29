@@ -89,14 +89,30 @@ AddCFRs <- function(D,algo='WHO'){
 ## note we have a stochastic model
 AddAlgoParms <- function(D){
   ## coverage of elements
-  D[,ptb:=ifelse(P$s.soc.ptbcov$r(nrow(D))>0.5,1,0)]
-  D[,testing.done:=ifelse(P$s.soc.testingcov$r(nrow(D))>0.5,1,0)]
-  D[,xray.only:=ifelse(P$s.soc.CXRonly$r(nrow(D))>0.5,1,0)]
+  D[,ptb:=ifelse(P$s.soc.ptbcov$r(nrow(D))>runif(nrow(D)),1,0)]
+  D[,testing.done:=ifelse(P$s.soc.testingcov$r(nrow(D))>runif(nrow(D)),1,0)]
+  D[,xray.only:=ifelse(P$s.soc.CXRonly$r(nrow(D))>runif(nrow(D)),1,0)]
   ## accuracy
-  D[,clin.sense:=ifelse(P$s.soc.clinsense$r(nrow(D))>0.5,1,0)]
-  D[,clin.spec:=ifelse(P$s.soc.clinspec$r(nrow(D))>0.5,1,0)]
-  D[,clin.senseX:=ifelse(P$s.soc.clinsenseX$r(nrow(D))>0.5,1,0)]
-  D[,clin.specX:=ifelse(P$s.soc.clinspecX$r(nrow(D))>0.5,1,0)]
-  D[,clin.senseU:=ifelse(P$s.soc.clinsenseU$r(nrow(D))>0.5,1,0)]
-  D[,clin.specU:=ifelse(P$s.soc.clinspecU$r(nrow(D))>0.5,1,0)]
+  D[,clin.sense:=ifelse(P$sens.clin$r(nrow(D))>runif(nrow(D)),1,0)]
+  D[,clin.spec:=ifelse(P$spec.clin$r(nrow(D))>runif(nrow(D)),1,0)]
+  D[,clin.senseX:=ifelse(P$sens.clinCXR.soc$r(nrow(D))>runif(nrow(D)),1,0)]
+  D[,clin.specX:=ifelse(P$spec.clinCXR.soc$r(nrow(D))>runif(nrow(D)),1,0)]
+  ## combining clinical and GA
+  tmp.sens <- 1 - (1-P$sens.clin$r(nrow(D))) * (1-P$sens.xga$r(nrow(D)))
+  tmp.spec <- 1 - (P$spec.clin$r(nrow(D))) * (1-P$spec.xga$r(nrow(D)))
+  D[,clin.senseU:=ifelse(tmp.sens>runif(nrow(D)),1,0)]
+  D[,clin.specU:=ifelse(tmp.spec>runif(nrow(D)),1,0)]
 }
+
+
+## ## parameter notes
+## ## s.soc.ptbcov - based on expert opinion @ 80%, take +/-10
+## (tpz <- getAB(0.8,(10/196)^2))
+## curve(dbeta(x,tpz$a,tpz$b),n=500)
+## ## s.soc.testingcov
+## (tpz <- getAB((0.8+0.95)/2,(0.95-0.8)^2))
+## curve(dbeta(x,tpz$a,tpz$b),n=500) #NOTE mode @ 1 but concords with description from experts
+## ## s.soc.CXRonly
+## (tpz <- getAB(0.75,(50/392)^2))
+## curve(dbeta(x,tpz$a,tpz$b),n=500) #NOTE 1-frac with GA done as well
+
