@@ -59,8 +59,7 @@ PD0 <- read.csv(here('data/SAMparameters.csv')) #read in
 P <- parse.parmtable(PD0)             #convert into parameter object
 
 ## for now neglect HIV
-AddCFRs <- function(D,algo='WHO'){
-  if(algo=='WHO'){
+AddCFRs <- function(D){
     ## WHO version
     D[TB=='not TB' & who.ATT==0,who.cfr:=0]
     D[TB=='not TB' & who.ATT==1,who.cfr:=0]
@@ -71,7 +70,6 @@ AddCFRs <- function(D,algo='WHO'){
     D[TB=='not TB' & soc.ATT==1,soc.cfr:=0]
     D[TB=='TB' & soc.ATT==0,soc.cfr:=P$notx.u5$r(sum(TB=='TB' & soc.ATT==0))]
     D[TB=='TB' & soc.ATT==1,soc.cfr:=P$ontx.u5$r(sum(TB=='TB' & soc.ATT==1))]
-  } else {
     ## 1 step
     D[TB=='not TB' & tbs1.ATT==0,tbs1.cfr:=0]
     D[TB=='not TB' & tbs1.ATT==1,tbs1.cfr:=0]
@@ -82,7 +80,6 @@ AddCFRs <- function(D,algo='WHO'){
     D[TB=='not TB' & tbs2.ATT==1,tbs2.cfr:=0]
     D[TB=='TB' & tbs2.ATT==0,tbs2.cfr:=P$notx.u5$r(sum(TB=='TB' & tbs2.ATT==0))]
     D[TB=='TB' & tbs2.ATT==1,tbs2.cfr:=P$ontx.u5$r(sum(TB=='TB' & tbs2.ATT==1))]
-  }
 }
 
 

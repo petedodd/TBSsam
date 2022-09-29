@@ -15,23 +15,31 @@ source(here('R/utils/readyoutcomes.R')) #parameters & life-years
 
 
 ## load synthetic populations
-load(file=gh('data/POPS.Rdata'))
-load(file=gh('data/POPS0.Rdata'))
+load(file=gh('data/nPOPS.Rdata'))
+load(file=gh('data/nPOPS0.Rdata'))
+## load(file=gh('data/POPS.Rdata'))
+## load(file=gh('data/POPS0.Rdata'))
 
 
 set.seed(2345)
 
 ## add in scores:
+pop <- POPS[["SAM_notTB"]]
+pop0 <- POPS0[["SAM_notTB"]]
+popt <- POPS[["SAM_TB"]]
+popt0 <- POPS0[["SAM_TB"]]
 
 ## --- WHO
-pop <- POPS[["WHO_notTB"]]
 pop <- appendWHOscores(pop)
-pop0 <- POPS0[["WHO_notTB"]]
 pop0 <- appendWHOscores(pop0)
-popt <- POPS[["WHO_TB"]]
 popt <- appendWHOscores(popt)
-popt0 <- POPS0[["WHO_TB"]]
 popt0 <- appendWHOscores(popt0)
+
+## --- TB Speed
+pop <- appendTBSscores(pop)
+pop0 <- appendTBSscores(pop0)
+popt <- appendTBSscores(popt)
+popt0 <- appendTBSscores(popt0)
 
 ## check se/sp
 pop[,1-mean(score_X>10)] #specificity =51%
@@ -39,62 +47,43 @@ pop[,1-mean(score_noX>10)] #specificity =87%
 popt[,mean(score_X>10)] #sensitivity =71%
 popt[,mean(score_noX>10)] #sensitivity =39%
 
-## --- TB Speed
-spop <- POPS[["TBS_notTB"]]
-spop <- appendTBSscores(spop)
-spop0 <- POPS0[["TBS_notTB"]]
-spop0 <- appendTBSscores(spop0)
-spopt <- POPS[["TBS_TB"]]
-spopt <- appendTBSscores(spopt)
-spopt0 <- POPS0[["TBS_TB"]]
-spopt0 <- appendTBSscores(spopt0)
-
 ## check se/sp
-spop[,1-mean(TBS1S>10)] #specificity =76%
-spop[,1-mean(TBS2Sa>10 & TBS2Sb>10)] #specificity =86%
-spopt[,mean(TBS1S>10)] #sensitivity =84%
-spopt[,mean(TBS2Sa>10 & TBS2Sb>10)] #sensitivity =63%
+pop[,1-mean(TBS1S>10)] #specificity =76%
+pop[,1-mean(TBS2Sa>10 & TBS2Sb>10)] #specificity =86%
+popt[,mean(TBS1S>10)] #sensitivity =84%
+popt[,mean(TBS2Sa>10 & TBS2Sb>10)] #sensitivity =63%
 
 ## compare
-pop0[,method:='no correlation']; spop0[,method:='no correlation']
-pop[,method:='copulas']; spop[,method:='copulas']
-popt0[,method:='no correlation']; spopt0[,method:='no correlation']
-popt[,method:='copulas']; spopt[,method:='copulas']
-pop0[,TB:='not TB']; spop0[,TB:='not TB']
-pop[,TB:='not TB']; spop[,TB:='not TB']
-popt0[,TB:='TB']; spopt0[,TB:='TB']
-popt[,TB:='TB']; spopt[,TB:='TB']
-CF <- rbindlist(list(pop,popt,pop0,popt0)) #WHO version
-sCF <- rbindlist(list(spop,spopt,spop0,spopt0)) #TBS version
+pop0[,method:='no correlation']
+pop[,method:='copulas']
+popt0[,method:='no correlation']
+popt[,method:='copulas']
+pop0[,TB:='not TB']
+pop[,TB:='not TB']
+popt0[,TB:='TB']
+popt[,TB:='TB']
+CF <- rbindlist(list(pop,popt,pop0,popt0)) #all
 
-## summary WHO
+
 CFS <- CF[,.(CXR=mean(score_X),noCXR=mean(score_noX),
-             CXR.sd=sd(score_X),noCXR.sd=sd(score_noX)),
+             CXR.sd=sd(score_X),noCXR.sd=sd(score_noX),
+             TBS1S=mean(TBS1S),TBS2Sa=mean(TBS2Sa),TBS2Sb=mean(TBS2Sb),
+             TBS1S.sd=sd(TBS1S),TBS2Sa.sd=sd(TBS2Sa),TBS2Sb.sd=sd(TBS2Sb)),
           by=.(TB,method)][order(TB)] #very similar
 CFS
 
-fwrite(CFS,file=here('data/compare.summary.WHO.csv'))
+fwrite(CFS,file=here('data/compare.summary.both.csv'))
 
-
-## summary TBS
-sCFS <- sCF[,.(TBS1S=mean(TBS1S),TBS2Sa=mean(TBS2Sa),TBS2Sb=mean(TBS2Sb),
-               TBS1S.sd=sd(TBS1S),TBS2Sa.sd=sd(TBS2Sa),TBS2Sb.sd=sd(TBS2Sb)),
-          by=.(TB,method)][order(TB)] #very similar
-sCFS
-
-fwrite(sCFS,file=here('data/compare.summary.TBS.csv'))
 
 
 ## choose method (could continue but need to remember)
 CF <- CF[method=='copulas']
-sCF <- sCF[method=='copulas']
-intersect(names(CF),names(sCF))
 
 ## grow?
 Nfold <- 10
 CF <- CF[rep(1:nrow(CF),Nfold)]
-sCF <- sCF[rep(1:nrow(sCF),Nfold)]
-CF[,id:=1:nrow(CF)]; sCF[,id:=1:nrow(sCF)];
+## sCF <- sCF[rep(1:nrow(sCF),Nfold)]
+CF[,id:=1:nrow(CF)]; ## sCF[,id:=1:nrow(sCF)];
 
 ## === create cost data
 CD <- parsecosts(gh('data/TB-Speed_SAM_Costs.csv'))
@@ -130,76 +119,35 @@ WHO.algorithm(CF)
 ## === SOC algorithm
 SOC.algorithm(CF)
 
-## NOTE
-## ditch most signs for simplificty
-CF <- CF[,.(country,id,TB,who.ATT,who.cost,soc.ATT,soc.cost)] #lose lots of info for now for simplicity
-summary(CF)
-
-## se/sp of algs
-CF[,.(who=mean(who.ATT),soc=mean(soc.ATT)),by=TB]
-
 
 ## === TBS algorithms
 
-## extend across countries;
-sCF <- sCF[rep(1:nrow(sCF),length(cnz))]
-sCF[,country:=rep(cnz,each=nrow(sCF)/length(cnz))]
-
 ## --- TBS1S algorithm
-sCF[,CXR.avail:=1] #code as available
-## assume Xpert available for all
-
-## merge in costs
-sCF <- merge(sCF,CDW,by=c('id','country'))
-
 ## apply to data (appends ATT)
-TBS1s.algorithm(sCF)
+TBS1s.algorithm(CF)
 
 
 ## --- TBS2S algorithm
 ## apply to data (appends ATT)
-TBS2s.algorithm(sCF)
+TBS2s.algorithm(CF)
 
 
-sCF <- sCF[,.(country,id,TB,
-              tbs1.ATT,tbs1.cost,
-              tbs2.ATT,tbs2.cost)] #lose lots of info for now for simplicity
+## NOTE
+## ditch most signs for simplificty
+CF <- CF[,.(country,id,TB,
+            who.ATT,who.cost,soc.ATT,soc.cost,
+            tbs1.ATT,tbs1.cost,tbs2.ATT,tbs2.cost)] #lose lots of info for now for simplicity
+summary(CF)
 
-summary(sCF)
+## se/sp of algs
+CF[,.(who=mean(who.ATT),soc=mean(soc.ATT),
+      tbs1=mean(tbs1.ATT),tbs2=mean(tbs2.ATT)),by=TB]
 
 
 ## ======== outcomes
-AddCFRs(CF,algo='WHO') #includes SOC
-AddCFRs(sCF,algo='TBS')
+AddCFRs(CF)
 
-## LYS
-CF <- merge(CF,LYKc[,.(country,dLYS=LYS)],by='country',all.x=TRUE)
-CF <- merge(CF,LYK[,.(country,LYS)],by='country',all.x=TRUE) #undiscounted
-sCF <- merge(sCF,LYKc[,.(country,dLYS=LYS)],by='country',all.x=TRUE)
-sCF <- merge(sCF,LYK[,.(country,LYS)],by='country',all.x=TRUE) #undiscounted
-
-
-## ==== TB prevalence NOTE this needs thought
-tb <- runif(max(CF$id)) < P$s.TBprev$r(max(CF$id))
-WHO <- rbind(CF[TB=='TB'][id %in% which(tb)],
-             CF[TB=='not TB'][id %in% which(!tb)])
-TBS <- rbind(sCF[TB=='TB'][id %in% which(tb)],
-             sCF[TB=='not TB'][id %in% which(!tb)])
-
-
-## ======== CEA outputs
-
-## combined data
-ALL <- merge(
-  WHO[,.(country,id,
-         who.cost,who.DALYs=who.cfr*dLYS,
-         soc.cost,soc.DALYs=soc.cfr*dLYS)],
-  TBS[,.(country,id,
-         tbs1.cost,tbs1.DALYs=tbs1.cfr*dLYS,
-         tbs2.cost,tbs2.DALYs=tbs2.cfr*dLYS)],
-  by=c('country','id')
-)
-
+ALL <- combineHE(CF)
 
 clz <- names(ALL)
 clz <- clz[-c(1,2)]
@@ -217,6 +165,14 @@ MZ[,.(country,
       DD_TBS1,DD_TBS2,DD_WHO,
       ICER_TBS1,ICER_TBS2,ICER_WHO)]
 
+
+M <- reshapeINC(ALL)
+MS <- M[,.(`DALYs averted`=mean(`DALYs averted`),
+           `Incremental cost`=mean(`Incremental cost`)),
+        by=.(country,algorithm)]
+
+GP <- CEAplots(MS)
+ggsave(GP,file=here('graphs/CEhull.pdf'),h=8,w=10)
 
 ## NOTE
 ## docs

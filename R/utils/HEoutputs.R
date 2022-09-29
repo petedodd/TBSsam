@@ -1,36 +1,29 @@
 library(ggplot2)
 library(scales)
 
-combineHE <- function(WS,TS){
+combineHE <- function(WS
+                      ){
 
   ## LYS
   WS <- merge(WS,LYKc[,.(country,dLYS=LYS)],by='country',all.x=TRUE)
   WS <- merge(WS,LYK[,.(country,LYS)],by='country',all.x=TRUE) #undiscounted
-  TS <- merge(TS,LYKc[,.(country,dLYS=LYS)],by='country',all.x=TRUE)
-  TS <- merge(TS,LYK[,.(country,LYS)],by='country',all.x=TRUE) #undiscounted
 
 
   ## ==== TB prevalence NOTE this needs thought
   tb <- runif(max(WS$id)) < P$s.TBprev$r(max(WS$id))
-  WHO <- rbind(WS[TB=='TB'][id %in% which(tb)],
+  WH <- rbind(WS[TB=='TB'][id %in% which(tb)],
                WS[TB=='not TB'][id %in% which(!tb)])
-  TBS <- rbind(TS[TB=='TB'][id %in% which(tb)],
-               TS[TB=='not TB'][id %in% which(!tb)])
 
 
   ## ======== CEA outputs
 
   ## combined data
-  ALL <- merge(
-    WHO[,.(country,id,
-           who.cost,who.DALYs=who.cfr*dLYS,
-           soc.cost,soc.DALYs=soc.cfr*dLYS)],
-    TBS[,.(country,id,
-           tbs1.cost,tbs1.DALYs=tbs1.cfr*dLYS,
-           tbs2.cost,tbs2.DALYs=tbs2.cfr*dLYS)],
-    by=c('country','id')
-  )
-
+  ALL <- WH[,.(country,id,
+               who.cost,who.DALYs=who.cfr*dLYS,
+               soc.cost,soc.DALYs=soc.cfr*dLYS,
+               tbs1.cost,tbs1.DALYs=tbs1.cfr*dLYS,
+               tbs2.cost,tbs2.DALYs=tbs2.cfr*dLYS)]
+ 
   ## return
   ALL
 

@@ -8,6 +8,8 @@ library(here)
 
 gh <- function(x) glue(here(x))
 
+## =================== combined pop version ===============
+
 ## gathering a few reused things togther:
 emp.plot <- function(N,D,ttl){
   ## prepare data
@@ -39,6 +41,7 @@ emp.plot <- function(N,D,ttl){
   tmp$pairing <- factor(tmp$pairing,levels=tmp$pairing)
 
   ## inference data
+  names(D)[1:2] <- c('Label','Variables')
   DM <- melt(D,id=c('Label','Variables'))
   DM <- DM[!is.na(value)]
   key <- sort(unique(DM$variable))
@@ -70,21 +73,14 @@ emp.plot <- function(N,D,ttl){
   list(GP=GP,DM=DM,key=key,N=N,GP2=GP2,pairs=list(CV=CV,CR=CR,CP=tmp,diagn=diagn))
 }
 
-## emp.plot(104,D)
-
-## D <- fread('WHO_TB.csv')
 
 ## files
-flz <- c('TBS_notTB.csv',
-         'TBS_TB.csv',
-         'WHO_TB.csv',
-         'WHO_notTB.csv')
+flz <- c('SAM_notTB.csv',
+         'SAM_TB.csv')
 
 ## hash for N
-NL <- list(TBS_notTB.csv = 431,
-           TBS_TB.csv = 104,
-           WHO_notTB.csv = 431,
-           WHO_TB.csv = 104
+NL <- list(SAM_notTB.csv = 431,
+           SAM_TB.csv = 104
            )
 
 ## run loop
@@ -108,11 +104,6 @@ save(SDS,file=gh('data/SDS.Rdata'))
 save(KZ,file=gh('data/KZ.Rdata'))
 save(NZ,file=gh('data/NZ.Rdata'))
 save(PZ,file=gh('data/PZ.Rdata'))
-
-## load(file=gh('data/SDS.Rdata'))
-## load(file=gh('data/KZ.Rdata'))
-## load(file=gh('data/NZ.Rdata'))
-## load(file=gh('data/PZ.Rdata'))
 
 
 ## --------------------
@@ -221,5 +212,5 @@ for(fn in flz){
 }
 
 ## save
-save(POPS,file=gh('data/POPS.Rdata'))
-save(POPS0,file=gh('data/POPS0.Rdata'))
+save(POPS,file=gh('data/nPOPS.Rdata'))
+save(POPS0,file=gh('data/nPOPS0.Rdata'))
