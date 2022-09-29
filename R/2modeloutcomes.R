@@ -7,7 +7,7 @@ gh <- function(x) glue(here(x))
 
 ## load dependencies
 source(gh('R/utils/scores.R')) #scores are coded in here
-source(gh('R/utils/costutils.R')) #scores are coded in here
+source(gh('R/utils/costutils.R')) #cost data parser
 
 ## load synthetic populations
 load(file=gh('data/POPS.Rdata'))
