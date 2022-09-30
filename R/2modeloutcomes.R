@@ -12,6 +12,7 @@ cnz <- c("Cambodia","Cameroon","Côte d'Ivoire","Mozambique",
 source(gh('R/utils/scores.R')) #scores are coded in here
 source(gh('R/utils/costutils.R')) #cost data parser
 source(here('R/utils/readyoutcomes.R')) #parameters & life-years
+source(here('R/utils/HEoutputs.R')) #various outputters
 
 
 ## load synthetic populations
@@ -80,9 +81,8 @@ fwrite(CFS,file=here('data/compare.summary.both.csv'))
 CF <- CF[method=='copulas']
 
 ## grow?
-Nfold <- 10
-CF <- CF[rep(1:nrow(CF),Nfold)]
-## sCF <- sCF[rep(1:nrow(sCF),Nfold)]
+## Nfold <- 10
+## CF <- CF[rep(1:nrow(CF),Nfold)]
 CF[,id:=1:nrow(CF)]; ## sCF[,id:=1:nrow(sCF)];
 
 ## === create cost data
@@ -99,7 +99,10 @@ CDW <- dcast(CDL,country+id~NAME,value.var = 'value')
 CDW
 
 ## extend across countries & append:
-AddAlgoParms(CF) #mainly/all for SOC
+## AddAlgoParms(CF) #mainly/all for SOC
+CF[,CXR.avail:=1] #code as available
+AP <- getAlgoParms(max(CF$id)) #mainly/all for SOC
+CF <- merge(CF,AP,by='id')
 
 ## extend across countries;
 CF <- CF[rep(1:nrow(CF),length(cnz))]
@@ -107,7 +110,6 @@ CF[,country:=rep(cnz,each=nrow(CF)/length(cnz))]
 
 ## TODO stool rather than GA params?
 ## === WHO algorithm
-CF[,CXR.avail:=1] #code as available
 CF[P$s.soc.CXRonly$r(nrow(CF))>runif(nrow(CF)),Xpert_res:=NA] #for now assume same mWRD avail as via GA in SOC
 
 ## merge in costs
@@ -132,11 +134,17 @@ TBS1s.algorithm(CF)
 TBS2s.algorithm(CF)
 
 
+## ======== outcomes
+AddCFRs(CF)
+
+
 ## NOTE
 ## ditch most signs for simplificty
 CF <- CF[,.(country,id,TB,
-            who.ATT,who.cost,soc.ATT,soc.cost,
-            tbs1.ATT,tbs1.cost,tbs2.ATT,tbs2.cost)] #lose lots of info for now for simplicity
+            who.ATT,who.cost,who.cfr,
+            soc.ATT,soc.cost,soc.cfr,
+            tbs1.ATT,tbs1.cost,tbs1.cfr,
+            tbs2.ATT,tbs2.cost,tbs2.cfr)] #lose lots of info for now for simplicity
 summary(CF)
 
 ## se/sp of algs
@@ -144,8 +152,6 @@ CF[,.(who=mean(who.ATT),soc=mean(soc.ATT),
       tbs1=mean(tbs1.ATT),tbs2=mean(tbs2.ATT)),by=TB]
 
 
-## ======== outcomes
-AddCFRs(CF)
 
 ALL <- combineHE(CF)
 
