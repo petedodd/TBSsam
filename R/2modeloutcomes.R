@@ -152,8 +152,8 @@ CF[,.(who=mean(who.ATT),soc=mean(soc.ATT),
       tbs1=mean(tbs1.ATT),tbs2=mean(tbs2.ATT)),by=TB]
 
 
-
-ALL <- combineHE(CF)
+## NOTE this step resamples Npops times with popsize and calculates means
+ALL <- combineHE(CF,popsize = 1e2,Npops=1e3)
 
 clz <- names(ALL)
 clz <- clz[-c(1,2)]
@@ -180,6 +180,7 @@ MS <- M[,.(`DALYs averted`=mean(`DALYs averted`),
 GP <- CEAplots(MS)
 ggsave(GP,file=here('graphs/CEhull.pdf'),h=8,w=10)
 
+
 ## NOTE
 ## docs
 ## https://tbksp.org/en/node/2032
@@ -198,3 +199,10 @@ ggsave(GP,file=here('graphs/CEhull.pdf'),h=8,w=10)
 
 ## NOTE
 ## presumptive TB same w/ & w/o TB - no info on spec
+
+
+## including a loop to to issues with discrete states
+Npops <- 1e2
+for(n in 1:Npops){
+  cat(n,'...\n')
+}

@@ -1,7 +1,9 @@
 library(ggplot2)
 library(scales)
 
-combineHE <- function(WS
+combineHE <- function(WS,
+                      popsize=1e3,
+                      Npops=1
                       ){
 
   ## LYS
@@ -9,24 +11,33 @@ combineHE <- function(WS
   WS <- merge(WS,LYK[,.(country,LYS)],by='country',all.x=TRUE) #undiscounted
 
 
-  ## ==== TB prevalence NOTE this needs thought
-  tb <- runif(max(WS$id)) < P$s.TBprev$r(max(WS$id))
-  WH <- rbind(WS[TB=='TB'][id %in% which(tb)],
-               WS[TB=='not TB'][id %in% which(!tb)])
-
-
-  ## ======== CEA outputs
-
-  ## combined data
-  ALL <- WH[,.(country,id,
-               who.cost,who.DALYs=who.cfr*dLYS,
-               soc.cost,soc.DALYs=soc.cfr*dLYS,
-               tbs1.cost,tbs1.DALYs=tbs1.cfr*dLYS,
-               tbs2.cost,tbs2.DALYs=tbs2.cfr*dLYS)]
- 
+  ALL <- list()
+  sfr <- unique(WS[,.(id,TB)])
+  for(n in 1:Npops){
+    if(!n %% round(0.1*Npops)) cat(' [ ',n,' / ',Npops,' ] pops...\n')
+    ## construct sampled population
+    prev <- P$s.TBprev$r(1)
+    nprev <- rbinom(1,popsize,prev)
+    idz1 <- sample(sfr[TB=='TB',id],nprev)
+    idz0 <- sample(sfr[TB!='TB',id],popsize-nprev)
+    WH <- WS[id %in% c(idz0,idz1)]
+    WH[,id:=1:nrow(WH)]
+    ## ======== CEA outputs
+    ## combined data
+    ALL[[n]] <- WH[,.(id=n,
+                      who.cost=mean(who.cost),
+                      who.DALYs=mean(who.cfr*dLYS),
+                      soc.cost=mean(soc.cost),
+                      soc.DALYs=mean(soc.cfr*dLYS),
+                      tbs1.cost=mean(tbs1.cost),
+                      tbs1.DALYs=mean(tbs1.cfr*dLYS),
+                      tbs2.cost=mean(tbs2.cost),
+                      tbs2.DALYs=mean(tbs2.cfr*dLYS)),
+                   by=country]
+  }
   ## return
-  ALL
-
+  ALL <- rbindlist(ALL)
+  return(ALL)
 }
 
 ## reshape and compute incrementals
@@ -63,6 +74,14 @@ make.ceac <- function(CEA,lamz){
 
 ## ggplot(CEAC,aes(lambda,`Probability CE`,col=country))+
 ##   geom_line()
+
+
+
+
+## ggplot(M[sample(nrow(M),size=1e2)],
+##        aes(`DALYs averted`,`Incremental cost`,col=algorithm))+
+##   geom_point()+
+##   facet_wrap(~country)
 
 
 ## ----- CE plane
