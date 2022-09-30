@@ -36,6 +36,7 @@ appendWHOscores <- function(D){
   }, by=id]
 }
 
+## cxr_pre_eff.factor
 
 ## TBSpeed scores
 appendTBSscores <- function(D){

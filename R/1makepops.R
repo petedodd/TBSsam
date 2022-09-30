@@ -214,3 +214,20 @@ for(fn in flz){
 ## save
 save(POPS,file=gh('data/nPOPS.Rdata'))
 save(POPS0,file=gh('data/nPOPS0.Rdata'))
+
+## validation outputs
+tmp <- POPS[['SAM_TB']]
+tmp <- as.matrix(tmp)
+tmp <- tmp[,2:ncol(tmp)]
+tmp <- t(tmp) %*% tmp
+tmp <- tmp * 1e-4 * 535
+tmp[upper.tri(tmp, diag = FALSE)] <- NA
+fwrite(tmp,file=here('data/TBchk.csv'))
+
+tmp <- POPS[['SAM_notTB']]
+tmp <- as.matrix(tmp)
+tmp <- tmp[,2:ncol(tmp)]
+tmp <- t(tmp) %*% tmp
+tmp <- tmp * 1e-4 * 535
+tmp[upper.tri(tmp, diag = FALSE)] <- NA
+fwrite(tmp,file=here('data/notTBchk.csv'))
