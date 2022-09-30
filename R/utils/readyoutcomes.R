@@ -84,27 +84,6 @@ AddCFRs <- function(D){
 
 
 ## ## NOTE try to gather all stochastic things into there
-## ## note we have a stochastic model
-## AddAlgoParms <- function(D){
-##   ## coverage of elements
-##   D[,ptb:=ifelse(P$s.soc.ptbcov$r(nrow(D))>runif(nrow(D)),1,0)]
-##   D[,testing.done:=ifelse(P$s.soc.testingcov$r(nrow(D))>runif(nrow(D)),1,0)]
-##   D[,xray.only:=ifelse(P$s.soc.CXRonly$r(nrow(D))>runif(nrow(D)),1,0)]
-##   ## accuracy
-##   D[,clin.sense:=ifelse(P$sens.clin$r(nrow(D))>runif(nrow(D)),1,0)]
-##   D[,clin.spec:=ifelse(P$spec.clin$r(nrow(D))>runif(nrow(D)),1,0)]
-##   D[,clin.senseX:=ifelse(P$sens.clinCXR.soc$r(nrow(D))>runif(nrow(D)),1,0)]
-##   D[,clin.specX:=ifelse(P$spec.clinCXR.soc$r(nrow(D))>runif(nrow(D)),1,0)]
-##   ## combining clinical and GA
-##   tmp.sens <- 1 - (1-P$sens.clin$r(nrow(D))) * (1-P$sens.xga$r(nrow(D)))
-##   tmp.spec <- 1 - (P$spec.clin$r(nrow(D))) * (1-P$spec.xga$r(nrow(D)))
-##   D[,clin.senseU:=ifelse(tmp.sens>runif(nrow(D)),1,0)]
-##   D[,clin.specU:=ifelse(tmp.spec>runif(nrow(D)),1,0)]
-##   ## CFRs for assigment
-##   D[,cfr.noatt:=P$notx.u5$r(nrow(D))]
-##   D[,cfr.att:=P$ontx.u5$r(nrow(D))]
-## }
-
 ## note we have a stochastic model
 getAlgoParms <- function(N){
   D <- data.table(id=1:N)

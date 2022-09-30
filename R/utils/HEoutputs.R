@@ -61,19 +61,21 @@ make.ceac <- function(CEA,lamz){
   crv
 }
 
+## across all countries
+make.ceacs <- function(M,lmz){
+  CEAC <- list()
+  for( cn in cnz){
+    cat('...',cn,'...\n')
+    for(alg in M[,unique(algorithm)]){
+      pz <- make.ceac(M[country==cn & algorithm==alg,
+                        .(Q=`DALYs averted`,P=`Incremental cost`)],lmz)
+      pz <- unlist(pz)
+      CEAC[[paste(cn,alg)]] <- data.table(country=cn,algorithm=alg,lambda=lmz,`Probability CE`=pz)
+    }
+  }
+  rbindlist(CEAC)
+}
 
-## lmz <- seq(from=0,to=150,by=0.5)
-## CEAC <- list()
-## for( cn in cnz){
-##   pz <- make.ceac(M[country==cn,
-##                     .(Q=`DALYs averted`,P=`Incremental cost`)],lmz)
-##   pz <- unlist(pz)
-##   CEAC[[cn]] <- data.table(country=cn,lambda=lmz,`Probability CE`=pz)
-## }
-## CEAC <- rbindlist(CEAC)
-
-## ggplot(CEAC,aes(lambda,`Probability CE`,col=country))+
-##   geom_line()
 
 
 
