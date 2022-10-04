@@ -112,12 +112,31 @@ CDW <- makeCostPSA(Nreps)
 ## merge in costs (read in and created in HEoutputs.R)
 CF <- merge(CF,CDW,by=c('id','country'))
 CF[,c.s.ATT:= rrp * c.s.rrATT + (1-rrp) * c.s.rsATT] #use a mean cost (same outcomes)
+CF[,c('who.cost','soc.cost','tbs1.cost','tbs2.cost'):=0.0] #initialize costs
+
 
 ## === WHO algorithm
 ## apply to data (appends ATT)
 WHO.algorithm(CF)
+## WHO.algorithm(CF,resample = TRUE) #including re-assessment via stratified resampling
+
+## ## checks
+## CF[,.(who=mean(who.ATT)),by=TB]
+## CF[,.(who=mean(who.cost)),by=.(TB,reassess)]
+## CF[,.(who=mean(who.ATT)),by=.(TB,reassess)]
+## CF[,.(who=mean(score_X)),by=.(TB,reassess)]
+## CF[is.na(Xpert_res) & itb_exp_con.factor==0,table(score_X>10,who.ATT)]
+
+
+
 ## === SOC algorithm
-SOC.algorithm(CF)
+SOC.algorithm(CF,resample = TRUE)
+
+## ## checks
+## CF[,.(soc=mean(soc.ATT)),by=TB]
+## CF[,.(soc=mean(soc.cost)),by=.(TB,reassess)]
+## CF[,.(soc=mean(soc.ATT)),by=.(TB,reassess)]
+
 
 ## === TBS algorithms
 ## --- TBS1S algorithm
@@ -145,6 +164,11 @@ CF[,.(who=mean(who.ATT),soc=mean(soc.ATT),
       tbs1=mean(tbs1.ATT),tbs2=mean(tbs2.ATT)),by=TB]
 
 
+## merge in Life-years
+CF <- merge(CF,LYKc[,.(country,dLYS=LYS)],by='country',all.x=TRUE)
+CF <- merge(CF,LYK[,.(country,LYS)],by='country',all.x=TRUE) #undiscounted
+
+
 ## NOTE this step resamples Npops times with popsize and calculates means
 ALL <- combineHE(CF,popsize = 1e2,Npops=1e3)
 
@@ -165,11 +189,15 @@ MZ[,.(country,
       DD_TBS1,DD_TBS2,DD_WHO,
       ICER_TBS1,ICER_TBS2,ICER_WHO)]
 
+fwrite(MZ,file = here('data/ICERtable.csv'))
+
 
 M <- reshapeINC(ALL)
 MS <- M[,.(`DALYs averted`=mean(`DALYs averted`),
            `Incremental cost`=mean(`Incremental cost`)),
         by=.(country,algorithm)]
+
+
 
 (GP <- CEAplots(MS))
 

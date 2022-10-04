@@ -35,11 +35,6 @@ combineHE <- function(WS,
                       Npops=1
                       ){
 
-  ## LYS
-  WS <- merge(WS,LYKc[,.(country,dLYS=LYS)],by='country',all.x=TRUE)
-  WS <- merge(WS,LYK[,.(country,LYS)],by='country',all.x=TRUE) #undiscounted
-
-
   ALL <- list()
   sfr <- unique(WS[,.(id,TB)])
   for(n in 1:Npops){
