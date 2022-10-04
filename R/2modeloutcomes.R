@@ -12,6 +12,7 @@ cnz <- c("Cambodia","Cameroon","Côte d'Ivoire","Mozambique",
 source(gh('R/utils/scores.R')) #scores are coded in here
 source(gh('R/utils/costutils.R')) #cost data parser
 source(here('R/utils/readyoutcomes.R')) #parameters & life-years
+source(here('R/utils/HEoutputs.R')) #various outputters
 
 
 ## load synthetic populations
@@ -19,7 +20,7 @@ load(file=gh('data/nPOPS.Rdata'))
 load(file=gh('data/nPOPS0.Rdata'))
 ## load(file=gh('data/POPS.Rdata'))
 ## load(file=gh('data/POPS0.Rdata'))
-
+## TODO clear out old data
 
 set.seed(2345)
 
@@ -79,11 +80,10 @@ fwrite(CFS,file=here('data/compare.summary.both.csv'))
 ## choose method (could continue but need to remember)
 CF <- CF[method=='copulas']
 
-## grow?
+## grow? (for more parameter sampling)
 Nfold <- 10
 CF <- CF[rep(1:nrow(CF),Nfold)]
-## sCF <- sCF[rep(1:nrow(sCF),Nfold)]
-CF[,id:=1:nrow(CF)]; ## sCF[,id:=1:nrow(sCF)];
+CF[,id:=1:nrow(CF)]
 
 ## === create cost data
 CD <- parsecosts(gh('data/TB-Speed_SAM_Costs.csv'))
@@ -99,7 +99,10 @@ CDW <- dcast(CDL,country+id~NAME,value.var = 'value')
 CDW
 
 ## extend across countries & append:
-AddAlgoParms(CF) #mainly/all for SOC
+## AddAlgoParms(CF) #mainly/all for SOC
+CF[,CXR.avail:=1] #code as available
+AP <- getAlgoParms(max(CF$id)) #mainly/all for SOC NOTE all stochastic elts here
+CF <- merge(CF,AP,by='id')
 
 ## extend across countries;
 CF <- CF[rep(1:nrow(CF),length(cnz))]
@@ -107,48 +110,47 @@ CF[,country:=rep(cnz,each=nrow(CF)/length(cnz))]
 
 ## TODO stool rather than GA params?
 ## === WHO algorithm
-CF[,CXR.avail:=1] #code as available
 CF[P$s.soc.CXRonly$r(nrow(CF))>runif(nrow(CF)),Xpert_res:=NA] #for now assume same mWRD avail as via GA in SOC
 
 ## merge in costs
 CF <- merge(CF,CDW,by=c('id','country'))
 
+## === WHO algorithm
 ## apply to data (appends ATT)
 WHO.algorithm(CF)
-
 ## === SOC algorithm
 SOC.algorithm(CF)
 
-
 ## === TBS algorithms
-
 ## --- TBS1S algorithm
 ## apply to data (appends ATT)
 TBS1s.algorithm(CF)
-
-
 ## --- TBS2S algorithm
 ## apply to data (appends ATT)
 TBS2s.algorithm(CF)
+
+## ======== outcomes
+AddCFRs(CF)
 
 
 ## NOTE
 ## ditch most signs for simplificty
 CF <- CF[,.(country,id,TB,
-            who.ATT,who.cost,soc.ATT,soc.cost,
-            tbs1.ATT,tbs1.cost,tbs2.ATT,tbs2.cost)] #lose lots of info for now for simplicity
+            who.ATT,who.cost,who.cfr,
+            soc.ATT,soc.cost,soc.cfr,
+            tbs1.ATT,tbs1.cost,tbs1.cfr,
+            tbs2.ATT,tbs2.cost,tbs2.cfr)] #lose lots of info for now for simplicity
 summary(CF)
 
-## se/sp of algs
+## se/sp of algs as a whole
 CF[,.(who=mean(who.ATT),soc=mean(soc.ATT),
       tbs1=mean(tbs1.ATT),tbs2=mean(tbs2.ATT)),by=TB]
 
 
-## ======== outcomes
-AddCFRs(CF)
+## NOTE this step resamples Npops times with popsize and calculates means
+ALL <- combineHE(CF,popsize = 1e2,Npops=1e3)
 
-ALL <- combineHE(CF)
-
+## quick looks
 clz <- names(ALL)
 clz <- clz[-c(1,2)]
 MZ <- ALL[,lapply(.SD,mean),by=country,.SDcols=clz]
@@ -171,8 +173,15 @@ MS <- M[,.(`DALYs averted`=mean(`DALYs averted`),
            `Incremental cost`=mean(`Incremental cost`)),
         by=.(country,algorithm)]
 
-GP <- CEAplots(MS)
+(GP <- CEAplots(MS))
 ggsave(GP,file=here('graphs/CEhull.pdf'),h=8,w=10)
+
+
+CEAC <- make.ceacs(M,seq(from=0,to=150,by=0.5))
+
+ggplot(CEAC,aes(lambda,`Probability CE`,col=country,lty=algorithm))+
+  geom_line()
+
 
 ## NOTE
 ## docs

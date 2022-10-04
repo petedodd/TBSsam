@@ -63,28 +63,30 @@ AddCFRs <- function(D){
     ## WHO version
     D[TB=='not TB' & who.ATT==0,who.cfr:=0]
     D[TB=='not TB' & who.ATT==1,who.cfr:=0]
-    D[TB=='TB' & who.ATT==0,who.cfr:=P$notx.u5$r(sum(TB=='TB' & who.ATT==0))]
-    D[TB=='TB' & who.ATT==1,who.cfr:=P$ontx.u5$r(sum(TB=='TB' & who.ATT==1))]
+    D[TB=='TB' & who.ATT==0,who.cfr:=cfr.noatt]
+    D[TB=='TB' & who.ATT==1,who.cfr:=cfr.att]
     ## SOC
     D[TB=='not TB' & soc.ATT==0,soc.cfr:=0]
     D[TB=='not TB' & soc.ATT==1,soc.cfr:=0]
-    D[TB=='TB' & soc.ATT==0,soc.cfr:=P$notx.u5$r(sum(TB=='TB' & soc.ATT==0))]
-    D[TB=='TB' & soc.ATT==1,soc.cfr:=P$ontx.u5$r(sum(TB=='TB' & soc.ATT==1))]
+    D[TB=='TB' & soc.ATT==0,soc.cfr:=cfr.noatt]
+    D[TB=='TB' & soc.ATT==1,soc.cfr:=cfr.att]
     ## 1 step
     D[TB=='not TB' & tbs1.ATT==0,tbs1.cfr:=0]
     D[TB=='not TB' & tbs1.ATT==1,tbs1.cfr:=0]
-    D[TB=='TB' & tbs1.ATT==0,tbs1.cfr:=P$notx.u5$r(sum(TB=='TB' & tbs1.ATT==0))]
-    D[TB=='TB' & tbs1.ATT==1,tbs1.cfr:=P$ontx.u5$r(sum(TB=='TB' & tbs1.ATT==1))]
+    D[TB=='TB' & tbs1.ATT==0,tbs1.cfr:=cfr.noatt]
+    D[TB=='TB' & tbs1.ATT==1,tbs1.cfr:=cfr.att]
     ## 2 step
     D[TB=='not TB' & tbs2.ATT==0,tbs2.cfr:=0]
     D[TB=='not TB' & tbs2.ATT==1,tbs2.cfr:=0]
-    D[TB=='TB' & tbs2.ATT==0,tbs2.cfr:=P$notx.u5$r(sum(TB=='TB' & tbs2.ATT==0))]
-    D[TB=='TB' & tbs2.ATT==1,tbs2.cfr:=P$ontx.u5$r(sum(TB=='TB' & tbs2.ATT==1))]
+    D[TB=='TB' & tbs2.ATT==0,tbs2.cfr:=cfr.noatt]
+    D[TB=='TB' & tbs2.ATT==1,tbs2.cfr:=cfr.att]
 }
 
 
+## ## NOTE try to gather all stochastic things into there
 ## note we have a stochastic model
-AddAlgoParms <- function(D){
+getAlgoParms <- function(N){
+  D <- data.table(id=1:N)
   ## coverage of elements
   D[,ptb:=ifelse(P$s.soc.ptbcov$r(nrow(D))>runif(nrow(D)),1,0)]
   D[,testing.done:=ifelse(P$s.soc.testingcov$r(nrow(D))>runif(nrow(D)),1,0)]
@@ -101,6 +103,10 @@ AddAlgoParms <- function(D){
   D[,clin.specU:=ifelse(tmp.spec>runif(nrow(D)),1,0)]
   ## reassessment etc
   D[,reassess:=ifelse(P$s.reassess$r(nrow(D))>runif(nrow(D)),1,0)]
+  ## CFRs for assigment
+  D[,cfr.noatt:=P$notx.u5$r(nrow(D))]
+  D[,cfr.att:=P$ontx.u5$r(nrow(D))]
+  return(D)
 }
 
 
