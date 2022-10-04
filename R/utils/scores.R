@@ -116,7 +116,7 @@ WHO.algorithm <- function(D){
     who.cost:=who.cost + c.s.who.examCXR]
   D[is.na(Xpert_res) & itb_exp_con.factor==0 & CXR.avail==0,
     who.cost:=who.cost + c.s.who.exam]
-  D[who.ATT==1,who.cost:=who.cost + c.s.rsATT] #ATT costs
+  D[who.ATT==1,who.cost:=who.cost + c.s.ATT] #ATT costs
 }
 
 
@@ -127,7 +127,7 @@ TBS1s.algorithm <- function(D){
   D[,tbs1.ATT:=ifelse(TBS1S>10,1,0)]       #TODO include catch-up clinical
   ## costs
   D[,tbs1.cost:=c.s.tbs1step.diag]                             #everyone gets
-  D[tbs1.ATT==1,tbs1.cost:=tbs1.cost + c.s.rsATT] #ATT costs
+  D[tbs1.ATT==1,tbs1.cost:=tbs1.cost + c.s.ATT] #ATT costs
 }
 
 
@@ -142,7 +142,7 @@ TBS2s.algorithm <- function(D){
   ## costs
   D[,tbs2.cost:=c.s.tbs2step.scre]                             #everyone gets
   D[TBS2Sa>10,tbs2.cost:=tbs2.cost + c.s.tbs2step.diag]        #only those @ s2 
-  D[tbs2.ATT==1,tbs2.cost:=tbs2.cost + c.s.rsATT] #ATT costs
+  D[tbs2.ATT==1,tbs2.cost:=tbs2.cost + c.s.ATT] #ATT costs
 }
 
 
@@ -162,7 +162,7 @@ SOC.algorithm <- function(D){
   D[ptb==1 & testing.done==0,soc.cost:=soc.cost + 0] #clinical
   D[ptb==1 & testing.done==1 & xray.only==1,soc.cost:=soc.cost + c.s.soc.CXR] #clinical+X
   D[ptb==1 & testing.done==1 & xray.only==0,soc.cost:=soc.cost + c.s.soc.CXRxga] #inc. bac
-  D[soc.ATT==1,soc.cost:=soc.cost + c.s.rsATT] #ATT costs
+  D[soc.ATT==1,soc.cost:=soc.cost + c.s.ATT] #ATT costs
 }
 
 ## TODO: 1) cost soc clinical only? 2) use of reassess in soc?

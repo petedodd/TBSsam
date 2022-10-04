@@ -1,6 +1,25 @@
 library(ggplot2)
 library(scales)
 
+
+## === create cost data
+CD <- parsecosts(gh('data/TB-Speed_SAM_Costs.csv'))
+CD[,c('cost.mid','cost.sd'):=.((High+Low)/2,(High-Low)/3.92)]
+## model as gamma parameters
+CD[,theta:=cost.sd^2/cost.mid]
+CD[,k:=cost.mid/theta]
+
+makeCostPSA <- function(N){
+  CDL <- CD[rep(1:nrow(CD),N),.(NAME,country,k,theta)]
+  CDL[,id:=rep(1:N,each=nrow(CD))]
+  CDL[,value := rgamma(n=nrow(CDL),shape=k,scale=theta)]
+  CDL[is.na(value),value:=0.0]
+  CDW <- dcast(CDL,country+id~NAME,value.var = 'value')
+  CDW
+}
+
+
+
 combineHE <- function(WS,
                       popsize=1e3,
                       Npops=1

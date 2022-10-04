@@ -123,3 +123,22 @@ getAlgoParms <- function(N){
 ## s.reassess - 10,70,50 
 ## (tpz <- getAB(0.5,((70-10)/392)^2))
 ## curve(dbeta(x,tpz$a,tpz$b),n=500)
+
+
+
+RRD <- fread(here('data/MDR_RR_TB_burden_estimates_2020-10-15.csv'))
+RRD[,c('rr.mid','rr.sd'):=.(e_rr_pct_new/100,(e_rr_pct_new_hi-e_rr_pct_new_lo)/392)]
+## model as gamma parameters
+RRD[,theta:=rr.sd^2/rr.mid]
+RRD[,k:=rr.mid/theta]
+## check
+## ckk <- 5
+## curve(dgamma(x,shape=RRD$k[ckk],scale=RRD$theta[ckk]),from = 0,to=0.1,n=500)
+
+makeRRdata <- function(N){
+  RDL <- RRD[rep(1:nrow(RRD),N),.(country,k,theta)]
+  RDL[,id:=rep(1:N,each=nrow(RRD))]
+  RDL[,rrp := rgamma(n=nrow(RDL),shape=k,scale=theta)]
+  RDL[is.na(rrp),rrp:=0.0]
+  RDL[,.(country,id,rrp)]
+}

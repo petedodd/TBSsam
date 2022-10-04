@@ -18,8 +18,6 @@ source(here('R/utils/HEoutputs.R')) #various outputters
 ## load synthetic populations
 load(file=gh('data/nPOPS.Rdata'))
 load(file=gh('data/nPOPS0.Rdata'))
-## load(file=gh('data/POPS.Rdata'))
-## load(file=gh('data/POPS0.Rdata'))
 ## TODO clear out old data
 
 set.seed(2345)
@@ -83,37 +81,34 @@ CF <- CF[method=='copulas']
 ## grow? (for more parameter sampling)
 Nfold <- 10
 CF <- CF[rep(1:nrow(CF),Nfold)]
-CF[,id:=1:nrow(CF)]
 
-## === create cost data
-CD <- parsecosts(gh('data/TB-Speed_SAM_Costs.csv'))
-CD[,c('cost.mid','cost.sd'):=.((High+Low)/2,(High-Low)/3.92)]
-## model as gamma parameters
-CD[,theta:=cost.sd^2/cost.mid]
-CD[,k:=cost.mid/theta]
-CDL <- CD[rep(1:nrow(CD),nrow(CF)),.(NAME,country,k,theta)]
-CDL[,id:=rep(1:nrow(CF),each=nrow(CD))]
-CDL[,value := rgamma(n=nrow(CDL),shape=k,scale=theta)]
-CDL[is.na(value),value:=0.0]
-CDW <- dcast(CDL,country+id~NAME,value.var = 'value')
-CDW
+Nreps <- nrow(CF)
+CF[,id:=1:Nreps]
 
 ## extend across countries & append:
 ## AddAlgoParms(CF) #mainly/all for SOC
 CF[,CXR.avail:=1] #code as available
-AP <- getAlgoParms(max(CF$id)) #mainly/all for SOC NOTE all stochastic elts here
+AP <- getAlgoParms(Nreps) #mainly/all for SOC NOTE all stochastic elts here
 CF <- merge(CF,AP,by='id')
 
 ## extend across countries;
 CF <- CF[rep(1:nrow(CF),length(cnz))]
 CF[,country:=rep(cnz,each=nrow(CF)/length(cnz))]
 
+## add in RR status
+RR <- makeRRdata(Nreps)
+CF <- merge(CF,RR,by=c('country','id'))
+
 ## TODO stool rather than GA params?
-## === WHO algorithm
+## === Xpert there for WHO?
 CF[P$s.soc.CXRonly$r(nrow(CF))>runif(nrow(CF)),Xpert_res:=NA] #for now assume same mWRD avail as via GA in SOC
 
-## merge in costs
+## make cost data
+CDW <- makeCostPSA(Nreps)
+
+## merge in costs (read in and created in HEoutputs.R)
 CF <- merge(CF,CDW,by=c('id','country'))
+CF[,c.s.ATT:= rrp * c.s.rrATT + (1-rrp) * c.s.rsATT] #use a mean cost (same outcomes)
 
 ## === WHO algorithm
 ## apply to data (appends ATT)
