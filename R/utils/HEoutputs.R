@@ -1,6 +1,14 @@
 library(ggplot2)
 library(scales)
 
+## helpers
+lo <- function(x) quantile(x,probs = 0.025)
+hi <- function(x) quantile(x,probs = 1-0.025)
+## rot45 <- theme(axis.text.x = element_text(angle = 45, hjust = 1))
+brkt <- function(M,L,H,ndp=0) paste0(round(M,ndp),' (',
+                                     round(L,ndp),' to ',
+                                     round(H,ndp),')')
+
 
 ## === create cost data
 CD <- parsecosts(gh('data/TB-Speed_SAM_Costs.csv'))
@@ -20,6 +28,8 @@ makeCostPSA <- function(N){
 
 
 
+## now resamples as loop 1:Npops, calculates mean HE outcomes for each pop and returns
+## partially because with stochastic output get hard to interpret quadrimodal outputs ~ ATT+/- x death+/-
 combineHE <- function(WS,
                       popsize=1e3,
                       Npops=1

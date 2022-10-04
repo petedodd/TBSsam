@@ -1,5 +1,11 @@
 library(discly)
 
+logit <- function(x) log(odds(x))
+ilogit <- function(x) iodds(exp(x))
+odds <- function(x) x/(1-x)
+iodds <- function(x) x/(1+x)
+
+
 ## making life years
 GetLifeYears <- function(isolist,discount.rate,yearfrom){
     ## template:
@@ -85,7 +91,7 @@ AddCFRs <- function(D){
 
 ## ## NOTE try to gather all stochastic things into there
 ## note we have a stochastic model
-getAlgoParms <- function(N){
+getAlgoParms <- function(N,hiv=NULL){
   D <- data.table(id=1:N)
   ## coverage of elements
   D[,ptb:=ifelse(P$s.soc.ptbcov$r(nrow(D))>runif(nrow(D)),1,0)]
@@ -106,6 +112,16 @@ getAlgoParms <- function(N){
   ## CFRs for assigment
   D[,cfr.noatt:=P$notx.u5$r(nrow(D))]
   D[,cfr.att:=P$ontx.u5$r(nrow(D))]
+  if(!is.null(hiv)){
+    ## -- hivartOR on tx
+    Z <- P$hivartOR$r(nrow(D))
+    Z <- rowSums(Z) #HIV+/ART+
+    D[,cfr.att:=ilogit(
+         logit(cfr.att) + Z * hiv
+       )]
+    ## -- HIV/ART off tx
+    D[hiv==1,cfr.noatt:=P$notxHA.u5$r(sum(hiv==1))]
+  }
   return(D)
 }
 

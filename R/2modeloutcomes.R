@@ -88,7 +88,10 @@ CF[,id:=1:Nreps]
 ## extend across countries & append:
 ## AddAlgoParms(CF) #mainly/all for SOC
 CF[,CXR.avail:=1] #code as available
-AP <- getAlgoParms(Nreps) #mainly/all for SOC NOTE all stochastic elts here
+AP <- getAlgoParms(Nreps,CF$hiv_res.factor) #mainly/all for SOC NOTE all stochastic elts here
+## ## check
+## AP[,hiv:=CF$hiv_res.factor]
+## AP[,.(mean(cfr.noatt),mean(cfr.att)),by=hiv]
 CF <- merge(CF,AP,by='id')
 
 ## extend across countries;
@@ -169,13 +172,19 @@ MS <- M[,.(`DALYs averted`=mean(`DALYs averted`),
         by=.(country,algorithm)]
 
 (GP <- CEAplots(MS))
+
 ggsave(GP,file=here('graphs/CEhull.pdf'),h=8,w=10)
 
 
 CEAC <- make.ceacs(M,seq(from=0,to=150,by=0.5))
 
-ggplot(CEAC,aes(lambda,`Probability CE`,col=country,lty=algorithm))+
-  geom_line()
+GP <- ggplot(CEAC,aes(lambda,`Probability CE`,col=country,lty=algorithm))+
+  geom_line()+scale_y_continuous(label=percent)+
+  xlab('Cost effectiveness threshold (USD per DALY averted)')+
+  ylab('Probability cost-effective')
+GP
+
+ggsave(GP,file=here('graphs/CEAC.pdf'),h=8,w=10)
 
 
 ## NOTE
@@ -188,9 +197,7 @@ ggplot(CEAC,aes(lambda,`Probability CE`,col=country,lty=algorithm))+
 ## sense/spec check
 ## ATT despite score in TBS
 ## WHO reassess - worsening? - resample
-## HIV
 ## SAM cfrs
-## prevalence of RS-TB, RR-TB
 ## check mortality
 
 ## NOTE
