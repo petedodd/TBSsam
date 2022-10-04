@@ -18,7 +18,7 @@ source(here('R/utils/HEoutputs.R')) #various outputters
 ## load synthetic populations
 load(file=gh('data/nPOPS.Rdata'))
 load(file=gh('data/nPOPS0.Rdata'))
-## TODO clear out old data
+
 
 set.seed(2345)
 
@@ -117,8 +117,12 @@ CF[,c('who.cost','soc.cost','tbs1.cost','tbs2.cost'):=0.0] #initialize costs
 
 ## === WHO algorithm
 ## apply to data (appends ATT)
-WHO.algorithm(CF)
+## WHO.algorithm(CF)
 ## WHO.algorithm(CF,resample = TRUE) #including re-assessment via stratified resampling
+
+ans <- WHO.algorithm(CF,resample = TRUE)
+CF[,c('who.ATT','who.cost'):=ans]
+
 
 ## ## checks
 ## CF[,.(who=mean(who.ATT)),by=TB]
@@ -130,7 +134,9 @@ WHO.algorithm(CF)
 
 
 ## === SOC algorithm
-SOC.algorithm(CF,resample = TRUE)
+## SOC.algorithm(CF,resample = TRUE)
+ans <- SOC.algorithm(CF,resample = TRUE)
+CF[,c('soc.ATT','soc.cost'):=ans]
 
 ## ## checks
 ## CF[,.(soc=mean(soc.ATT)),by=TB]
@@ -199,14 +205,14 @@ MS <- M[,.(`DALYs averted`=mean(`DALYs averted`),
 
 
 
-(GP <- CEAplots(MS))
+(GP <- CEAplots(MS,ring=FALSE))
 
 ggsave(GP,file=here('graphs/CEhull.pdf'),h=8,w=10)
 
 
 CEAC <- make.ceacs(M,seq(from=0,to=150,by=0.5))
 
-GP <- ggplot(CEAC,aes(lambda,`Probability CE`,col=country,lty=algorithm))+
+GP <- ggplot(CEAC[algorithm!='tbs2'],aes(lambda,`Probability CE`,col=country,lty=algorithm))+
   geom_line()+scale_y_continuous(label=percent)+
   xlab('Cost effectiveness threshold (USD per DALY averted)')+
   ylab('Probability cost-effective')
@@ -224,7 +230,6 @@ ggsave(GP,file=here('graphs/CEAC.pdf'),h=8,w=10)
 ## TODO
 ## sense/spec check
 ## ATT despite score in TBS
-## WHO reassess - worsening? - resample
 ## SAM cfrs
 ## check mortality
 

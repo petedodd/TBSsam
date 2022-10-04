@@ -1,25 +1,6 @@
 ## the scores & algorithms
 
 
-
-whosigns <- c('itb_cou_3',
-              'itb_fev_2',
-              'itb_fat_2',
-              'itb_wgt_3',
-              'haemoptysis',
-              'night.sweats',
-              'ice_ade.factor',
-              'tachycardia',
-              'tachypnea',
-              'cxr_pre_exc.factor',
-              'cxr_pre_hil.factor',
-              'cxr_pre_alv.factor',
-              'cxr_pre_mil.factor',
-              'cxr_pre_ple_per_eff.factor'
-              )
-
-
-
 ## function to compute WHO scores
 appendWHOscores <- function(D){
   D[, c('score_noX','score_X'):={
@@ -118,25 +99,17 @@ appendTBSscores <- function(D){
 
 ## NOTE costs must be initialized to zero
 
+
+
 ## WHO algorithm
-## NOTE this acts by side-effect
 WHO.algorithm <- function(D,resample=FALSE){
-  ## NOTE some dt voodoo here: not sure why necessary to include who.ATT, but it is
   cat('...',nrow(D),'\n')
-  ## treatment decision
-  ## D[,who.ATT:=fcase(
-  ##      !is.na(Xpert_res), ifelse(Xpert_res==1,1,0), #Xpert result available
-  ##      is.na(Xpert_res) & itb_exp_con.factor==1, 1, #HH contact
-  ##      is.na(Xpert_res) & itb_exp_con.factor==0 & CXR.avail==1, ifelse(score_X>10,1,0),
-  ##      is.na(Xpert_res) & itb_exp_con.factor==0 & CXR.avail==0, ifelse(score_noX>10,1,0),
-  ##      default=0
-  ##    )]
   D[,who.ATT:=0]
   D[!is.na(Xpert_res),who.ATT:=ifelse(Xpert_res==1,1,0)] #Xpert result available
   D[is.na(Xpert_res) & itb_exp_con.factor==1,who.ATT:=1] #HH contact
   D[is.na(Xpert_res) & itb_exp_con.factor==0 & CXR.avail==1,who.ATT:=ifelse(score_X>10,1,0)]
   D[is.na(Xpert_res) & itb_exp_con.factor==0 & CXR.avail==0,who.ATT:=ifelse(score_noX>10,1,0)]
-  ## costs
+   ## costs
   D[,who.cost:=who.cost+c.s.who.exam]                             #everyone gets
   D[!is.na(Xpert_res),who.cost:=who.cost + c.s.who.xns] #NOTE assumes not available=no cost
   D[is.na(Xpert_res),who.cost:=who.cost + c.s.who.hist] #those w/o Xpert get history assesst
@@ -148,22 +121,24 @@ WHO.algorithm <- function(D,resample=FALSE){
   ## resample approach to reassessment
   whovrs <- c('Xpert_res','score_X','score_noX') #variables to overwrite in resmple  'who.ATT',
   if(resample){
-    tmp <- D[who.ATT==0 & reassess==1] #who will get reassessed
     for(h in 0:1){                     #resample signs stratified by TB/HIV
       for(tb in c('TB','not TB')){
         cat('h=',h,' , tb=',tb,'\n')
-        n <- nrow(D[who.ATT==0 & reassess==1][TB==tb & hiv_res.factor==h])
+        n <- nrow(D[who.ATT==0 & reassess==1 & TB==tb & hiv_res.factor==h])
         N <- nrow(D[TB==tb & hiv_res.factor==h])
         if(n>0){ #resample signs
-          ns <- D[TB==tb & hiv_res.factor==h][sample(N,n),..whovrs] #new sample
-          D[who.ATT==0 & reassess==1 & TB==tb & hiv_res.factor==h,(whovrs):=ns]
-          WHO.algorithm(D[who.ATT==0 & reassess==1 & TB==tb & hiv_res.factor==h],
-                        resample=FALSE) #recurse, depth 1
+          ns <- D[TB==tb & hiv_res.factor==h,..whovrs] #new sample frame
+          D[who.ATT==0 & reassess==1 & TB==tb & hiv_res.factor==h,(whovrs):=ns[sample(N,n)]]
+          ans <- WHO.algorithm(D[who.ATT==0 & reassess==1 & TB==tb & hiv_res.factor==h],
+                               resample=FALSE) #recurse, depth 1
+          D[who.ATT==0 & reassess==1 & TB==tb & hiv_res.factor==h,c('who.ATT','who.cost'):=ans]
         }
       }
     }
   }
+  return(data.table(who.ATT=D$who.ATT,who.cost=D$who.cost))
 }
+
 
 
 ## TBS 1-step algorithm
@@ -193,14 +168,11 @@ TBS2s.algorithm <- function(D){
 
 
 ## SOC
-## NOTE this acts by side-effect
 SOC.algorithm <- function(D,resample=FALSE){
   socvrs <- c('ptb','testing.done','xray.only','clin.senseX','clin.specX',
               'clin.sense','clin.spec','clin.senseU','clin.specU')
+  cat('...',nrow(D),'\n')
   ## treatment decision
-  ## D[,soc.ATT:=0]
-  ## D[,soc.ATT:=0]
-  ## D[ptb==1 & testing.done==0,ifelse(TB=='TB',clin.sense,1-clin.spec)]
   D[,soc.ATT:=fcase(
        ptb==0,0,                                    #if not considered presumptive
        ptb==1 & testing.done==0,ifelse(TB=='TB',clin.sense,1-clin.spec), #clinical
@@ -216,22 +188,24 @@ SOC.algorithm <- function(D,resample=FALSE){
   D[soc.ATT==1,soc.cost:=soc.cost + c.s.ATT] #ATT costs
   ## resample approach to reassessment
   if(resample){
-    tmp <- D[who.ATT==0 & reassess==1] #who will get reassessed
     for(h in 0:1){                     #resample signs stratified by TB/HIV
       for(tb in c('TB','not TB')){
         cat('h=',h,' , tb=',tb,'\n')
-        n <- nrow(D[who.ATT==0 & reassess==1][TB==tb & hiv_res.factor==h])
+        n <- nrow(D[soc.ATT==0 & reassess==1 & TB==tb & hiv_res.factor==h])
         N <- nrow(D[TB==tb & hiv_res.factor==h])
         if(n>0){ #resample signs
-          ns <- D[TB==tb & hiv_res.factor==h][sample(N,n),..socvrs] #new sample
-          D[who.ATT==0 & reassess==1 & TB==tb & hiv_res.factor==h,(socvrs):=ns]
-          SOC.algorithm(D[who.ATT==0 & reassess==1 & TB==tb & hiv_res.factor==h],
-                        resample=FALSE) #recurse, depth 1
+          ns <- D[TB==tb & hiv_res.factor==h,..socvrs] #new sample frame
+          D[soc.ATT==0 & reassess==1 & TB==tb & hiv_res.factor==h,(socvrs):=ns[sample(N,n)]]
+          ans <- SOC.algorithm(D[soc.ATT==0 & reassess==1 & TB==tb & hiv_res.factor==h],
+                               resample=FALSE) #recurse, depth 1
+          D[soc.ATT==0 & reassess==1 & TB==tb & hiv_res.factor==h,c('soc.ATT','soc.cost'):=ans]
         }
       }
     }
   }
+  return(data.table(soc.ATT=D$soc.ATT,soc.cost=D$soc.cost))
 }
+
 
 ## TODO: 1) cost soc clinical only? 2) use of reassess in soc?
 

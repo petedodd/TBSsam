@@ -130,7 +130,7 @@ getHull <- function(dQ,dC){
 
 ## plots of mean CEAC
 
-CEAplots <- function(MS){
+CEAplots <- function(MS,ring=TRUE){
   ## mean CEAs
   HZ <- list()
   for(cn in MS[,unique(country)]){
@@ -148,5 +148,7 @@ CEAplots <- function(MS){
     facet_wrap(~country)+
     geom_hline(yintercept = 0)+geom_vline(xintercept = 0)
   ## return
-  GP+geom_line(data=HZ,col=2,lty=2) + geom_point(data=HZ,shape=1,size=3,col=2)
+  if(ring)
+    GP <- GP+geom_line(data=HZ,col=2,lty=2) + geom_point(data=HZ,shape=1,size=3,col=2)
+  GP
 }
