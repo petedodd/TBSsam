@@ -99,6 +99,8 @@ AddAlgoParms <- function(D){
   tmp.spec <- 1 - (P$spec.clin$r(nrow(D))) * (1-P$spec.xga$r(nrow(D)))
   D[,clin.senseU:=ifelse(tmp.sens>runif(nrow(D)),1,0)]
   D[,clin.specU:=ifelse(tmp.spec>runif(nrow(D)),1,0)]
+  ## reassessment etc
+  D[,reassess:=ifelse(P$s.reassess$r(nrow(D))>runif(nrow(D)),1,0)]
 }
 
 
@@ -112,4 +114,6 @@ AddAlgoParms <- function(D){
 ## ## s.soc.CXRonly
 ## (tpz <- getAB(0.75,(50/392)^2))
 ## curve(dbeta(x,tpz$a,tpz$b),n=500) #NOTE 1-frac with GA done as well
-
+## s.reassess - 10,70,50 
+## (tpz <- getAB(0.5,((70-10)/392)^2))
+## curve(dbeta(x,tpz$a,tpz$b),n=500)

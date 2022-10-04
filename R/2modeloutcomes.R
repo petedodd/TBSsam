@@ -183,12 +183,11 @@ ggsave(GP,file=here('graphs/CEhull.pdf'),h=8,w=10)
 ## TODO
 ## sense/spec check
 ## ATT despite score in TBS
-## RR-TB
+## WHO reassess - worsening? - resample
 ## HIV
 ## SAM cfrs
-## mixture of TB vs not TB
-## clarify soc vs WHO & check costs
 ## prevalence of RS-TB, RR-TB
+## check mortality
 
 ## NOTE
 ## presumptive TB same w/ & w/o TB - no info on spec
