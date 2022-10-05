@@ -216,14 +216,10 @@ tab
 fwrite(tab,file = here('data/ICERtable.csv'))
 
 
-M <- reshapeINC(ALL)
-MS <- M[,.(`DALYs averted`=mean(`DALYs averted`),
-           `Incremental cost`=mean(`Incremental cost`)),
-        by=.(country,algorithm)]
+ALL
 
 
-
-(GP <- CEAplots(MS,ring=FALSE)) #TODO repair and unc
+GP <- CEAplots(ALL,ring=TRUE,alph=0.05)
 
 ggsave(GP,file=here('graphs/CEhull.pdf'),h=8,w=10)
 

@@ -133,7 +133,14 @@ getHull <- function(dQ,dC){
 
 ## plots of mean CEAC
 
-CEAplots <- function(MS,ring=TRUE){
+CEAplots <- function(ALL,ring=TRUE,alph=0.1){
+  ## reshape data
+  keep <- c('country','id',grep('\\.',names(ALL),value = TRUE))
+  M <- reshapeINC(ALL[,..keep])
+  MS <- M[,.(`DALYs averted`=mean(`DALYs averted`),
+             `Incremental cost`=mean(`Incremental cost`)),
+          by=.(country,algorithm)]
+
   ## mean CEAs
   HZ <- list()
   for(cn in MS[,unique(country)]){
@@ -147,9 +154,11 @@ CEAplots <- function(MS,ring=TRUE){
   HZ[,algorithm:=NA]
   ## plot
   GP <- ggplot(MS,aes(`DALYs averted`,`Incremental cost`,fill=algorithm,col=algorithm))+
-    geom_point()+
+    geom_point(data=M,alpha=alph,shape=1)+
+    geom_point(size=3,shape=3,stroke=2)+
     facet_wrap(~country)+
-    geom_hline(yintercept = 0)+geom_vline(xintercept = 0)
+    geom_hline(yintercept = 0)+geom_vline(xintercept = 0)+
+    ylab('Incremental cost (USD)')
   ## return
   if(ring)
     GP <- GP+geom_line(data=HZ,col=2,lty=2) + geom_point(data=HZ,shape=1,size=3,col=2)
