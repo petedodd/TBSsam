@@ -133,14 +133,10 @@ getHull <- function(dQ,dC){
 
 ## plots of mean CEAC
 
-CEAplots <- function(ALL,ring=TRUE,alph=0.1){
-  ## reshape data
-  keep <- c('country','id',grep('\\.',names(ALL),value = TRUE))
-  M <- reshapeINC(ALL[,..keep])
+CEAplots <- function(M,ring=TRUE,alph=0.1){
   MS <- M[,.(`DALYs averted`=mean(`DALYs averted`),
              `Incremental cost`=mean(`Incremental cost`)),
           by=.(country,algorithm)]
-
   ## mean CEAs
   HZ <- list()
   for(cn in MS[,unique(country)]){

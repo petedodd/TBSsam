@@ -101,9 +101,10 @@ CF[,country:=rep(cnz,each=nrow(CF)/length(cnz))]
 RR <- makeRRdata(Nreps)
 CF <- merge(CF,RR,by=c('country','id'))
 
-## TODO stool rather than GA params?
+
 ## === Xpert there for WHO?
 CF[P$s.soc.CXRonly$r(nrow(CF))>runif(nrow(CF)),Xpert_res:=NA] #for now assume same mWRD avail as via GA in SOC
+## assume NPA/Stool make Xpert always available for WHO
 
 ## make cost data
 CDW <- makeCostPSA(Nreps)
@@ -176,7 +177,7 @@ CF <- merge(CF,LYK[,.(country,LYS)],by='country',all.x=TRUE) #undiscounted
 
 
 ## NOTE this step resamples Npops times with popsize and calculates means
-ALL <- combineHE(CF,popsize = 1e2,Npops=1e3)
+ALL <- combineHE(CF,popsize = 5e2,Npops=1e3)
 
 ALL[,c('DC_TBS1','DC_TBS2','DC_WHO'):=.(tbs1.cost-soc.cost,tbs2.cost-soc.cost,who.cost-soc.cost)]
 ALL[,c('DD_TBS1','DD_TBS2','DD_WHO'):=.(tbs1.DALYs-soc.DALYs,tbs2.DALYs-soc.DALYs,who.DALYs-soc.DALYs)]
@@ -215,11 +216,13 @@ tab
 
 fwrite(tab,file = here('data/ICERtable.csv'))
 
+## reshape data
+keep <- c('country','id',grep('\\.',names(ALL),value = TRUE))
+M <- reshapeINC(ALL[,..keep])
 
-ALL
 
-
-GP <- CEAplots(ALL,ring=TRUE,alph=0.05)
+GP <- CEAplots(M,ring=TRUE,alph=0.05)
+GP
 
 ggsave(GP,file=here('graphs/CEhull.pdf'),h=8,w=10)
 
@@ -243,7 +246,6 @@ ggsave(GP,file=here('graphs/CEAC.pdf'),h=8,w=10)
 
 ## TODO
 ## sense/spec check
-## ATT despite score in TBS
 ## SAM cfrs
 ## check mortality
 

@@ -109,7 +109,7 @@ WHO.algorithm <- function(D,resample=FALSE){
   D[is.na(Xpert_res) & itb_exp_con.factor==1,who.ATT:=1] #HH contact
   D[is.na(Xpert_res) & itb_exp_con.factor==0 & CXR.avail==1,who.ATT:=ifelse(score_X>10,1,0)]
   D[is.na(Xpert_res) & itb_exp_con.factor==0 & CXR.avail==0,who.ATT:=ifelse(score_noX>10,1,0)]
-   ## costs
+  ## costs
   D[,who.cost:=who.cost+c.s.who.exam]                             #everyone gets
   D[!is.na(Xpert_res),who.cost:=who.cost + c.s.who.xns] #NOTE assumes not available=no cost
   D[is.na(Xpert_res),who.cost:=who.cost + c.s.who.hist] #those w/o Xpert get history assesst
@@ -145,7 +145,7 @@ WHO.algorithm <- function(D,resample=FALSE){
 ## NOTE this acts by side-effect
 TBS1s.algorithm <- function(D){
   ## treatment decision
-  D[,tbs1.ATT:=ifelse(TBS1S>10,1,0)]       #TODO include catch-up clinical
+  D[,tbs1.ATT:=ifelse(TBS1S>10,1,0)]
   ## treatment despite score
   D[tbs1.ATT==0 & reassess==1,tbs1.cost:=tbs1.cost+0] #cost NOTE assumed zero like in SOC
   D[tbs1.ATT==0 & reassess==1 & TB=='TB',tbs1.ATT:=clin.sense]
@@ -214,8 +214,6 @@ SOC.algorithm <- function(D,resample=FALSE){
   return(data.table(soc.ATT=D$soc.ATT,soc.cost=D$soc.cost))
 }
 
-
-## TODO: 1) cost soc clinical only? 2) use of reassess in soc?
 
 ## c.s.soc.exam	SOC: initial clinical assessment
 ## c.s.soc.CXR	SOC: CXR
