@@ -1,3 +1,4 @@
+library(HEdtree)
 library(discly)
 
 logit <- function(x) log(odds(x))
@@ -56,7 +57,6 @@ if(!file.exists(fn)){
 }
 
 ## CFRs
-library(HEdtree)
 
 ## prior parameters
 PD0 <- read.csv(here('data/SAMparameters.csv')) #read in

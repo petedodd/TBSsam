@@ -74,7 +74,6 @@ CFS
 fwrite(CFS,file=here('data/compare.summary.both.csv'))
 
 
-
 ## choose method (could continue but need to remember)
 CF <- CF[method=='copulas']
 
@@ -145,6 +144,7 @@ CF[,c('soc.ATT','soc.cost'):=ans]
 
 
 ## === TBS algorithms
+## NOTE these act by side effect rather than return
 ## --- TBS1S algorithm
 ## apply to data (appends ATT)
 TBS1s.algorithm(CF)
@@ -205,15 +205,15 @@ MS <- M[,.(`DALYs averted`=mean(`DALYs averted`),
 
 
 
-(GP <- CEAplots(MS,ring=FALSE))
+(GP <- CEAplots(MS,ring=FALSE)) #TODO repair and unc
 
 ggsave(GP,file=here('graphs/CEhull.pdf'),h=8,w=10)
 
 
-CEAC <- make.ceacs(M,seq(from=0,to=150,by=0.5))
+CEAC <- make.ceacs(M,seq(from=0,to=500,by=0.5))
 
 GP <- ggplot(CEAC[algorithm!='tbs2'],aes(lambda,`Probability CE`,col=country,lty=algorithm))+
-  geom_line()+scale_y_continuous(label=percent)+
+  geom_line(lwd=1)+scale_y_continuous(label=percent)+
   xlab('Cost effectiveness threshold (USD per DALY averted)')+
   ylab('Probability cost-effective')
 GP
