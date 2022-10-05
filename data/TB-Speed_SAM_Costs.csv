@@ -1,0 +1,15 @@
+,,,,Cambodia,,,Cameroon,,,Côte d'Ivoire,,,Mozambique,,,Sierra Leone,,,Uganda,,,Zambia,
+COSTS,NAME,DESCRIPTION,,Low,High,,Low,High,,Low,High,,Low,High,,Low,High,,Low,High,,Low,High
+Screening,c.s.soc.exam,SOC: initial clinical assessment,,1.77,2.09,,3.09,3.92,,3.09,4.14,,2.69,3.62,,2.15,4.21,,2.78,3.61,,3.88,4.58
+Reassessment,c.s.tbs2step.scre,INT: TB-Speed two-steps algo: screening: clinical exam + HIV test ,,4.94,5.43,,6.75,8.38,,6.75,8.71,,5.81,7.5,,4.89,7.71,,6.65,7.77,,7.64,8.67
+,c.s.who.exam,INT: WHO algo: clinical exam + HIV test ,,4.94,5.43,,6.75,8.38,,6.75,8.71,,5.81,7.5,,4.89,7.71,,6.65,7.77,,7.64,8.67
+Exams & tests,c.s.soc.CXR,SOC: CXR,,7.31,7.63,,7.53,8,,8.08,8.79,,7.39,8.02,,7.74,9.22,,7.65,8.52,,8.29,8.91
+,c.s.who.examCXR,INT: WHO algo: clinical exam + CXR,,9.08,9.73,,10.62,11.92,,11.17,12.93,,10.08,11.64,,9.9,13.43,,10.43,12.13,,12.16,13.49
+,c.s.soc.CXRxga,SOC: CXR + Xpert Ultra on GA [for all] + urine LAM,,40.25,46.23,,49.21,56.21,,46.64,53.94,,39.39,46.09,,37.38,44.9,,40.3,46.87,,48.63,55.53
+,c.s.soc.reassessCXRxga,SOC: reassessment exam + CXR + Xpert Ultra on GA [for all] + urine LAM,,42.02,48.32,,52.3,60.13,,49.73,58.08,,42.08,49.7,,39.53,49.11,,43.08,50.47,,52.51,60.11
+,c.s.tbs1step.diag,INT: TB-Speed one-step algo: clinical exam + HIV test + CXR + Xpert on NPA and stool + abdo US,,57.23,66.56,,66.56,79.22,,65.65,79.2,,62.87,75.77,,59.57,76.97,,64.22,76.41,,70.68,82.74
+,c.s.tbs2step.diag,INT: TB-Speed two-steps algo: diagnostic: CXR + Xpert on NPA and stool + abdo US,,52.28,61.13,,59.81,70.84,,58.89,70.49,,57.06,68.27,,54.68,69.26,,57.57,68.64,,63.05,74.07
+,c.s.who.xns,INT: WHO algo: Xpert Ultra on NPA & stool,,41.82,49.58,,48.24,57.62,,45.6,54.75,,45.82,54.84,,42.54,51.56,,45.88,53.96,,48.71,57.55
+,c.s.who.hist,INT: WHO algo: assessment of TB contacts in the previous 12 months,,0,0,,0,0,,0,0,,0,0,,0,0,,0,0,,0,0
+RELATED PARAMETERS,c.s.rsATT,Rifampicin-sensitive anti-TB treatment in SAM children,,34.77,36.74,,36.06,39.58,,41.04,45.87,,36.6,41.04,,39.87,54.87,,34.69,40.67,,43.21,47.79
+,c.s.rrATT,Rifampicin-resistant anti-TB treatment in SAM children,,1459.57,1475.1,,1469.79,1497.5,,1509.01,1547.08,,1473.99,1509.01,,1499.82,1618.08,,1458.94,1506.09,,1526.15,1562.24
