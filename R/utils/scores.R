@@ -106,9 +106,9 @@ WHO.algorithm <- function(D,resample=FALSE){
   cat('...',nrow(D),'\n')
   D[,who.ATT:=0]
   D[!is.na(Xpert_res),who.ATT:=ifelse(Xpert_res==1,1,0)] #Xpert result available
-  D[is.na(Xpert_res) & itb_exp_con.factor==1,who.ATT:=1] #HH contact
-  D[is.na(Xpert_res) & itb_exp_con.factor==0 & CXR.avail==1,who.ATT:=ifelse(score_X>10,1,0)]
-  D[is.na(Xpert_res) & itb_exp_con.factor==0 & CXR.avail==0,who.ATT:=ifelse(score_noX>10,1,0)]
+  D[(is.na(Xpert_res) | Xpert_res==0) & itb_exp_con.factor==1,who.ATT:=1] #HH contact
+  D[(is.na(Xpert_res) | Xpert_res==0) & itb_exp_con.factor==0 & CXR.avail==1,who.ATT:=ifelse(score_X>10,1,0)]
+  D[(is.na(Xpert_res) | Xpert_res==0) & itb_exp_con.factor==0 & CXR.avail==0,who.ATT:=ifelse(score_noX>10,1,0)]
   ## costs
   D[,who.cost:=who.cost+c.s.who.exam]                             #everyone gets
   D[!is.na(Xpert_res),who.cost:=who.cost + c.s.who.xns] #NOTE assumes not available=no cost

@@ -101,9 +101,11 @@ CF[,country:=rep(cnz,each=nrow(CF)/length(cnz))]
 RR <- makeRRdata(Nreps)
 CF <- merge(CF,RR,by=c('country','id'))
 
+## check Xpert
+CF[,.(mean(Xpert_res)),by=TB]
 
 ## === Xpert there for WHO?
-CF[P$s.soc.CXRonly$r(nrow(CF))>runif(nrow(CF)),Xpert_res:=NA] #for now assume same mWRD avail as via GA in SOC
+## CF[P$s.soc.CXRonly$r(nrow(CF))>runif(nrow(CF)),Xpert_res:=NA] #for now assume same mWRD avail as via GA in SOC
 ## assume NPA/Stool make Xpert always available for WHO
 
 ## make cost data
