@@ -46,6 +46,9 @@ combineHE <- function(WS,
     idz0 <- sample(sfr[TB!='TB',id],popsize-nprev)
     WH <- WS[id %in% c(idz0,idz1)]
     WH[,id:=1:nrow(WH)]
+    ## also sample across reassess
+    rea <- P$s.reassess$r(1)
+    WH[,reassess:=ifelse(rea>runif(nrow(WH)),1,0)]
     ## ======== CEA outputs
     ## combined data
     ALL[[n]] <- WH[,.(id=n,

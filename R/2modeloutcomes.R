@@ -178,24 +178,42 @@ CF <- merge(CF,LYK[,.(country,LYS)],by='country',all.x=TRUE) #undiscounted
 ## NOTE this step resamples Npops times with popsize and calculates means
 ALL <- combineHE(CF,popsize = 1e2,Npops=1e3)
 
+ALL[,c('DC_TBS1','DC_TBS2','DC_WHO'):=.(tbs1.cost-soc.cost,tbs2.cost-soc.cost,who.cost-soc.cost)]
+ALL[,c('DD_TBS1','DD_TBS2','DD_WHO'):=.(tbs1.DALYs-soc.DALYs,tbs2.DALYs-soc.DALYs,who.DALYs-soc.DALYs)]
+
 ## quick looks
 clz <- names(ALL)
 clz <- clz[-c(1,2)]
 MZ <- ALL[,lapply(.SD,mean),by=country,.SDcols=clz]
-
+MZh <- ALL[,lapply(.SD,hi),by=country,.SDcols=clz]
+MZl <- ALL[,lapply(.SD,lo),by=country,.SDcols=clz]
+names(MZh)[2:ncol(MZh)] <- paste0(names(MZh)[2:ncol(MZh)],'.hi')
+names(MZl)[2:ncol(MZl)] <- paste0(names(MZl)[2:ncol(MZl)],'.lo')
+MZ <- merge(MZ,MZl,by='country')
+MZ <- merge(MZ,MZh,by='country')
 
 ## wrt SOC
-MZ[,c('DC_TBS1','DC_TBS2','DC_WHO'):=.(tbs1.cost-soc.cost,tbs2.cost-soc.cost,who.cost-soc.cost)]
-MZ[,c('DD_TBS1','DD_TBS2','DD_WHO'):=.(tbs1.DALYs-soc.DALYs,tbs2.DALYs-soc.DALYs,who.DALYs-soc.DALYs)]
 MZ[,c('ICER_TBS1','ICER_TBS2','ICER_WHO'):=.(-DC_TBS1/DD_TBS1,-DC_TBS2/DD_TBS2,-DC_WHO/DD_WHO)]
 
 
-MZ[,.(country,
-      DC_TBS1,DC_TBS2,DC_WHO,
-      DD_TBS1,DD_TBS2,DD_WHO,
-      ICER_TBS1,ICER_TBS2,ICER_WHO)]
+tab <- MZ[,.(country,
+               `cost per child, SOC`=brkt(soc.cost,soc.cost.lo,soc.cost.hi),
+               `cost per child, WHO`=brkt(who.cost,who.cost.lo,who.cost.hi),
+               `cost per child, TBS1`=brkt(tbs1.cost,tbs1.cost.lo,tbs1.cost.hi),
+               `cost per child, TBS2`=brkt(tbs2.cost,tbs2.cost.lo,tbs2.cost.hi),
+               `incremental cost, WHO`=brkt(DC_WHO,DC_WHO.lo,DC_WHO.hi),
+               `incremental cost, TBS1`=brkt(DC_TBS1,DC_TBS1.lo,DC_TBS1.hi),
+               `incremental cost, TBS2`=brkt(DC_TBS2,DC_TBS2.lo,DC_TBS2.hi),
+               `100x DALYs averted, WHO`=brkt(-1e2*DD_WHO,-1e2*DD_WHO.hi,-1e2*DD_WHO.lo),
+               `100x DALYs averted, TBS1`=brkt(-1e2*DD_TBS1,-1e2*DD_TBS1.hi,-1e2*DD_TBS1.lo),
+               `100x DALYs averted, TBS2`=brkt(-1e2*DD_TBS2,-1e2*DD_TBS2.hi,-1e2*DD_TBS2.lo),
+               `ICER, WHO`=round(ICER_WHO,2),
+               `ICER, TBS1`=round(ICER_TBS1,2),
+               `ICER, TBS2`=round(ICER_TBS2,2)
+               )]
+tab
 
-fwrite(MZ,file = here('data/ICERtable.csv'))
+fwrite(tab,file = here('data/ICERtable.csv'))
 
 
 M <- reshapeINC(ALL)
