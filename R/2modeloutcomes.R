@@ -221,7 +221,7 @@ keep <- c('country','id',grep('\\.',names(ALL),value = TRUE))
 M <- reshapeINC(ALL[,..keep])
 
 
-GP <- CEAplots(M,ring=TRUE,alph=0.05)
+GP <- CEAplots(M[algorithm!='tbs2'],ring=TRUE,alph=0.05)
 GP
 
 ggsave(GP,file=here('graphs/CEhull.pdf'),h=8,w=10)
