@@ -158,6 +158,8 @@ TBS2s.algorithm(CF)
 ## ======== outcomes
 AddCFRs(CF)
 
+CF
+
 
 ## NOTE
 ## ditch most signs for simplificty
@@ -167,6 +169,11 @@ CF <- CF[,.(country,id,TB,
             tbs1.ATT,tbs1.cost,tbs1.cfr,
             tbs2.ATT,tbs2.cost,tbs2.cfr)] #lose lots of info for now for simplicity
 summary(CF)
+
+## CFRs
+CF[,.(who=mean(who.cfr),soc=mean(soc.cfr),
+      tbs1=mean(tbs1.cfr),tbs2=mean(tbs2.cfr)),by=TB]
+
 
 ## se/sp of algs as a whole
 CF[,.(who=mean(who.ATT),soc=mean(soc.ATT),
@@ -181,8 +188,16 @@ CF <- merge(CF,LYK[,.(country,LYS)],by='country',all.x=TRUE) #undiscounted
 ## NOTE this step resamples Npops times with popsize and calculates means
 ALL <- combineHE(CF,popsize = 5e2,Npops=1e3)
 
+## incremental wrt SOC
 ALL[,c('DC_TBS1','DC_TBS2','DC_WHO'):=.(tbs1.cost-soc.cost,tbs2.cost-soc.cost,who.cost-soc.cost)]
 ALL[,c('DD_TBS1','DD_TBS2','DD_WHO'):=.(tbs1.DALYs-soc.DALYs,tbs2.DALYs-soc.DALYs,who.DALYs-soc.DALYs)]
+ALL[,c('DT_TBS1','DT_TBS2','DT_WHO'):=.(tbs1.ATT-soc.ATT,tbs2.ATT-soc.ATT,who.ATT-soc.ATT)]
+ALL[,c('DM_TBS1','DM_TBS2','DM_WHO'):=.(tbs1.cfr-soc.cfr,tbs2.DALYs-soc.cfr,who.cfr-soc.cfr)]
+
+## wrt WHO
+ALL[,c('wDC_TBS1','wDC_TBS2'):=.(tbs1.cost-who.cost,tbs2.cost-who.cost)]
+ALL[,c('wDD_TBS1','wDD_TBS2'):=.(tbs1.DALYs-who.DALYs,tbs2.DALYs-who.DALYs)]
+
 
 ## quick looks
 clz <- names(ALL)
@@ -197,23 +212,11 @@ MZ <- merge(MZ,MZh,by='country')
 
 ## wrt SOC
 MZ[,c('ICER_TBS1','ICER_TBS2','ICER_WHO'):=.(-DC_TBS1/DD_TBS1,-DC_TBS2/DD_TBS2,-DC_WHO/DD_WHO)]
+## wrt WHO
+MZ[,c('wICER_TBS1','wICER_TBS2'):=.(-wDC_TBS1/wDD_TBS1,-wDC_TBS2/wDD_TBS2)]
 
 
-tab <- MZ[,.(country,
-               `cost per child, SOC`=brkt(soc.cost,soc.cost.lo,soc.cost.hi),
-               `cost per child, WHO`=brkt(who.cost,who.cost.lo,who.cost.hi),
-               `cost per child, TBS1`=brkt(tbs1.cost,tbs1.cost.lo,tbs1.cost.hi),
-               `cost per child, TBS2`=brkt(tbs2.cost,tbs2.cost.lo,tbs2.cost.hi),
-               `incremental cost, WHO`=brkt(DC_WHO,DC_WHO.lo,DC_WHO.hi),
-               `incremental cost, TBS1`=brkt(DC_TBS1,DC_TBS1.lo,DC_TBS1.hi),
-               `incremental cost, TBS2`=brkt(DC_TBS2,DC_TBS2.lo,DC_TBS2.hi),
-               `100x DALYs averted, WHO`=brkt(-1e2*DD_WHO,-1e2*DD_WHO.hi,-1e2*DD_WHO.lo),
-               `100x DALYs averted, TBS1`=brkt(-1e2*DD_TBS1,-1e2*DD_TBS1.hi,-1e2*DD_TBS1.lo),
-               `100x DALYs averted, TBS2`=brkt(-1e2*DD_TBS2,-1e2*DD_TBS2.hi,-1e2*DD_TBS2.lo),
-               `ICER, WHO`=round(ICER_WHO,2),
-               `ICER, TBS1`=round(ICER_TBS1,2),
-               `ICER, TBS2`=round(ICER_TBS2,2)
-               )]
+tab <- makeTable(MZ)
 tab
 
 fwrite(tab,file = here('data/ICERtable.csv'))
@@ -231,7 +234,8 @@ ggsave(GP,file=here('graphs/CEhull.pdf'),h=8,w=10)
 
 CEAC <- make.ceacs(M,seq(from=0,to=500,by=0.5))
 
-GP <- ggplot(CEAC[algorithm!='tbs2'],aes(lambda,`Probability CE`,col=country,lty=algorithm))+
+GP <- ggplot(CEAC[algorithm!='tbs2' & country %in% c('Uganda','Zambia')],
+             aes(lambda,`Probability CE`,col=country,lty=algorithm))+
   geom_line(lwd=1)+scale_y_continuous(label=percent)+
   xlab('Cost effectiveness threshold (USD per DALY averted)')+
   ylab('Probability cost-effective')
@@ -248,8 +252,7 @@ ggsave(GP,file=here('graphs/CEAC.pdf'),h=8,w=10)
 
 ## TODO
 ## sense/spec check
-## SAM cfrs
-## check mortality
 
 ## NOTE
 ## presumptive TB same w/ & w/o TB - no info on spec
+## unc stoch vs parm

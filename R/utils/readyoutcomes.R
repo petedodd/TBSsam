@@ -66,26 +66,31 @@ P <- parse.parmtable(PD0)             #convert into parameter object
 
 ## for now neglect HIV
 AddCFRs <- function(D){
-    ## WHO version
-    D[TB=='not TB' & who.ATT==0,who.cfr:=0]
-    D[TB=='not TB' & who.ATT==1,who.cfr:=0]
-    D[TB=='TB' & who.ATT==0,who.cfr:=cfr.noatt]
-    D[TB=='TB' & who.ATT==1,who.cfr:=cfr.att]
-    ## SOC
-    D[TB=='not TB' & soc.ATT==0,soc.cfr:=0]
-    D[TB=='not TB' & soc.ATT==1,soc.cfr:=0]
-    D[TB=='TB' & soc.ATT==0,soc.cfr:=cfr.noatt]
-    D[TB=='TB' & soc.ATT==1,soc.cfr:=cfr.att]
-    ## 1 step
-    D[TB=='not TB' & tbs1.ATT==0,tbs1.cfr:=0]
-    D[TB=='not TB' & tbs1.ATT==1,tbs1.cfr:=0]
-    D[TB=='TB' & tbs1.ATT==0,tbs1.cfr:=cfr.noatt]
-    D[TB=='TB' & tbs1.ATT==1,tbs1.cfr:=cfr.att]
-    ## 2 step
-    D[TB=='not TB' & tbs2.ATT==0,tbs2.cfr:=0]
-    D[TB=='not TB' & tbs2.ATT==1,tbs2.cfr:=0]
-    D[TB=='TB' & tbs2.ATT==0,tbs2.cfr:=cfr.noatt]
-    D[TB=='TB' & tbs2.ATT==1,tbs2.cfr:=cfr.att]
+  ## background SAM mortality
+  D[,SAMmort:= P$s.SAMmort$r(nrow(D))]
+  ## WHO version
+  D[TB=='not TB' & who.ATT==0,who.cfr:=0+SAMmort]
+  D[TB=='not TB' & who.ATT==1,who.cfr:=0+SAMmort]
+  D[TB=='TB' & who.ATT==0,who.cfr:=cfr.noatt+SAMmort]
+  D[TB=='TB' & who.ATT==1,who.cfr:=cfr.att+SAMmort]
+  ## SOC
+  D[TB=='not TB' & soc.ATT==0,soc.cfr:=0+SAMmort]
+  D[TB=='not TB' & soc.ATT==1,soc.cfr:=0+SAMmort]
+  D[TB=='TB' & soc.ATT==0,soc.cfr:=cfr.noatt+SAMmort]
+  D[TB=='TB' & soc.ATT==1,soc.cfr:=cfr.att+SAMmort]
+  ## 1 step
+  D[TB=='not TB' & tbs1.ATT==0,tbs1.cfr:=0+SAMmort]
+  D[TB=='not TB' & tbs1.ATT==1,tbs1.cfr:=0+SAMmort]
+  D[TB=='TB' & tbs1.ATT==0,tbs1.cfr:=cfr.noatt+SAMmort]
+  D[TB=='TB' & tbs1.ATT==1,tbs1.cfr:=cfr.att+SAMmort]
+  ## 2 step
+  D[TB=='not TB' & tbs2.ATT==0,tbs2.cfr:=0+SAMmort]
+  D[TB=='not TB' & tbs2.ATT==1,tbs2.cfr:=0+SAMmort]
+  D[TB=='TB' & tbs2.ATT==0,tbs2.cfr:=cfr.noatt+SAMmort]
+  D[TB=='TB' & tbs2.ATT==1,tbs2.cfr:=cfr.att+SAMmort]
+  ## cap
+  cap <- c('who.cfr','soc.cfr','tbs1.cfr','tbs2.cfr')
+  D[,(cap):=lapply(.SD,function(x)pmin(1,x)),.SDcols=cap]
 }
 
 

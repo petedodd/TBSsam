@@ -54,12 +54,20 @@ combineHE <- function(WS,
     ALL[[n]] <- WH[,.(id=n,
                       who.cost=mean(who.cost),
                       who.DALYs=mean(who.cfr*dLYS),
+                      who.cfr=mean(who.cfr),
+                      who.ATT=mean(who.ATT),
                       soc.cost=mean(soc.cost),
                       soc.DALYs=mean(soc.cfr*dLYS),
+                      soc.cfr=mean(soc.cfr),
+                      soc.ATT=mean(soc.ATT),
                       tbs1.cost=mean(tbs1.cost),
                       tbs1.DALYs=mean(tbs1.cfr*dLYS),
+                      tbs1.cfr=mean(tbs1.cfr),
+                      tbs1.ATT=mean(tbs1.ATT),
                       tbs2.cost=mean(tbs2.cost),
-                      tbs2.DALYs=mean(tbs2.cfr*dLYS)),
+                      tbs2.DALYs=mean(tbs2.cfr*dLYS),
+                      tbs2.cfr=mean(tbs2.cfr),
+                      tbs2.ATT=mean(tbs2.ATT)),
                    by=country]
   }
   ## return
@@ -159,4 +167,41 @@ CEAplots <- function(M,ring=TRUE,alph=0.1){
   if(ring)
     GP <- GP+geom_line(data=HZ,col=2,lty=2) + geom_point(data=HZ,shape=1,size=3,col=2)
   GP
+}
+
+
+makeTable <- function(MZ){
+  MZ[,.(country,
+        `cost per child, SOC`=brkt(soc.cost,soc.cost.lo,soc.cost.hi),
+        `cost per child, WHO`=brkt(who.cost,who.cost.lo,who.cost.hi),
+        `cost per child, TBS1`=brkt(tbs1.cost,tbs1.cost.lo,tbs1.cost.hi),
+        `cost per child, TBS2`=brkt(tbs2.cost,tbs2.cost.lo,tbs2.cost.hi),
+        `incremental cost, WHO`=brkt(DC_WHO,DC_WHO.lo,DC_WHO.hi),
+        `incremental cost, TBS1`=brkt(DC_TBS1,DC_TBS1.lo,DC_TBS1.hi),
+        `incremental cost, TBS2`=brkt(DC_TBS2,DC_TBS2.lo,DC_TBS2.hi),
+        `100x ATT per child, SOC`=brkt(1e2*soc.ATT,1e2*soc.ATT.lo,1e2*soc.ATT.hi),
+        `100x ATT per child, WHO`=brkt(1e2*who.ATT,1e2*who.ATT.lo,1e2*who.ATT.hi),
+        `100x ATT per child, TBS1`=brkt(1e2*tbs1.ATT,1e2*tbs1.ATT.lo,1e2*tbs1.ATT.hi),
+        `100x ATT per child, TBS2`=brkt(1e2*tbs2.ATT,1e2*tbs2.ATT.lo,1e2*tbs2.ATT.hi),
+        `100x incremental ATT, WHO`=brkt(1e2*DT_WHO,1e2*DT_WHO.lo,1e2*DT_WHO.hi),
+        `100x incremental ATT, TBS1`=brkt(1e2*DT_TBS1,1e2*DT_TBS1.lo,1e2*DT_TBS1.hi),
+        `100x incremental ATT, TBS2`=brkt(1e2*DT_TBS2,1e2*DT_TBS2.lo,1e2*DT_TBS2.hi),
+        `100x DALYs averted, WHO`=brkt(-1e2*DD_WHO,-1e2*DD_WHO.hi,-1e2*DD_WHO.lo),
+        `100x DALYs averted, TBS1`=brkt(-1e2*DD_TBS1,-1e2*DD_TBS1.hi,-1e2*DD_TBS1.lo),
+        `100x DALYs averted, TBS2`=brkt(-1e2*DD_TBS2,-1e2*DD_TBS2.hi,-1e2*DD_TBS2.lo),
+        `100x deaths per child, SOC`=brkt(1e2*soc.cfr,1e2*soc.cfr.lo,1e2*soc.cfr.hi),
+        `100x deaths per child, WHO`=brkt(1e2*who.cfr,1e2*who.cfr.lo,1e2*who.cfr.hi),
+        `100x deaths per child, TBS1`=brkt(1e2*tbs1.cfr,1e2*tbs1.cfr.lo,1e2*tbs1.cfr.hi),
+        `100x deaths per child, TBS2`=brkt(1e2*tbs2.cfr,1e2*tbs2.cfr.lo,1e2*tbs2.cfr.hi),
+        `100x incremental deaths, WHO`=brkt(1e2*DM_WHO,1e2*DM_WHO.lo,1e2*DM_WHO.hi),
+        `100x incremental deaths, TBS1`=brkt(1e2*DM_TBS1,1e2*DM_TBS1.lo,1e2*DM_TBS1.hi),
+        `100x incremental deaths, TBS2`=brkt(1e2*DM_TBS2,1e2*DM_TBS2.lo,1e2*DM_TBS2.hi),
+        `100x DALYs averted, WHO`=brkt(-1e2*DD_WHO,-1e2*DD_WHO.hi,-1e2*DD_WHO.lo),
+        `100x DALYs averted, TBS1`=brkt(-1e2*DD_TBS1,-1e2*DD_TBS1.hi,-1e2*DD_TBS1.lo),
+        `100x DALYs averted, TBS2`=brkt(-1e2*DD_TBS2,-1e2*DD_TBS2.hi,-1e2*DD_TBS2.lo),
+        `ICER, WHO`=round(ICER_WHO,2),
+        `ICER, TBS1`=round(ICER_TBS1,2),
+        `ICER, TBS2 vs WHO`=round(wICER_TBS2,2),
+        `ICER, TBS1 vs WHO`=round(wICER_TBS1,2)
+        )]
 }
