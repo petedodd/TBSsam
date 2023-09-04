@@ -46,50 +46,48 @@ appendTBSscores <- function(D){
     TBS1S <- TBS2Sa <- TBS2Sb <- 0;
 
     ## one-step algorithm
-    if(itb_exp_con.factor==1) TBS1S <- TBS1S + 8;
+    if(Contact_TB==1) TBS1S <- TBS1S + 8;
     if(itb_cou_3==1) TBS1S <- TBS1S + 6;
     if(itb_app_2==1) TBS1S <- TBS1S + 2;
-    if(temp_38==1) TBS1S <- TBS1S + 2;
-    if(tachycardia==1) TBS1S <- TBS1S + 5;
-    if(ice_ind.factor==1) TBS1S <- TBS1S + 8;
-    if(ice_csc.factor==1) TBS1S <- TBS1S + 2;
-    if(ice_ade.factor==1) TBS1S <- TBS1S + 12;
+    if(tachycardia==1) TBS1S <- TBS1S + 6;
+    if(ice_ind_bin.factor==1) TBS1S <- TBS1S + 7;
+    if(Dep_csc==1) TBS1S <- TBS1S + 1;
     if(cxr_pre_alv.factor==1) TBS1S <- TBS1S + 4;
     if(cxr_pre_hil.factor==1) TBS1S <- TBS1S + 6;
-    if(cxr_pre_ple.factor==1) TBS1S <- TBS1S + 13;
-    if(cxr_pre_eff.factor==1) TBS1S <- TBS1S - 9;
-    if(aus_sma.factor==1) TBS1S <- TBS1S + 11;
-    if(aus_effusion==1) TBS1S <- TBS1S + 5;
-    if(hiv_res.factor==1) TBS1S <- TBS1S + 6;
-    if(Xpert_res==1) TBS1S <- TBS1S + 40;
+    if(cxr_pre_ple.factor==1) TBS1S <- TBS1S + 11;
+    if(cxr_pre_eff.factor==1) TBS1S <- TBS1S - 8;
+    if(aus_sma.factor==1) TBS1S <- TBS1S + 8;
+    if(aus_hma.factor==1) TBS1S <- TBS1S + 10;
+    if(aus_effusion==1) TBS1S <- TBS1S + 3;
+    if(aus_asc.factor==1) TBS1S <- TBS1S + 1;
+    if(Xpert_res==1) TBS1S <- TBS1S + 35;
 
     ## two-step part 1
-    if(itb_exp_con.factor==1) TBS2Sa <- TBS2Sa + 20;
-    if(itb_fat_2==1) TBS2Sa <- TBS2Sa + 6;
-    if(itb_cou_3==1) TBS2Sa <- TBS2Sa + 9;
-    if(temp_38==1) TBS2Sa <- TBS2Sa + 19;
-    if(ice_ind.factor==1) TBS2Sa <- TBS2Sa + 9;
-    if(ice_cra.factor==1) TBS2Sa <- TBS2Sa + 9;
-    if(ice_csc.factor==1) TBS2Sa <- TBS2Sa + 7;
-    if(ice_ade.factor==1) TBS2Sa <- TBS2Sa + 26;
-    if(hiv_res.factor==1) TBS2Sa <- TBS2Sa + 9;
+    if(Contact_TB==1) TBS2Sa <- TBS2Sa + 33;
+    if(itb_fat_2==1) TBS2Sa <- TBS2Sa + 9;
+    if(itb_cou_3==1) TBS2Sa <- TBS2Sa + 17;
+    if(temp_38==1) TBS2Sa <- TBS2Sa + 28;
+    if(tachycardia==1) TBS2Sa <- TBS2Sa + 11;
+    if(ice_ind_bin.factor==1) TBS2Sa <- TBS2Sa + 16;
+    if(ice_cra.factor==1) TBS2Sa <- TBS2Sa + 16;
+    if(Dep_csc==1) TBS2Sa <- TBS2Sa + 10;
+    if(ice_ade_bin.factor==1) TBS2Sa <- TBS2Sa + 27;
+    if(hiv_res.factor==1) TBS2Sa <- TBS2Sa + 11;
 
     ## two-step part 2
-    if(itb_exp_con.factor==1) TBS2Sb <- TBS2Sb + 9;
+    if(Contact_TB==1) TBS2Sb <- TBS2Sb + 8;
     if(itb_cou_3==1) TBS2Sb <- TBS2Sb + 5;
     if(itb_app_2==1) TBS2Sb <- TBS2Sb + 2;
-    if(temp_38==1) TBS2Sb <- TBS2Sb + 4;
-    if(ice_ind.factor==1) TBS2Sb <- TBS2Sb + 9;
-    if(ice_ade.factor==1) TBS2Sb <- TBS2Sb + 14;
-    if(cxr_pre_alv.factor==1) TBS2Sb <- TBS2Sb + 4;
-    if(cxr_pre_hil.factor==1) TBS2Sb <- TBS2Sb + 6;
-    if(cxr_pre_ple.factor==1) TBS2Sb <- TBS2Sb + 13;
-    if(cxr_pre_eff.factor==1) TBS2Sb <- TBS2Sb - 10;
-    if(aus_hep.factor==1) TBS2Sb <- TBS2Sb - 2;
-    if(aus_sma.factor==1) TBS2Sb <- TBS2Sb + 11;
-    if(aus_effusion==1) TBS2Sb <- TBS2Sb + 7;
-    if(hiv_res.factor==1) TBS2Sb <- TBS2Sb + 7;
-    if(Xpert_res==1) TBS2Sb <- TBS2Sb + 41;
+    if(tachycardia==1) TBS2Sb <- TBS2Sb + 5;
+    if(ice_ind_bin.factor==1) TBS2Sb <- TBS2Sb + 7;
+    if(cxr_pre_alv.factor==1) TBS2Sb <- TBS2Sb + 5;
+    if(cxr_pre_hil.factor==1) TBS2Sb <- TBS2Sb + 5;
+    if(cxr_pre_ple.factor==1) TBS2Sb <- TBS2Sb + 10;
+    if(cxr_pre_eff.factor==1) TBS2Sb <- TBS2Sb - 6;
+    if(aus_sma.factor==1) TBS2Sb <- TBS2Sb + 6;
+    if(aus_hma.factor==1) TBS2Sb <- TBS2Sb + 10;
+    if(aus_effusion==1) TBS2Sb <- TBS2Sb + 4;
+    if(Xpert_res==1) TBS2Sb <- TBS2Sb + 31;
 
     ## return
     list(TBS1S, TBS2Sa, TBS2Sb)
