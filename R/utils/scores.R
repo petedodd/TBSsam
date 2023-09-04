@@ -13,7 +13,7 @@ appendWHOscores <- function(D){
     if(itb_wgt_3==1) A <- A + 3;      #weight loss
     if(haemoptysis==1) A <- A + 4;    #haemoptysis
     if(night.sweats==1) A <- A + 2;   #night sweats
-    if(ice_ade.factor==1) A <- A + 4; #swolen LNs
+    if(ice_ade_bin.factor==1) A <- A + 4; #swolen LNs
     if(tachycardia==1) A <- A + 2;    #tachycardia
     if(tachypnea==1) A <- A - 1;      #tachypnea
     ## CXR variables
@@ -30,7 +30,7 @@ appendWHOscores <- function(D){
     if(itb_wgt_3==1) C <- C + 5;      #weight loss
     if(haemoptysis==1) A <- A + 9;    #haemoptysis
     if(night.sweats==1) A <- A + 6;   #night sweats
-    if(ice_ade.factor==1) C <- C + 7; #swolen LNs
+    if(ice_ade_bin.factor==1) C <- C + 7; #swolen LNs
     if(tachycardia==1) C <- C + 4;    #tachycardia
     if(tachypnea==1) C <- C + 2;      #tachypnea
     list(C,A+B)
