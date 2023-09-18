@@ -47,10 +47,12 @@ popt[,mean(score_X>10)] #sensitivity =71%
 popt[,mean(score_noX>10)] #sensitivity =39%
 
 ## check se/sp
-pop[,1-mean(TBS1S>10)] #specificity =76%
-pop[,1-mean(TBS2Sa>10 & TBS2Sb>10)] #specificity =86%
-popt[,mean(TBS1S>10)] #sensitivity =84%
-popt[,mean(TBS2Sa>10 & TBS2Sb>10)] #sensitivity =63%
+pop[,1-mean(TBS1S>10)] #specificity =84%    clinical paper: TBS1S spe: 82%
+pop[,1-mean(TBS2Sa>10 & TBS2Sb>10)] #specificity =90%     clinical paper: TBS2S spe: 86%
+popt[,mean(TBS1S>10)] #sensitivity =80%     clinical paper: TBS1S sen: 85%
+popt[,mean(TBS2Sa>10 & TBS2Sb>10)] #sensitivity =70%      clinical paper: TBS2S sen: 77%
+
+### recheck that sen.spe du 2step sont comparé avec la sen/spe estimé sur l'ensemble de la pop (N=535) - refaire point avec Minh
 
 ## compare
 pop0[,method:='no correlation']
@@ -237,7 +239,7 @@ CEAC <- make.ceacs(M,seq(from=0,to=500,by=0.5))
 GP <- ggplot(CEAC[algorithm!='tbs2' & country %in% c('Uganda','Zambia')],
              aes(lambda,`Probability CE`,col=country,lty=algorithm))+
   geom_line(lwd=1)+scale_y_continuous(label=percent)+
-  xlab('Cost effectiveness threshold (USD per DALY averted)')+
+  xlab('Cost effectiveness threshold (US$ per DALY averted)')+
   ylab('Probability cost-effective')
 GP
 
