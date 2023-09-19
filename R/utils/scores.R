@@ -102,20 +102,31 @@ appendTBSscores <- function(D){
 ## WHO algorithm
 WHO.algorithm <- function(D,resample=FALSE){
   cat('...',nrow(D),'\n')
-  D[,who.ATT:=0]
-  D[!is.na(Xpert_res),who.ATT:=ifelse(Xpert_res==1,1,0)] #Xpert result available
-  D[(is.na(Xpert_res) | Xpert_res==0) & Contact_TB==1,who.ATT:=1] #HH contact
-  D[(is.na(Xpert_res) | Xpert_res==0) & Contact_TB==0 & CXR.avail==1,who.ATT:=ifelse(score_X>10,1,0)]
-  D[(is.na(Xpert_res) | Xpert_res==0) & Contact_TB==0 & CXR.avail==0,who.ATT:=ifelse(score_noX>10,1,0)]
+  
+  ## treatment decision
+  D[,who.ATT:=fcase(
+    ptb==0,0,                                    #if not considered presumptive (screening rate=80% based on expert opinion, as in SOC)
+    ptb==1 & CXR.avail==1,who.ATT:=ifelse(score_X>10,1,0),
+    ptb==1 & CXR.avail==0,who.ATT:=ifelse(score_noX>10,1,0),
+    default=0
+  )]
+  
+  ## treatment decision
+  D[,soc.ATT:=fcase(
+    ptb==0,0,                                    #if not considered presumptive (screening rate=80% based on expert opinion)
+    ptb==1 & testing.done==0,ifelse(TB=='TB',clin.sense,1-clin.spec), #clinical
+    ptb==1 & testing.done==1 & xray.only==1,ifelse(TB=='TB',clin.senseX,1-clin.specX), #clinical+X
+    ptb==1 & testing.done==1 & xray.only==0,ifelse(TB=='TB',clin.senseU,1-clin.specU), #inc. bac
+    default=0
+  )]
+  
   ## costs
-  D[,who.cost:=who.cost+c.s.who.exam]                             #everyone gets
-  D[!is.na(Xpert_res),who.cost:=who.cost + c.s.who.xns] #NOTE assumes not available=no cost
-  D[is.na(Xpert_res),who.cost:=who.cost + c.s.who.hist] #those w/o Xpert get history assesst
-  D[is.na(Xpert_res) & Contact_TB==0 & CXR.avail==1,
-    who.cost:=who.cost + c.s.who.examCXR]
-  D[is.na(Xpert_res) & Contact_TB==0 & CXR.avail==0,
-    who.cost:=who.cost + c.s.who.exam]
-  D[who.ATT==1,who.cost:=who.cost + c.s.ATT] #ATT costs
+  D[,who.cost:=who.cost+c.s.who.scre]                             #everyone gets
+  D[ptb==1 & hiv_res.factor==1,who.cost:=who.cost + c.s.who.hiv.diag] #CLHIV get urine LF-LAM 
+  D[ptb==1 & hiv_res.factor==0,who.cost:=who.cost + c.s.who.diag] 
+  D[ptb==1 & who.ATT==1,who.cost:=who.cost + c.s.ATT] #ATT costs
+  
+  
   ## resample approach to reassessment
   whovrs <- c('Xpert_res','score_X','score_noX') #variables to overwrite in resmple  'who.ATT',
   if(resample){
@@ -142,6 +153,8 @@ WHO.algorithm <- function(D,resample=FALSE){
 ## TBS 1-step algorithm
 ## NOTE this acts by side-effect
 TBS1s.algorithm <- function(D){
+  ## TB screening - none - all receive tbs1
+  
   ## treatment decision
   D[,tbs1.ATT:=ifelse(TBS1S>10,1,0)]
   ## treatment despite score
@@ -178,19 +191,20 @@ SOC.algorithm <- function(D,resample=FALSE){
   socvrs <- c('ptb','testing.done','xray.only','clin.senseX','clin.specX',
               'clin.sense','clin.spec','clin.senseU','clin.specU')
   cat('...',nrow(D),'\n')
+  
   ## treatment decision
   D[,soc.ATT:=fcase(
-       ptb==0,0,                                    #if not considered presumptive
+       ptb==0,0,                                    #if not considered presumptive (screening rate=80% based on expert opinion)
        ptb==1 & testing.done==0,ifelse(TB=='TB',clin.sense,1-clin.spec), #clinical
        ptb==1 & testing.done==1 & xray.only==1,ifelse(TB=='TB',clin.senseX,1-clin.specX), #clinical+X
        ptb==1 & testing.done==1 & xray.only==0,ifelse(TB=='TB',clin.senseU,1-clin.specU), #inc. bac
        default=0
      )]
   ## costs
-  D[,soc.cost:=soc.cost+c.s.soc.exam]                             #everyone gets
-  D[ptb==1 & testing.done==0,soc.cost:=soc.cost + 0] #clinical
-  D[ptb==1 & testing.done==1 & xray.only==1,soc.cost:=soc.cost + c.s.soc.CXR] #clinical+X
-  D[ptb==1 & testing.done==1 & xray.only==0,soc.cost:=soc.cost + c.s.soc.CXRxga] #inc. bac
+  D[,soc.cost:=soc.cost+c.s.soc.scre]                             #everyone gets
+  D[ptb==1 & testing.done==0 & xray.only==0,soc.cost:=soc.cost + c.s.soc.exam] #clinical
+  D[ptb==1 & testing.done==0 & xray.only==1,soc.cost:=soc.cost + c.s.soc.exam + c.s.soc.CXR] #clinical+X
+  D[ptb==1 & testing.done==1 & xray.only==1,soc.cost:=soc.cost + c.s.soc.exam + c.s.soc.CXRxga] #inc. bac
   D[soc.ATT==1,soc.cost:=soc.cost + c.s.ATT] #ATT costs
   ## resample approach to reassessment
   if(resample){
