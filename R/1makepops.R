@@ -79,8 +79,8 @@ flz <- c('SAM_notTB.csv',
          'SAM_TB.csv')
 
 ## hash for N
-NL <- list(SAM_notTB.csv = 431,
-           SAM_TB.csv = 104
+NL <- list(SAM_notTB.csv = 434,
+           SAM_TB.csv = 101
            )
 
 ## run loop
