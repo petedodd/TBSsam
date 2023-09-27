@@ -86,8 +86,7 @@ NL <- list(SAM_notTB.csv = 434,
 ## run loop
 SDS <- KZ <- NZ <- PZ <- list()
 for(fn in flz){
-  ffn <- gh('data/') + fn
-  D <- fread(ffn)
+    D <- fread(paste(gh('data'),fn,sep='/'))
   tmp <- emp.plot(NL[[fn]],D,'')
   fn2 <- gsub('csv','pdf',fn)
   fn2 <- gh('graphs/') + fn2
