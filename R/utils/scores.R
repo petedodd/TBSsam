@@ -10,7 +10,7 @@ appendWHOscores <- function(D){
     if(itb_cou_3==1) A <- A + 2;      #cough
     if(itb_fev_2==1) A <- A + 5;      #fever
     if(itb_fat_2==1) A <- A + 3;      #lethargy
-    if(itb_wgt_3==1) A <- A + 3;      #weight loss
+    if(itb_wgt.factor==1) A <- A + 3;      #weight loss
     if(haemoptysis==1) A <- A + 4;    #haemoptysis
     if(night.sweats==1) A <- A + 2;   #night sweats
     if(ice_ade_bin.factor==1) A <- A + 4; #swolen LNs
@@ -27,7 +27,7 @@ appendWHOscores <- function(D){
     if(itb_cou_3==1) C <- C + 5;      #cough
     if(itb_fev_2==1) C <- C +10;      #fever
     if(itb_fat_2==1) C <- C + 4;      #lethargy
-    if(itb_wgt_3==1) C <- C + 5;      #weight loss
+    if(itb_wgt.factor==1) C <- C + 5;      #weight loss
     if(haemoptysis==1) A <- A + 9;    #haemoptysis
     if(night.sweats==1) A <- A + 6;   #night sweats
     if(ice_ade_bin.factor==1) C <- C + 7; #swolen LNs
