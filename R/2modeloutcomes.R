@@ -4,6 +4,7 @@ library(here)
 library(glue)
 library(data.table)
 library(ggplot2)
+library(readxl)
 gh <- function(x) glue(here(x))
 cnz <- c("Cambodia","Cameroon","Côte d'Ivoire","Mozambique",
          "Sierra Leone","Uganda","Zambia")
@@ -13,6 +14,10 @@ source(gh('R/utils/scores.R')) #scores are coded in here
 source(gh('R/utils/costutils.R')) #cost data parser
 source(here('R/utils/readyoutcomes.R')) #parameters & life-years
 source(here('R/utils/HEoutputs.R')) #various outputters
+source(gh('data/realpopt.csv'))
+
+realpopt <- read_excel("data/realpopt.xlsx")
+realpop <- read_excel("data/realpop.xlsx")
 
 
 ## load synthetic populations
@@ -41,10 +46,10 @@ popt <- appendTBSscores(popt)
 popt0 <- appendTBSscores(popt0)
 
 ## check se/sp
-pop[,1-mean(score_X>10)] #specificity =51%
-pop[,1-mean(score_noX>10)] #specificity =87%
-popt[,mean(score_X>10)] #sensitivity =71%
-popt[,mean(score_noX>10)] #sensitivity =39%
+pop[,1-mean(score_X>10)] #specificity =47%
+pop[,1-mean(score_noX>10)] #specificity =83%
+popt[,mean(score_X>10)] #sensitivity =74%
+popt[,mean(score_noX>10)] #sensitivity =46%
 
 ## check se/sp
 pop[,1-mean(TBS1S>10)] #specificity =84%    clinical paper: TBS1S spe: 82%
@@ -52,7 +57,122 @@ pop[,1-mean(TBS2Sa>10 & TBS2Sb>10)] #specificity =90%     clinical paper: TBS2S 
 popt[,mean(TBS1S>10)] #sensitivity =80%     clinical paper: TBS1S sen: 85%
 popt[,mean(TBS2Sa>10 & TBS2Sb>10)] #sensitivity =70%      clinical paper: TBS2S sen: 77%
 
-### recheck that sen.spe du 2step sont comparé avec la sen/spe estimé sur l'ensemble de la pop (N=535) - refaire point avec Minh
+
+## Compare synthetic and real populations 
+
+
+## add in scores to real populations
+
+
+varlist<- list("realpopt$Contact_TB", "realpopt$itb_fat_2",	"itb_fev_2",	"itb_cou_3",	"itb_app_2",	"temp_38",	"itb_wgt.factor",	
+            "tachycardia",	"tachypnea",	"ice_ind_bin.factor",	"ice_cra.factor",	"Dep_csc",	"ice_ade_bin.factor",	
+            "cxr_pre_mil.factor",	"cxr_pre_alv.factor",	"cxr_pre_hil.factor",	"cxr_pre_exc.factor",	"cxr_pre_ple.factor",
+            "cxr_pre_eff.factor",	"cxr_pre_ple_per_eff.factor",	"aus_sma.factor",	"aus_hma.factor",	"aus_effusion",	"aus_asc.factor")
+# TB pop
+names(realpopt)[names(realpopt) == "pat_ide"] <- "id"
+
+realpopt$Contact_TB<-ifelse(realpopt$Contact_TB=="Yes",1,0)
+realpopt$itb_fat_2<-ifelse(realpopt$itb_fat_2=="Yes",1,0)
+realpopt$itb_fev_2<-ifelse(realpopt$itb_fev_2=="Yes",1,0)
+realpopt$itb_cou_3<-ifelse(realpopt$itb_cou_3=="Yes",1,0)
+realpopt$itb_app_2<-ifelse(realpopt$itb_app_2=="Yes",1,0)
+realpopt$temp_38<-ifelse(realpopt$temp_38=="Yes",1,0)
+realpopt$itb_wgt.factor<-ifelse(realpopt$itb_wgt.factor=="Yes",1,0)
+realpopt$tachycardia<-ifelse(realpopt$tachycardia=="Yes",1,0)
+realpopt$tachypnea<-ifelse(realpopt$tachypnea=="Yes",1,0)
+realpopt$ice_ind_bin.factor<-ifelse(realpopt$ice_ind_bin.factor=="Yes",1,0)
+realpopt$ice_cra.factor<-ifelse(realpopt$ice_cra.factor=="Yes",1,0)
+realpopt$Dep_csc<-ifelse(realpopt$Dep_csc=="Yes",1,0)
+realpopt$ice_ade_bin.factor<-ifelse(realpopt$ice_ade_bin.factor=="Yes",1,0)
+realpopt$cxr_pre_mil.factor<-ifelse(realpopt$cxr_pre_mil.factor=="Yes",1,0)
+realpopt$cxr_pre_alv.factor<-ifelse(realpopt$cxr_pre_alv.factor=="Yes",1,0)
+realpopt$cxr_pre_hil.factor<-ifelse(realpopt$cxr_pre_hil.factor=="Yes",1,0)
+realpopt$cxr_pre_exc.factor<-ifelse(realpopt$cxr_pre_exc.factor=="Yes",1,0)
+realpopt$cxr_pre_ple.factor<-ifelse(realpopt$cxr_pre_ple.factor=="Yes",1,0)
+realpopt$cxr_pre_eff.factor<-ifelse(realpopt$cxr_pre_eff.factor=="Yes",1,0)
+realpopt$cxr_pre_ple_per_eff.factor<-ifelse(realpopt$cxr_pre_ple_per_eff.factor=="Yes",1,0)
+realpopt$aus_sma.factor<-ifelse(realpopt$aus_sma.factor=="Yes",1,0)
+realpopt$aus_hma.factor<-ifelse(realpopt$aus_hma.factor=="Yes",1,0)
+realpopt$aus_effusion<-ifelse(realpopt$aus_effusion=="Yes",1,0)
+realpopt$aus_asc.factor<-ifelse(realpopt$aus_asc.factor=="Yes",1,0)
+
+realpopt$hiv_res.factor<-ifelse(realpopt$hiv_res.factor=="Positive",1,0)
+realpopt$Xpert_res<-ifelse(realpopt$Xpert_res=="Positive",1,0)
+
+#Not TB pop
+names(realpop)[names(realpop) == "pat_ide"] <- "id"
+
+realpop$Contact_TB<-ifelse(realpop$Contact_TB=="Yes",1,0)
+realpop$itb_fat_2<-ifelse(realpop$itb_fat_2=="Yes",1,0)
+realpop$itb_fev_2<-ifelse(realpop$itb_fev_2=="Yes",1,0)
+realpop$itb_cou_3<-ifelse(realpop$itb_cou_3=="Yes",1,0)
+realpop$itb_app_2<-ifelse(realpop$itb_app_2=="Yes",1,0)
+realpop$temp_38<-ifelse(realpop$temp_38=="Yes",1,0)
+realpop$itb_wgt.factor<-ifelse(realpop$itb_wgt.factor=="Yes",1,0)
+realpop$tachycardia<-ifelse(realpop$tachycardia=="Yes",1,0)
+realpop$tachypnea<-ifelse(realpop$tachypnea=="Yes",1,0)
+realpop$ice_ind_bin.factor<-ifelse(realpop$ice_ind_bin.factor=="Yes",1,0)
+realpop$ice_cra.factor<-ifelse(realpop$ice_cra.factor=="Yes",1,0)
+realpop$Dep_csc<-ifelse(realpop$Dep_csc=="Yes",1,0)
+realpop$ice_ade_bin.factor<-ifelse(realpop$ice_ade_bin.factor=="Yes",1,0)
+realpop$cxr_pre_mil.factor<-ifelse(realpop$cxr_pre_mil.factor=="Yes",1,0)
+realpop$cxr_pre_alv.factor<-ifelse(realpop$cxr_pre_alv.factor=="Yes",1,0)
+realpop$cxr_pre_hil.factor<-ifelse(realpop$cxr_pre_hil.factor=="Yes",1,0)
+realpop$cxr_pre_exc.factor<-ifelse(realpop$cxr_pre_exc.factor=="Yes",1,0)
+realpop$cxr_pre_ple.factor<-ifelse(realpop$cxr_pre_ple.factor=="Yes",1,0)
+realpop$cxr_pre_eff.factor<-ifelse(realpop$cxr_pre_eff.factor=="Yes",1,0)
+realpop$cxr_pre_ple_per_eff.factor<-ifelse(realpop$cxr_pre_ple_per_eff.factor=="Yes",1,0)
+realpop$aus_sma.factor<-ifelse(realpop$aus_sma.factor=="Yes",1,0)
+realpop$aus_hma.factor<-ifelse(realpop$aus_hma.factor=="Yes",1,0)
+realpop$aus_effusion<-ifelse(realpop$aus_effusion=="Yes",1,0)
+realpop$aus_asc.factor<-ifelse(realpop$aus_asc.factor=="Yes",1,0)
+
+realpop$hiv_res.factor<-ifelse(realpop$hiv_res.factor=="Positive",1,0)
+realpop$Xpert_res<-ifelse(realpop$Xpert_res=="Positive",1,0)
+
+
+## --- TB Speed
+setDT(realpop)
+setDT(realpopt)
+
+realpop <- appendTBSscores(realpop)
+realpopt <- appendTBSscores(realpopt)
+
+
+## check se/sp using our score
+realpop[,1-mean(TBS1S>10)] #specificity = 83% (versus 84% with synthetic pop)    clinical paper: TBS1S spe: 82%
+realpop[,1-mean(TBS2Sa>10 & TBS2Sb>10)] #specificity = 87% (versus 90% with synthetic pop)     clinical paper: TBS2S spe: 86%
+realpopt[,mean(TBS1S>10)] #sensitivity = 83% (versus 80% with synthetic pop)      clinical paper: TBS1S sen: 85%
+realpopt[,mean(TBS2Sa>10 & TBS2Sb>10)] #sensitivity = 67% (versus 70% with synthetic pop)      clinical paper: TBS2S sen: 77%
+
+
+## check se/sp using Minh's variables
+realpop[,1-mean(realpop$SCO_ORG_tot>10)] #specificity =83%    clinical paper: TBS1S spe: 82%
+realpop[,1-mean(realpop$SCO_SCR_tot>10 & realpop$SCO_DIA_tot>10)] #specificity =87%     clinical paper: TBS2S spe: 86%
+realpopt[,mean(realpopt$SCO_ORG_tot>10)] #sensitivity =83%     clinical paper: TBS1S sen: 85%
+realpopt[,mean(realpopt$SCO_SCR_tot>10 & realpopt$SCO_DIA_tot>10)] #sensitivity =67%      clinical paper: TBS2S sen: 77% --- ??? check if on another score?
+
+# so, we have to recheck that sen.spe du 2step sont comparé avec la sen/spe estimé sur l'ensemble de la pop (N=535) - refaire point avec Minh
+
+
+## --- WHO
+realpop <- appendWHOscores(realpop)
+realpopt <- appendWHOscores(realpopt)
+
+## check se/sp
+pop[,1-mean(score_X>10)] #specificity =47%
+pop[,1-mean(score_noX>10)] #specificity =83%
+popt[,mean(score_X>10)] #sensitivity =74%
+popt[,mean(score_noX>10)] #sensitivity =46%
+
+
+
+
+
+
+
+
+
 
 ## compare
 pop0[,method:='no correlation']
