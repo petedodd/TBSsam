@@ -14,7 +14,6 @@ source(gh('R/utils/scores.R')) #scores are coded in here
 source(gh('R/utils/costutils.R')) #cost data parser
 source(here('R/utils/readyoutcomes.R')) #parameters & life-years
 source(here('R/utils/HEoutputs.R')) #various outputters
-source(gh('data/realpopt.csv'))
 
 realpopt <- read_excel("data/realpopt.xlsx")
 realpop <- read_excel("data/realpop.xlsx")
@@ -52,22 +51,17 @@ popt[,mean(score_X>10)] #sensitivity =74%
 popt[,mean(score_noX>10)] #sensitivity =46%
 
 ## check se/sp
-pop[,1-mean(TBS1S>10)] #specificity =84%    clinical paper: TBS1S spe: 82%
-pop[,1-mean(TBS2Sa>10 & TBS2Sb>10)] #specificity =90%     clinical paper: TBS2S spe: 86%
-popt[,mean(TBS1S>10)] #sensitivity =80%     clinical paper: TBS1S sen: 85%
-popt[,mean(TBS2Sa>10 & TBS2Sb>10)] #sensitivity =70%      clinical paper: TBS2S sen: 77%
+pop[,1-mean(TBS1S>10)] #specificity =84%    clinical paper: TBS1S spe: 82% [78-85]
+pop[,1-mean(TBS2Sa>10 & TBS2Sb>10, na.rm = TRUE)] #specificity =90%     clinical paper: TBS2S spe: 86% [82-89]
+popt[,mean(TBS1S>10)] #sensitivity =80%     clinical paper: TBS1S sen: 85% [77-91]
+popt[,mean(TBS2Sa>10 & TBS2Sb>10, na.rm = TRUE)] #sensitivity =70%      clinical paper: TBS2S sen: 77% [68-84] - sen is ok with Minh's approach
+
 
 
 ## Compare synthetic and real populations 
 
-
 ## add in scores to real populations
 
-
-varlist<- list("realpopt$Contact_TB", "realpopt$itb_fat_2",	"itb_fev_2",	"itb_cou_3",	"itb_app_2",	"temp_38",	"itb_wgt.factor",	
-            "tachycardia",	"tachypnea",	"ice_ind_bin.factor",	"ice_cra.factor",	"Dep_csc",	"ice_ade_bin.factor",	
-            "cxr_pre_mil.factor",	"cxr_pre_alv.factor",	"cxr_pre_hil.factor",	"cxr_pre_exc.factor",	"cxr_pre_ple.factor",
-            "cxr_pre_eff.factor",	"cxr_pre_ple_per_eff.factor",	"aus_sma.factor",	"aus_hma.factor",	"aus_effusion",	"aus_asc.factor")
 # TB pop
 names(realpopt)[names(realpopt) == "pat_ide"] <- "id"
 
@@ -140,10 +134,20 @@ realpopt <- appendTBSscores(realpopt)
 
 
 ## check se/sp using our score
-realpop[,1-mean(TBS1S>10)] #specificity = 83% (versus 84% with synthetic pop)    clinical paper: TBS1S spe: 82%
-realpop[,1-mean(TBS2Sa>10 & TBS2Sb>10)] #specificity = 87% (versus 90% with synthetic pop)     clinical paper: TBS2S spe: 86%
-realpopt[,mean(TBS1S>10)] #sensitivity = 83% (versus 80% with synthetic pop)      clinical paper: TBS1S sen: 85%
-realpopt[,mean(TBS2Sa>10 & TBS2Sb>10)] #sensitivity = 67% (versus 70% with synthetic pop)      clinical paper: TBS2S sen: 77%
+realpop[,1-mean(TBS1S>10)] #real pop sp = 83% 
+                           #synthetic pop sp: 84% 
+                           #clinical paper sp: 82%
+realpop[,1-mean(TBS2Sa>10 & TBS2Sb>10, na.rm = TRUE)] #real pop sp = 87% 
+                                                      #synthetic pop sp: 90% 
+                                                      #clinical paper sp: 86%
+realpopt[,mean(TBS1S>10)] #real pop se = 83% 
+                          #synthetic pop se: 80% 
+                          #clinical paper se: 85%
+realpopt[,mean(TBS2Sa>10 & TBS2Sb>10, na.rm = TRUE)] #real pop se = 67% 
+                                                     #synthetic pop se: 70% 
+                                                     #clinical paper se: 77%
+
+
 
 
 ## check se/sp using Minh's variables
@@ -152,7 +156,25 @@ realpop[,1-mean(realpop$SCO_SCR_tot>10 & realpop$SCO_DIA_tot>10)] #specificity =
 realpopt[,mean(realpopt$SCO_ORG_tot>10)] #sensitivity =83%     clinical paper: TBS1S sen: 85%
 realpopt[,mean(realpopt$SCO_SCR_tot>10 & realpopt$SCO_DIA_tot>10)] #sensitivity =67%      clinical paper: TBS2S sen: 77% --- ??? check if on another score?
 
-# so, we have to recheck that sen.spe du 2step sont comparé avec la sen/spe estimé sur l'ensemble de la pop (N=535) - refaire point avec Minh
+# realpopt[,mean(realpopt$SCO_SCR_tot>10 & realpopt$SCO_DIA_tot>10, na.rm = TRUE)] #sensitivity =67%      
+
+#Compare Minh's scores and ours
+all(realpopt$SCO_ORG_tot == realpopt$TBS1S)
+all(realpop$SCO_ORG_tot == realpop$TBS1S)
+
+all(realpopt$SCO_SCR_tot == realpopt$TBS2Sa)
+all(realpop$SCO_SCR_tot == realpop$TBS2Sa)
+
+all(realpopt$SCO_DIA_tot == realpopt$TBS2Sb, na.rm = TRUE)
+all(realpop$SCO_DIA_tot == realpop$TBS2Sb, na.rm = TRUE)
+
+
+
+#replace everywhere >=10 - maximise sensitivity (and rounding issue on the logit theshold and scoring)  
+
+
+
+
 
 
 ## --- WHO
