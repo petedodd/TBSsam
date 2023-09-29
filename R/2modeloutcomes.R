@@ -133,27 +133,27 @@ realpop <- appendTBSscores(realpop)
 realpopt <- appendTBSscores(realpopt)
 
 
+## check se/sp using Minh's variables
+realpop[,1-mean(realpop$SCO_ORG_tot>=10)] #specificity =81%    clinical paper: TBS1S spe: 82%
+realpop[,1-mean(realpop$SCO_SCR_tot>=10 & realpop$SCO_DIA_tot>=10)] #specificity =84%     clinical paper: TBS2S spe: 86%
+realpopt[,mean(realpopt$SCO_ORG_tot>=10)] #sensitivity =86%     clinical paper: TBS1S sen: 85%
+realpopt[,mean(realpopt$SCO_SCR_tot>=10 & realpopt$SCO_DIA_tot>=10)] #sensitivity =79%      clinical paper: TBS2S sen: 77% 
+
+
+
 ## check se/sp using our score
 realpop[,1-mean(TBS1S>=10)] #real pop sp = 81% 
                            #synthetic pop sp: 80% 
-                           #clinical paper sp: 82%
+                           #clinical paper sp: 82% [78-85]
 realpop[,1-mean(TBS2Sa>=10 & TBS2Sb>=10, na.rm = TRUE)] #real pop sp = 84% 
                                                       #synthetic pop sp: 85% 
-                                                      #clinical paper sp: 86%
+                                                      #clinical paper sp: 86% [82-89]
 realpopt[,mean(TBS1S>=10)] #real pop se = 86% 
                           #synthetic pop se: 83% 
-                          #clinical paper se: 85%
+                          #clinical paper se: 85% [77-91]
 realpopt[,mean(TBS2Sa>=10 & TBS2Sb>=10, na.rm = TRUE)] #real pop se = 79% 
                                                      #synthetic pop se: 76% 
-                                                     #clinical paper se: 77%
-
-
-## check se/sp using Minh's variables
-realpop[,1-mean(realpop$SCO_ORG_tot>=10)] #specificity =83%    clinical paper: TBS1S spe: 82%
-realpop[,1-mean(realpop$SCO_SCR_tot>=10 & realpop$SCO_DIA_tot>=10)] #specificity =87%     clinical paper: TBS2S spe: 86%
-realpopt[,mean(realpopt$SCO_ORG_tot>=10)] #sensitivity =83%     clinical paper: TBS1S sen: 85%
-realpopt[,mean(realpopt$SCO_SCR_tot>=10 & realpopt$SCO_DIA_tot>=10)] #sensitivity =67%      clinical paper: TBS2S sen: 77% --- ??? check if on another score?
-
+                                                     #clinical paper se: 77% [68-84]
 
 #Compare Minh's scores and ours
 all(realpopt$SCO_ORG_tot == realpopt$TBS1S)
