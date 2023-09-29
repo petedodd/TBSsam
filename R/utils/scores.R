@@ -88,11 +88,13 @@ appendTBSscores <- function(D){
     if(aus_hma.factor==1) TBS2Sb <- TBS2Sb + 10;
     if(aus_effusion==1) TBS2Sb <- TBS2Sb + 4;
     if(Xpert_res==1) TBS2Sb <- TBS2Sb + 31;
-
+    TBS2Sb <- replace(TBS2Sb,TBS2Sa<10,NA);
+    
     ## return
     list(TBS1S, TBS2Sa, TBS2Sb)
   }, by=id]
 }
+
 
 
 ## NOTE costs must be initialized to zero
