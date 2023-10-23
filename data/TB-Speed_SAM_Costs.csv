@@ -4,12 +4,16 @@ COSTS,NAME,DESCRIPTION,,Low,High,,Low,High,,Low,High,,Low,High,,Low,High,,Low,Hi
 ,c.s.soc.exam,SOC: initial clinical assessment,,,,,,,,,,,,,,,,,2.78,3.61,,3.88,4.58
 ,c.s.soc.CXR,SOC: CXR [for all],,,,,,,,,,,,,,,,,7.65,8.52,,8.29,8.91
 ,c.s.soc.CXRxga,SOC: CXR [for all] + Xpert Ultra on GA [for all] + Urine LF-LAM,,,,,,,,,,,,,,,,,49.45,61.76,,57.78,70.42
-,c.s.soc.reassessCXRxga,SOC: reassessment exam + CXR [for all] + Xpert Ultra on GA [for all] + Urine LF-LAM,,,,,,,,,,,,,,,,,52.23,65.36,,61.66,75.00
+,c.s.soc.reassessCXRxga,SOC: reassessment exam + CXR [for all] + Xpert Ultra on GA [for all] + Urine LF-LAM,,,,,,,,,,,,,,,,,52.23,65.36,,61.66,75
 ,c.s.tbs1step.diag,INT: TB-Speed one-step algo: clinical exam + CXR + Xpert on NPA and stool + abdo US,,,,,,,,,,,,,,,,,60.35,72.24,,66.92,78.65
 ,c.s.tbs2step.scre,INT: TB-Speed two-steps algo: screening: clinical exam + HIV test ,,,,,,,,,,,,,,,,,6.65,7.77,,7.64,8.67
 ,c.s.tbs2step.diag,INT: TB-Speed two-steps algo: diagnostic: CXR + Xpert on NPA and stool + abdo US,,,,,,,,,,,,,,,,,57.57,68.64,,63.05,74.07
 ,c.s.who.scre,INT: WHO algo: TB screening,,,,,,,,,,,,,,,,,0.28,0.33,,0.21,0.28
 ,c.s.who.hiv.diag,INT: WHO algo: clinical exam + TB contact + CXR + Xpert on NPA and stool + HIV test + Urine LF-LAM,,,,,,,,,,,,,,,,,69.33,85.14,,73.78,90.02
 ,c.s.who.diag,INT: WHO algo: clinical exam + TB contact + CXR + Xpert on NPA and stool + HIV test,,,,,,,,,,,,,,,,,60.18,70.25,,64.63,75.13
+,c.s.who.exam,INT: WHO algo: clinical exam + HIV test ,,,,,,,,,,,,,,,,,6.65,7.77,,7.64,8.67
+,c.s.who.examCXR,INT: WHO algo: clinical exam + CXR,,,,,,,,,,,,,,,,,10.43,12.13,,12.16,13.49
+,c.s.who.xns,INT: WHO algo: Xpert Ultra on NPA & stool,,,,,,,,,,,,,,,,,45.88,53.96,,48.71,57.55
+,c.s.who.hist,INT: WHO algo: assessment of TB contacts in the previous 12 months,,,,,,,,,,,,,,,,,0.00,0.00,,0.00,0.00
 ,c.s.rsATT,Rifampicin-sensitive anti-TB treatment in SAM children,,,,,,,,,,,,,,,,,34.69,40.67,,43.21,47.79
 ,c.s.rrATT,Rifampicin-resistant anti-TB treatment in SAM children,,,,,,,,,,,,,,,,,1458.94,1506.09,,1526.15,1562.24
