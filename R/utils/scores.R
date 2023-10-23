@@ -99,12 +99,53 @@ appendTBSscores <- function(D){
 
 ## NOTE costs must be initialized to zero
 
-
-
-## WHO algorithm
+## WHO algorithm - Pete's version
 WHO.algorithm <- function(D,resample=FALSE){
   cat('...',nrow(D),'\n')
+  D[,who.ATT:=0]
+  D[!is.na(Xpert_res),who.ATT:=ifelse(Xpert_res==1,1,0)] #Xpert result available
+  D[(is.na(Xpert_res) | Xpert_res==0) & Contact_TB==1,who.ATT:=1] #HH contact
+  D[(is.na(Xpert_res) | Xpert_res==0) & Contact_TB==0 & CXR.avail==1,who.ATT:=ifelse(score_X>10,1,0)]
+  D[(is.na(Xpert_res) | Xpert_res==0) & Contact_TB==0 & CXR.avail==0,who.ATT:=ifelse(score_noX>10,1,0)]
   
+  ## costs
+  D[,who.cost:=who.cost+c.s.who.exam]                             #everyone gets
+  D[!is.na(Xpert_res),who.cost:=who.cost + c.s.who.xns] #NOTE assumes not available=no cost
+  D[is.na(Xpert_res),who.cost:=who.cost + c.s.who.hist] #those w/o Xpert get history assesst
+  D[is.na(Xpert_res) & Contact_TB==0 & CXR.avail==1,
+    who.cost:=who.cost + c.s.who.examCXR]
+  D[is.na(Xpert_res) & Contact_TB==0 & CXR.avail==0,
+    who.cost:=who.cost + c.s.who.exam]
+  D[who.ATT==1,who.cost:=who.cost + c.s.ATT] #ATT costs
+  
+  
+  ## resample approach to reassessment
+  whovrs <- c('Xpert_res','score_X','score_noX') #variables to overwrite in resmple  'who.ATT',
+  if(resample){
+    for(h in 0:1){                     #resample signs stratified by TB/HIV
+      for(tb in c('TB','not TB')){
+        cat('h=',h,' , tb=',tb,'\n')
+        n <- nrow(D[who.ATT==0 & reassess==1 & TB==tb & hiv_res.factor==h])
+        N <- nrow(D[TB==tb & hiv_res.factor==h])
+        if(n>0){ #resample signs
+          ns <- D[TB==tb & hiv_res.factor==h,..whovrs] #new sample frame
+          D[who.ATT==0 & reassess==1 & TB==tb & hiv_res.factor==h,(whovrs):=ns[sample(N,n)]]
+          ans <- WHO.algorithm(D[who.ATT==0 & reassess==1 & TB==tb & hiv_res.factor==h],
+                               resample=FALSE) #recurse, depth 1
+          D[who.ATT==0 & reassess==1 & TB==tb & hiv_res.factor==h,c('who.ATT','who.cost'):=ans]
+        }
+      }
+    }
+  }
+  return(data.table(who.ATT=D$who.ATT,who.cost=D$who.cost))
+}
+
+
+## WHO algorithm - Marc's version
+WHO.algorithm <- function(D,resample=FALSE){
+  cat('...',nrow(D),'\n')
+  D[,who.ATT:=0]
+
   ## treatment decision
   D[,who.ATT:=fcase(
     ptb==0,0,                                    #if not considered presumptive (screening rate=80% based on expert opinion, as in SOC)
@@ -112,16 +153,6 @@ WHO.algorithm <- function(D,resample=FALSE){
     ptb==1 & CXR.avail==0,who.ATT:=ifelse(score_noX>10,1,0),
     default=0
   )]
-  
-  ## treatment decision
-  D[,soc.ATT:=fcase(
-    ptb==0,0,                                    #if not considered presumptive (screening rate=80% based on expert opinion)
-    ptb==1 & testing.done==0,ifelse(TB=='TB',clin.sense,1-clin.spec), #clinical
-    ptb==1 & testing.done==1 & xray.only==1,ifelse(TB=='TB',clin.senseX,1-clin.specX), #clinical+X
-    ptb==1 & testing.done==1 & xray.only==0,ifelse(TB=='TB',clin.senseU,1-clin.specU), #inc. bac
-    default=0
-  )]
-  
   ## costs
   D[,who.cost:=who.cost+c.s.who.scre]                             #everyone gets
   D[ptb==1 & hiv_res.factor==1,who.cost:=who.cost + c.s.who.hiv.diag] #CLHIV get urine LF-LAM 
@@ -149,6 +180,8 @@ WHO.algorithm <- function(D,resample=FALSE){
   }
   return(data.table(who.ATT=D$who.ATT,who.cost=D$who.cost))
 }
+
+
 
 
 
