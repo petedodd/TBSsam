@@ -6,8 +6,7 @@ library(data.table)
 library(ggplot2)
 library(readxl)
 gh <- function(x) glue(here(x))
-cnz <- c("Cambodia","Cameroon","Côte d'Ivoire","Mozambique",
-         "Sierra Leone","Uganda","Zambia")
+cnz <- c("Uganda","Zambia")
 
 ## load dependencies
 source(gh('R/utils/scores.R')) #scores are coded in here
@@ -155,6 +154,17 @@ realpopt[,mean(TBS2Sa>=10 & TBS2Sb>=10, na.rm = TRUE)] #real pop se = 79%
                                                      #synthetic pop se: 76% 
                                                      #clinical paper se: 77% [68-84]
 
+table(realpopt$SCO_ORG_tot>=10) # 87/101
+table(realpop$SCO_ORG_tot<10) # 351/434
+
+table(realpopt$SCO_SCR_tot>=10) # 90/101
+table(realpop$SCO_SCR_tot<10) # 151/434
+
+table(realpopt$SCO_DIA_tot>=10) # 80/101
+table(realpop$SCO_DIA_tot<10) # 212+151= 363/434
+summary(is.na(realpop$SCO_DIA_tot))
+
+
 #Compare Minh's scores and ours
 all(realpopt$SCO_ORG_tot == realpopt$TBS1S)
 all(realpop$SCO_ORG_tot == realpop$TBS1S)
@@ -166,9 +176,6 @@ all(realpopt$SCO_DIA_tot == realpopt$TBS2Sb, na.rm = TRUE)
 all(realpop$SCO_DIA_tot == realpop$TBS2Sb, na.rm = TRUE)
 
 
-## --- WHO
-realpop <- appendWHOscores(realpop)
-realpopt <- appendWHOscores(realpopt)
 
 ## check se/sp
 pop[,1-mean(score_X>10)] #specificity =47%
@@ -326,6 +333,7 @@ ALL[,c('wDD_TBS1','wDD_TBS2'):=.(tbs1.DALYs-who.DALYs,tbs2.DALYs-who.DALYs)]
 
 
 ## quick looks
+
 clz <- names(ALL)
 clz <- clz[-c(1,2)]
 MZ <- ALL[,lapply(.SD,mean),by=country,.SDcols=clz]
@@ -351,8 +359,8 @@ fwrite(tab,file = here('data/ICERtable.csv'))
 keep <- c('country','id',grep('\\.',names(ALL),value = TRUE))
 M <- reshapeINC(ALL[,..keep])
 
-
-GP <- CEAplots(M[algorithm!='tbs2'],ring=TRUE,alph=0.05)
+#GP <- CEAplots(M[algorithm!='tbs2'],ring=TRUE,alph=0.05)
+GP <- CEAplots(M[],ring=TRUE,alph=0.05)
 GP
 
 ggsave(GP,file=here('graphs/CEhull.pdf'),h=8,w=10)
