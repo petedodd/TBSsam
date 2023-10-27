@@ -101,6 +101,7 @@ appendTBSscores <- function(D){
 
 ## WHO algorithm - Pete's version
 WHO.algorithm <- function(D,resample=FALSE){
+  if(!is.data.table(D)) stop('Input data must be data.table!')
   cat('...',nrow(D),'\n')
   D[,who.ATT:=0]
   D[!is.na(Xpert_res),who.ATT:=ifelse(Xpert_res==1,1,0)] #Xpert result available
@@ -142,18 +143,20 @@ WHO.algorithm <- function(D,resample=FALSE){
 
 
 ## WHO algorithm - Marc's version
-WHO.algorithm <- function(D,resample=FALSE){
+WHO.algorithm2 <- function(D,resample=FALSE){
+  if(!is.data.table(D)) stop('Input data must be data.table!')
   cat('...',nrow(D),'\n')
   D[,who.ATT:=0]
 
   ## treatment decision
+  ## NOTE corrected syntax
   D[,who.ATT:=fcase(
     ptb==0,0,                                    #if not considered presumptive (screening rate=80% based on expert opinion, as in SOC)
-    ptb==1 & CXR.avail==1,who.ATT:=ifelse(score_X>10,1,0),
-    ptb==1 & CXR.avail==0,who.ATT:=ifelse(score_noX>10,1,0),
+    ptb==1 & CXR.avail==1,ifelse(score_X>10,1,0),
+    ptb==1 & CXR.avail==0,ifelse(score_noX>10,1,0),
     default=0
   )]
-  ## costs
+  ## costs TODO why do these costs depend on true TB status?
   D[,who.cost:=who.cost+c.s.who.scre]                             #everyone gets
   D[ptb==1 & hiv_res.factor==1,who.cost:=who.cost + c.s.who.hiv.diag] #CLHIV get urine LF-LAM 
   D[ptb==1 & hiv_res.factor==0,who.cost:=who.cost + c.s.who.diag] 
@@ -188,6 +191,7 @@ WHO.algorithm <- function(D,resample=FALSE){
 ## TBS 1-step algorithm
 ## NOTE this acts by side-effect
 TBS1s.algorithm <- function(D){
+  if(!is.data.table(D)) stop('Input data must be data.table!')
   ## TB screening - none - all receive tbs1
   
   ## treatment decision
@@ -205,6 +209,7 @@ TBS1s.algorithm <- function(D){
 ## TBS 2-step algorithm
 ## NOTE this acts by side-effect
 TBS2s.algorithm <- function(D){
+  if(!is.data.table(D)) stop('Input data must be data.table!')
   ## treatment decision
   D[,tbs2.ATT:=fcase(
        TBS2Sa>10 & TBS2Sb>10, 1,
@@ -223,6 +228,7 @@ TBS2s.algorithm <- function(D){
 
 ## SOC
 SOC.algorithm <- function(D,resample=FALSE){
+  if(!is.data.table(D)) stop('Input data must be data.table!')
   socvrs <- c('ptb','testing.done','xray.only','clin.senseX','clin.specX',
               'clin.sense','clin.spec','clin.senseU','clin.specU')
   cat('...',nrow(D),'\n')

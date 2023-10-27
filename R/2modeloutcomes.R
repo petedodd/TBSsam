@@ -256,8 +256,11 @@ CF[,c('who.cost','soc.cost','tbs1.cost','tbs2.cost'):=0.0] #initialize costs
 ## WHO.algorithm(CF,resample = TRUE) #including re-assessment via stratified resampling
 
 ans <- WHO.algorithm(CF,resample = TRUE)
+ans2 <- WHO.algorithm2(CF,resample = TRUE) #Marc version
 CF[,c('who.ATT','who.cost'):=ans]
 
+summary(ans)
+summary(ans2)
 
 ## ## checks
 ## CF[,.(who=mean(who.ATT)),by=TB]
