@@ -255,12 +255,12 @@ CF[,c('who.cost','soc.cost','tbs1.cost','tbs2.cost'):=0.0] #initialize costs
 ## WHO.algorithm(CF)
 ## WHO.algorithm(CF,resample = TRUE) #including re-assessment via stratified resampling
 
-ans <- WHO.algorithm(CF,resample = TRUE)
-ans2 <- WHO.algorithm2(CF,resample = TRUE) #Marc version
+## ans0 <- WHO.algorithm(CF,resample = TRUE)
+ans <- WHO.algorithm2(CF,resample = TRUE) #Marc version
 CF[,c('who.ATT','who.cost'):=ans]
 
-summary(ans)
-summary(ans2)
+## summary(ans0)
+## summary(ans)
 
 ## ## checks
 ## CF[,.(who=mean(who.ATT)),by=TB]
@@ -315,6 +315,12 @@ CF[,.(who=mean(who.cfr),soc=mean(soc.cfr),
 CF[,.(who=mean(who.ATT),soc=mean(soc.ATT),
       tbs1=mean(tbs1.ATT),tbs2=mean(tbs2.ATT)),by=TB]
 
+## costs of algs as a whole
+CF[,.(who=mean(who.cost),soc=mean(soc.cost),
+      tbs1=mean(tbs1.cost),tbs2=mean(tbs2.cost)),by=TB]
+CF[,.(who=mean(who.cost),soc=mean(soc.cost),
+      tbs1=mean(tbs1.cost),tbs2=mean(tbs2.cost))]
+
 
 ## merge in Life-years
 CF <- merge(CF,LYKc[,.(country,dLYS=LYS)],by='country',all.x=TRUE)
@@ -365,6 +371,10 @@ M <- reshapeINC(ALL[,..keep])
 #GP <- CEAplots(M[algorithm!='tbs2'],ring=TRUE,alph=0.05)
 GP <- CEAplots(M[],ring=TRUE,alph=0.05)
 GP
+
+M[,.(`DALYs averted`=mean(`DALYs averted`),
+     `Incremental cost`=mean(`Incremental cost`)),
+  by=.(country,algorithm)]
 
 ggsave(GP,file=here('graphs/CEhull.pdf'),h=8,w=10)
 

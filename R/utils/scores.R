@@ -156,7 +156,7 @@ WHO.algorithm2 <- function(D,resample=FALSE){
     ptb==1 & CXR.avail==0,ifelse(score_noX>10,1,0),
     default=0
   )]
-  ## costs TODO why do these costs depend on true TB status?
+  ## costs TODO check where presumptive gets set
   D[,who.cost:=who.cost+c.s.who.scre]                             #everyone gets
   D[ptb==1 & hiv_res.factor==1,who.cost:=who.cost + c.s.who.hiv.diag] #CLHIV get urine LF-LAM 
   D[ptb==1 & hiv_res.factor==0,who.cost:=who.cost + c.s.who.diag] 
@@ -193,7 +193,6 @@ WHO.algorithm2 <- function(D,resample=FALSE){
 TBS1s.algorithm <- function(D){
   if(!is.data.table(D)) stop('Input data must be data.table!')
   ## TB screening - none - all receive tbs1
-  
   ## treatment decision
   D[,tbs1.ATT:=ifelse(TBS1S>10,1,0)]
   ## treatment despite score
