@@ -195,7 +195,11 @@ TBS1s.algorithm <- function(D){
   if(!is.data.table(D)) stop('Input data must be data.table!')
   ## TB screening - none - all receive tbs1
   ## treatment decision
-  D[,tbs1.ATT:=ifelse(TBS1S>10,1,0)]
+    D[,tbs1.ATT:=fcase(
+    TBS1Sa>=10 | (TBS1Sa<10 & TBS1Sb>=10), 1,
+    default=0
+  )]
+  
   ## treatment despite score
   D[tbs1.ATT==0 & reassess==1,tbs1.cost:=tbs1.cost+0] #cost NOTE assumed zero like in SOC
   D[tbs1.ATT==0 & reassess==1 & TB=='TB',tbs1.ATT:=clin.sense]
@@ -205,14 +209,13 @@ TBS1s.algorithm <- function(D){
   D[tbs1.ATT==1,tbs1.cost:=tbs1.cost + c.s.ATT] #ATT costs
 }
 
-
 ## TBS 2-step algorithm
 ## NOTE this acts by side-effect
 TBS2s.algorithm <- function(D){
   if(!is.data.table(D)) stop('Input data must be data.table!')
   ## treatment decision
   D[,tbs2.ATT:=fcase(
-       TBS2Sa>=1 & TBS2Sb>10, 1,
+       TBS2Sa>=1 & TBS2Sb>=10, 1,
        default=0
      )]
   ## treatment despite score
