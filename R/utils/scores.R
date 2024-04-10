@@ -41,57 +41,58 @@ appendWHOscores <- function(D){
 
 ## TBSpeed scores
 appendTBSscores <- function(D){
-  D[, c('TBS1S','TBS2Sa','TBS2Sb'):={
+  D[, c('TBS1Sa', 'TBS1Sb','TBS2Sa','TBS2Sb'):={
 
-    TBS1S <- TBS2Sa <- TBS2Sb <- 0;
+    TBS1Sa <- TBS1Sb <- TBS2Sa <- TBS2Sb <- 0;
 
-    ## one-step algorithm
-    if(Contact_TB==1) TBS1S <- TBS1S + 8;
-    if(itb_cou_3==1) TBS1S <- TBS1S + 6;
-    if(itb_app_2==1) TBS1S <- TBS1S + 2;
-    if(tachycardia==1) TBS1S <- TBS1S + 6;
-    if(ice_ind_bin.factor==1) TBS1S <- TBS1S + 7;
-    if(Dep_csc==1) TBS1S <- TBS1S + 1;
-    if(cxr_pre_alv.factor==1) TBS1S <- TBS1S + 4;
-    if(cxr_pre_hil.factor==1) TBS1S <- TBS1S + 6;
-    if(cxr_pre_ple.factor==1) TBS1S <- TBS1S + 11;
-    if(cxr_pre_eff.factor==1) TBS1S <- TBS1S - 8;
-    if(aus_sma.factor==1) TBS1S <- TBS1S + 8;
-    if(aus_hma.factor==1) TBS1S <- TBS1S + 10;
-    if(aus_effusion==1) TBS1S <- TBS1S + 3;
-    if(aus_asc.factor==1) TBS1S <- TBS1S + 1;
-    if(Xpert_res==1) TBS1S <- TBS1S + 35;
+    ## one-step part 1
+    if(Contact_TB==1) TBS1Sa <- TBS1Sa + 8;
+    if(ice_ind_bin.factor==1) TBS1Sa <- TBS1Sa + 7;
+    if(itb_cou_3==1) TBS1Sa <- TBS1Sa + 6;
+    if(tachycardia==1) TBS1Sa <- TBS1Sa + 6;
+    if(itb_app_2==1) TBS1Sa <- TBS1Sa + 2;
+    if(Dep_csc==1) TBS1Sa <- TBS1Sa + 1;
+    
+    ## one-step part 2
+    if(cxr_pre_ple.factor==1) TBS1Sb <- TBS1Sb + 11;
+    if(cxr_pre_hil.factor==1) TBS1Sb <- TBS1Sb + 6;
+    if(cxr_pre_alv.factor==1) TBS1Sb <- TBS1Sb + 4;
+    if(cxr_pre_eff.factor==1) TBS1Sb <- TBS1Sb - 8;
+    if(Xpert_res==1) TBS1Sb <- TBS1Sb + 35;
+    if(aus_hma.factor==1) TBS1Sb <- TBS1Sb + 10;
+    if(aus_sma.factor==1) TBS1Sb <- TBS1Sb + 8;
+    if(aus_effusion==1) TBS1Sb <- TBS1Sb + 3;
+    if(aus_asc.factor==1) TBS1Sb <- TBS1Sb + 1;
 
     ## two-step part 1
-    if(Contact_TB==1) TBS2Sa <- TBS2Sa + 33;
-    if(itb_fat_2==1) TBS2Sa <- TBS2Sa + 9;
-    if(itb_cou_3==1) TBS2Sa <- TBS2Sa + 17;
-    if(temp_38==1) TBS2Sa <- TBS2Sa + 28;
-    if(tachycardia==1) TBS2Sa <- TBS2Sa + 11;
-    if(ice_ind_bin.factor==1) TBS2Sa <- TBS2Sa + 16;
-    if(ice_cra.factor==1) TBS2Sa <- TBS2Sa + 16;
-    if(Dep_csc==1) TBS2Sa <- TBS2Sa + 10;
-    if(ice_ade_bin.factor==1) TBS2Sa <- TBS2Sa + 27;
-    if(hiv_res.factor==1) TBS2Sa <- TBS2Sa + 11;
+    if(Contact_TB==1) TBS2Sa <- TBS2Sa + 1;
+    if(itb_cou_3==1) TBS2Sa <- TBS2Sa + 1;
+    if(temp_38==1) TBS2Sa <- TBS2Sa + 1;
+    if(tachycardia==1) TBS2Sa <- TBS2Sa + 1;
+    if(ice_ind_bin.factor==1) TBS2Sa <- TBS2Sa + 1;
+    if(ice_cra.factor==1) TBS2Sa <- TBS2Sa + 1;
+    if(Dep_csc==1) TBS2Sa <- TBS2Sa + 1;
+    if(ice_ade_bin.factor==1) TBS2Sa <- TBS2Sa + 1;
+    if(hiv_res.factor==1) TBS2Sa <- TBS2Sa + 1;
 
     ## two-step part 2
     if(Contact_TB==1) TBS2Sb <- TBS2Sb + 8;
-    if(itb_cou_3==1) TBS2Sb <- TBS2Sb + 5;
-    if(itb_app_2==1) TBS2Sb <- TBS2Sb + 2;
-    if(tachycardia==1) TBS2Sb <- TBS2Sb + 5;
     if(ice_ind_bin.factor==1) TBS2Sb <- TBS2Sb + 7;
+    if(itb_cou_3==1) TBS2Sb <- TBS2Sb + 5;
+    if(tachycardia==1) TBS2Sb <- TBS2Sb + 5;
+    if(itb_app_2==1) TBS2Sb <- TBS2Sb + 2;
+    if(Xpert_res==1) TBS2Sb <- TBS2Sb + 31;
+    if(cxr_pre_ple.factor==1) TBS2Sb <- TBS2Sb + 10;
     if(cxr_pre_alv.factor==1) TBS2Sb <- TBS2Sb + 5;
     if(cxr_pre_hil.factor==1) TBS2Sb <- TBS2Sb + 5;
-    if(cxr_pre_ple.factor==1) TBS2Sb <- TBS2Sb + 10;
     if(cxr_pre_eff.factor==1) TBS2Sb <- TBS2Sb - 6;
-    if(aus_sma.factor==1) TBS2Sb <- TBS2Sb + 6;
     if(aus_hma.factor==1) TBS2Sb <- TBS2Sb + 10;
+    if(aus_sma.factor==1) TBS2Sb <- TBS2Sb + 6;
     if(aus_effusion==1) TBS2Sb <- TBS2Sb + 4;
-    if(Xpert_res==1) TBS2Sb <- TBS2Sb + 31;
-    TBS2Sb <- replace(TBS2Sb,TBS2Sa<10,NA);
+    TBS2Sb <- replace(TBS2Sb,TBS2Sa<1,NA);
     
     ## return
-    list(TBS1S, TBS2Sa, TBS2Sb)
+    list(TBS1Sa, TBS1Sb, TBS2Sa, TBS2Sb)
   }, by=id]
 }
 
@@ -211,7 +212,7 @@ TBS2s.algorithm <- function(D){
   if(!is.data.table(D)) stop('Input data must be data.table!')
   ## treatment decision
   D[,tbs2.ATT:=fcase(
-       TBS2Sa>10 & TBS2Sb>10, 1,
+       TBS2Sa>=1 & TBS2Sb>10, 1,
        default=0
      )]
   ## treatment despite score
