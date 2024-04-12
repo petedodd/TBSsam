@@ -3,8 +3,13 @@
 
 ## function to compute WHO scores
 appendWHOscores <- function(D){
-  D[, c('score_noX','score_X'):={
-    A <- B <- C <- 0;
+  D[, c('who_scre','score_noX','score_X'):={
+    who_scre <- A <- B <- C <- 0;
+    ## screening step
+    if(itb_cou_3==1) who_scre <- who_scre + 1;      #cough
+    if(itb_fev_2==1) who_scre <- who_scre + 1;      #fever
+    if(itb_fat_2==1) who_scre <- who_scre + 1;      #lethargy (fatigue, reduced playfulness, decreased activity)
+    if(itb_wgt.factor==1) who_scre <- whoscre + 1;      #weight loss
     ## == w CXR algorithm
     ## non-CXR variables
     if(itb_cou_3==1) A <- A + 2;      #cough
@@ -33,7 +38,7 @@ appendWHOscores <- function(D){
     if(ice_ade_bin.factor==1) C <- C + 7; #swolen LNs
     if(tachycardia==1) C <- C + 4;    #tachycardia
     if(tachypnea==1) C <- C + 2;      #tachypnea
-    list(C,A+B)
+    list(who_scre,C,A+B)
   }, by=id]
 }
 
@@ -105,10 +110,10 @@ WHO.algorithm <- function(D,resample=FALSE){
   if(!is.data.table(D)) stop('Input data must be data.table!')
   cat('...',nrow(D),'\n')
   D[,who.ATT:=0]
-  D[!is.na(Xpert_res),who.ATT:=ifelse(Xpert_res==1,1,0)] #Xpert result available
-  D[(is.na(Xpert_res) | Xpert_res==0) & Contact_TB==1,who.ATT:=1] #HH contact
-  D[(is.na(Xpert_res) | Xpert_res==0) & Contact_TB==0 & CXR.avail==1,who.ATT:=ifelse(score_X>10,1,0)]
-  D[(is.na(Xpert_res) | Xpert_res==0) & Contact_TB==0 & CXR.avail==0,who.ATT:=ifelse(score_noX>10,1,0)]
+  D[who_scre>=1 & !is.na(Xpert_res),who.ATT:=ifelse(Xpert_res==1,1,0)] #Xpert result available
+  D[who_scre>=1 & (is.na(Xpert_res) | Xpert_res==0) & Contact_TB==1,who.ATT:=1] #HH contact
+  D[who_scre>=1 & (is.na(Xpert_res) | Xpert_res==0) & Contact_TB==0 & CXR.avail==1,who.ATT:=ifelse(score_X>10,1,0)]
+  D[who_scre>=1 & (is.na(Xpert_res) | Xpert_res==0) & Contact_TB==0 & CXR.avail==0,who.ATT:=ifelse(score_noX>10,1,0)]
   
   ## costs
   D[,who.cost:=who.cost+c.s.who.exam]                             #everyone gets
