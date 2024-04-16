@@ -210,7 +210,8 @@ TBS1s.algorithm <- function(D){
   D[tbs1.ATT==0 & reassess==1 & TB=='TB',tbs1.ATT:=clin.sense]
   D[tbs1.ATT==0 & reassess==1 & TB=='not TB',tbs1.ATT:=1-clin.spec]
   ## costs
-  D[,tbs1.cost:=tbs1.cost+c.s.tbs1step.diag]                             #everyone gets
+  D[TBS1Sa>=10,tbs1.cost:=tbs1.cost+c.s.tbs1step.diag.clin]                  #clinical score only (and CXR, Xpert for non-diag purpose)
+  D[TBS1Sa<10 & TBS1Sb>=10,tbs1.cost:=tbs1.cost+c.s.tbs1step.diag.test]      #clinical, CXR, Xpert, AUS scoring
   D[tbs1.ATT==1,tbs1.cost:=tbs1.cost + c.s.ATT] #ATT costs
 }
 
