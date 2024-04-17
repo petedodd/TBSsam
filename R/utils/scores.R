@@ -117,16 +117,12 @@ WHO.algorithm <- function(D,resample=FALSE){
   D[who_scre>=1 & (is.na(Xpert_res) | Xpert_res==0) & Contact_TB==0 & CXR.avail==0,who.ATT:=ifelse(score_noX>10,1,0)]
   
   ## costs
-  D[,who.cost:=who.cost+c.s.who.exam]                             #everyone gets
-  D[!is.na(Xpert_res),who.cost:=who.cost + c.s.who.xns] #NOTE assumes not available=no cost
-  D[is.na(Xpert_res),who.cost:=who.cost + c.s.who.hist] #those w/o Xpert get history assesst
-  D[is.na(Xpert_res) & Contact_TB==0 & CXR.avail==1,
-    who.cost:=who.cost + c.s.who.examCXR]
-  D[is.na(Xpert_res) & Contact_TB==0 & CXR.avail==0,
-    who.cost:=who.cost + c.s.who.exam]
-  D[who.ATT==1,who.cost:=who.cost + c.s.ATT] #ATT costs
+  D[,who.cost:=who.cost+c.s.who.scre]                                         #everyone gets
+  D[who_scre>=1,who.cost:=who.cost+c.s.who.diag]                              #if presents one of the chronic symptoms
+  D[who_scre>=1 & hiv_res.factor==1,who.cost:=who.cost+c.s.who.hiv.diag]      #if presents one of the chronic symptoms and is HIV+, also receive urine LAM
+  D[who.ATT==1,who.cost:=who.cost + c.s.ATT]                                  #ATT costs
   
-  
+
   ## resample approach to reassessment
   whovrs <- c('Xpert_res','score_X','score_noX') #variables to overwrite in resmple  'who.ATT',
   if(resample){
