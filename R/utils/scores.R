@@ -204,8 +204,9 @@ SOC.algorithm <- function(D,resample=FALSE){
   ## costs
   D[,soc.cost:=soc.cost+c.s.soc.scre]                             #everyone gets
   D[ptb==1 & testing.done==0 & xray.only==0,soc.cost:=soc.cost + c.s.soc.exam] #clinical
-  D[ptb==1 & testing.done==0 & xray.only==1,soc.cost:=soc.cost + c.s.soc.exam + c.s.soc.CXR] #clinical+X
-  D[ptb==1 & testing.done==1 & xray.only==1,soc.cost:=soc.cost + c.s.soc.exam + c.s.soc.CXRxga] #inc. bac
+  D[ptb==1 & testing.done==0 & xray.only==1,soc.cost:=soc.cost + c.s.soc.exam + c.s.soc.CXR] #clinical+CXR
+  D[ptb==1 & testing.done==1 & xray.only==0,soc.cost:=soc.cost + c.s.soc.exam + c.s.soc.xga] #clinical+Xpert
+  D[ptb==1 & testing.done==1 & xray.only==1,soc.cost:=soc.cost + c.s.soc.exam + c.s.soc.CXRxga] #clinical+CXR+Xpert
   D[soc.ATT==1,soc.cost:=soc.cost + c.s.ATT] #ATT costs
   ## resample approach to reassessment
   if(resample){
