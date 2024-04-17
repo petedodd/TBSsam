@@ -106,7 +106,7 @@ appendTBSscores <- function(D){
 
 ## NOTE costs must be initialized to zero
 
-## WHO algorithm - Pete's version
+## WHO algorithm
 WHO.algorithm <- function(D,resample=FALSE){
   if(!is.data.table(D)) stop('Input data must be data.table!')
   cat('...',nrow(D),'\n')
@@ -143,52 +143,6 @@ WHO.algorithm <- function(D,resample=FALSE){
   }
   return(data.table(who.ATT=D$who.ATT,who.cost=D$who.cost))
 }
-
-
-## WHO algorithm - Marc's version
-WHO.algorithm2 <- function(D,resample=FALSE){
-  if(!is.data.table(D)) stop('Input data must be data.table!')
-  cat('...',nrow(D),'\n')
-  D[,who.ATT:=0]
-
-  ## treatment decision
-  ## NOTE corrected syntax
-  D[,who.ATT:=fcase(
-    ptb==0,0,                                    #if not considered presumptive (screening rate=80% based on expert opinion, as in SOC)
-    ptb==1 & CXR.avail==1,ifelse(score_X>10,1,0),
-    ptb==1 & CXR.avail==0,ifelse(score_noX>10,1,0),
-    default=0
-  )]
-  ## costs TODO check where presumptive gets set
-  D[,who.cost:=who.cost+c.s.who.scre]                             #everyone gets
-  D[ptb==1 & hiv_res.factor==1,who.cost:=who.cost + c.s.who.hiv.diag] #CLHIV get urine LF-LAM 
-  D[ptb==1 & hiv_res.factor==0,who.cost:=who.cost + c.s.who.diag] 
-  D[ptb==1 & who.ATT==1,who.cost:=who.cost + c.s.ATT] #ATT costs
-  
-  
-  ## resample approach to reassessment
-  whovrs <- c('Xpert_res','score_X','score_noX') #variables to overwrite in resmple  'who.ATT',
-  if(resample){
-    for(h in 0:1){                     #resample signs stratified by TB/HIV
-      for(tb in c('TB','not TB')){
-        cat('h=',h,' , tb=',tb,'\n')
-        n <- nrow(D[who.ATT==0 & reassess==1 & TB==tb & hiv_res.factor==h])
-        N <- nrow(D[TB==tb & hiv_res.factor==h])
-        if(n>0){ #resample signs
-          ns <- D[TB==tb & hiv_res.factor==h,..whovrs] #new sample frame
-          D[who.ATT==0 & reassess==1 & TB==tb & hiv_res.factor==h,(whovrs):=ns[sample(N,n)]]
-          ans <- WHO.algorithm(D[who.ATT==0 & reassess==1 & TB==tb & hiv_res.factor==h],
-                               resample=FALSE) #recurse, depth 1
-          D[who.ATT==0 & reassess==1 & TB==tb & hiv_res.factor==h,c('who.ATT','who.cost'):=ans]
-        }
-      }
-    }
-  }
-  return(data.table(who.ATT=D$who.ATT,who.cost=D$who.cost))
-}
-
-
-
 
 
 ## TBS 1-step algorithm
