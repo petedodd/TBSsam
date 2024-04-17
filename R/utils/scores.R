@@ -230,7 +230,7 @@ TBS2s.algorithm <- function(D){
   D[tbs2.ATT==0 & reassess==1 & TB=='not TB',tbs2.ATT:=1-clin.spec]
   ## costs
   D[,tbs2.cost:=tbs2.cost+c.s.tbs2step.scre]                             #everyone gets
-  D[TBS2Sa>10,tbs2.cost:=tbs2.cost + c.s.tbs2step.diag]        #only those @ s2 
+  D[TBS2Sa>=1,tbs2.cost:=tbs2.cost + c.s.tbs2step.diag]                  #only those @ s2 
   D[tbs2.ATT==1,tbs2.cost:=tbs2.cost + c.s.ATT] #ATT costs
 }
 
