@@ -6,7 +6,7 @@ appendWHOscores <- function(D){
   D[, c('who_scre','score_noX','score_X'):={
     who_scre <- A <- B <- C <- 0;
     ## screening step
-    if(itb_cou_3==1) who_scre <- who_scre + 1;      #cough
+    if(itb_cou_2==1) who_scre <- who_scre + 1;      #cough
     if(itb_fev_2==1) who_scre <- who_scre + 1;      #fever
     if(itb_fat_2==1) who_scre <- who_scre + 1;      #lethargy (fatigue, reduced playfulness, decreased activity)
     if(itb_wgt.factor==1) who_scre <- whoscre + 1;      #weight loss
