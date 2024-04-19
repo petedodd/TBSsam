@@ -9,8 +9,8 @@ appendWHOscores <- function(D){
     if(itb_cou_2==1) who_scre <- who_scre + 1;      #cough
     if(itb_fev_2==1) who_scre <- who_scre + 1;      #fever
     if(itb_fat_2==1) who_scre <- who_scre + 1;      #lethargy (fatigue, reduced playfulness, decreased activity)
-    if(itb_wgt.factor==1) who_scre <- whoscre + 1;      #weight loss
-    if(itb_app_2==1) who_scre <- whoscre + 1;      #loss of appetite
+    if(itb_wgt.factor==1) who_scre <- who_scre + 1;      #weight loss
+    if(itb_app_2==1) who_scre <- who_scre + 1;      #loss of appetite
     ## == w CXR algorithm
     ## non-CXR variables
     if(itb_cou_3==1) A <- A + 2;      #cough
