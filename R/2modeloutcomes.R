@@ -50,10 +50,10 @@ popt[,mean(score_X>10)] #sensitivity =74%
 popt[,mean(score_noX>10)] #sensitivity =46%
 
 ## check se/sp
-pop[,1-mean(TBS1S>=10)] #specificity =80%    clinical paper: TBS1S spe: 82% [78-85]
-pop[,1-mean(TBS2Sa>=10 & TBS2Sb>=10, na.rm = TRUE)] #specificity =85%     clinical paper: TBS2S spe: 86% [82-89]
-popt[,mean(TBS1S>=10)] #sensitivity =83%     clinical paper: TBS1S sen: 85% [77-91]
-popt[,mean(TBS2Sa>=10 & TBS2Sb>=10, na.rm = TRUE)] #sensitivity =76%      clinical paper: TBS2S sen: 77% [68-84] 
+pop[,1-mean(TBS1Sa>=10 | (TBS1Sa<10 & TBS1Sb>=10))] #specificity =80%    clinical paper: TBS1S spe: 82% [78-85]
+pop[,1-mean(TBS2Sa>=1 & TBS2Sb>=10, na.rm = TRUE)] #specificity =85%     clinical paper: TBS2S spe: 86% [82-89]
+popt[,mean(TBS1Sa>=10 | (TBS1Sa<10 & TBS1Sb>=10))] #sensitivity =83%     clinical paper: TBS1S sen: 85% [77-91]
+popt[,mean(TBS2Sa>=1 & TBS2Sb>=10, na.rm = TRUE)] #sensitivity =76%      clinical paper: TBS2S sen: 77% [68-84] 
 
 
 ##
@@ -67,6 +67,7 @@ popt[,mean(TBS2Sa>=10 & TBS2Sb>=10, na.rm = TRUE)] #sensitivity =76%      clinic
 # realpopt$Contact_TB<-ifelse(realpopt$Contact_TB=="Yes",1,0)
 # realpopt$itb_fat_2<-ifelse(realpopt$itb_fat_2=="Yes",1,0)
 # realpopt$itb_fev_2<-ifelse(realpopt$itb_fev_2=="Yes",1,0)
+# realpopt$itb_cou_2<-ifelse(realpopt$itb_cou_2=="Yes",1,0)
 # realpopt$itb_cou_3<-ifelse(realpopt$itb_cou_3=="Yes",1,0)
 # realpopt$itb_app_2<-ifelse(realpopt$itb_app_2=="Yes",1,0)
 # realpopt$temp_38<-ifelse(realpopt$temp_38=="Yes",1,0)
@@ -98,6 +99,7 @@ popt[,mean(TBS2Sa>=10 & TBS2Sb>=10, na.rm = TRUE)] #sensitivity =76%      clinic
 # realpop$Contact_TB<-ifelse(realpop$Contact_TB=="Yes",1,0)
 # realpop$itb_fat_2<-ifelse(realpop$itb_fat_2=="Yes",1,0)
 # realpop$itb_fev_2<-ifelse(realpop$itb_fev_2=="Yes",1,0)
+# realpop$itb_cou_2<-ifelse(realpop$itb_cou_2=="Yes",1,0)
 # realpop$itb_cou_3<-ifelse(realpop$itb_cou_3=="Yes",1,0)
 # realpop$itb_app_2<-ifelse(realpop$itb_app_2=="Yes",1,0)
 # realpop$temp_38<-ifelse(realpop$temp_38=="Yes",1,0)
@@ -141,13 +143,13 @@ popt[,mean(TBS2Sa>=10 & TBS2Sb>=10, na.rm = TRUE)] #sensitivity =76%      clinic
 # 
 # 
 # ## check se/sp using our score
-# realpop[,1-mean(TBS1S>=10)] #real pop sp = 81% 
+# realpop[,1-mean(TBS1Sa>=10 | (TBS1Sa<10 & TBS1Sb>=10))] #real pop sp = 81% 
 #                            #synthetic pop sp: 80% 
 #                            #clinical paper sp: 82% [78-85]
 # realpop[,1-mean(TBS2Sa>=10 & TBS2Sb>=10, na.rm = TRUE)] #real pop sp = 84% 
 #                                                       #synthetic pop sp: 85% 
 #                                                       #clinical paper sp: 86% [82-89]
-# realpopt[,mean(TBS1S>=10)] #real pop se = 86% 
+# realpopt[,mean(TBS1Sa>=10 | (TBS1Sa<10 & TBS1Sb>=10))] #real pop se = 86% 
 #                           #synthetic pop se: 83% 
 #                           #clinical paper se: 85% [77-91]
 # realpopt[,mean(TBS2Sa>=10 & TBS2Sb>=10, na.rm = TRUE)] #real pop se = 79% 
@@ -166,8 +168,11 @@ popt[,mean(TBS2Sa>=10 & TBS2Sb>=10, na.rm = TRUE)] #sensitivity =76%      clinic
 # 
 # 
 # #Compare Minh's scores and ours
-# all(realpopt$SCO_ORG_tot == realpopt$TBS1S)
-# all(realpop$SCO_ORG_tot == realpop$TBS1S)
+# all(realpopt$SCO_ORG_SCR_tot == realpopt$TBS1Sa)
+# all(realpop$SCO_ORG_SCR_tot == realpop$TBS1Sa)
+
+# all(realpopt$SCO_ORG_tot == realpopt$TBS1Sb)
+# all(realpop$SCO_ORG_tot == realpop$TBS1Sb)
 # 
 # all(realpopt$SCO_SCR_tot == realpopt$TBS2Sa)
 # all(realpop$SCO_SCR_tot == realpop$TBS2Sa)
@@ -199,8 +204,8 @@ CF <- rbindlist(list(pop,popt,pop0,popt0)) #all
 
 CFS <- CF[,.(CXR=mean(score_X),noCXR=mean(score_noX),
              CXR.sd=sd(score_X),noCXR.sd=sd(score_noX),
-             TBS1S=mean(TBS1S),TBS2Sa=mean(TBS2Sa),TBS2Sb=mean(TBS2Sb),
-             TBS1S.sd=sd(TBS1S),TBS2Sa.sd=sd(TBS2Sa),TBS2Sb.sd=sd(TBS2Sb)),
+             TBS1Sa=mean(TBS1Sa),TBS1Sb=mean(TBS1Sb),TBS2Sa=mean(TBS2Sa),TBS2Sb=mean(TBS2Sb),
+             TBS1Sa.sd=sd(TBS1Sa),TBS1Sb.sd=sd(TBS1Sb),TBS2Sa.sd=sd(TBS2Sa),TBS2Sb.sd=sd(TBS2Sb)),
           by=.(TB,method)][order(TB)] #very similar
 CFS
 
