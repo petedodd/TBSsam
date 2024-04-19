@@ -60,6 +60,12 @@ appendTBSscores <- function(D){
     if(Dep_csc==1) TBS1Sa <- TBS1Sa + 1;
     
     ## one-step part 2
+    if(Contact_TB==1) TBS1Sb <- TBS1Sb + 8;
+    if(ice_ind_bin.factor==1) TBS1Sb <- TBS1Sb + 7;
+    if(itb_cou_3==1) TBS1Sb <- TBS1Sb + 6;
+    if(tachycardia==1) TBS1Sb <- TBS1Sb + 6;
+    if(itb_app_2==1) TBS1Sb <- TBS1Sb + 2;
+    if(Dep_csc==1) TBS1Sb <- TBS1Sb + 1;
     if(cxr_pre_ple.factor==1) TBS1Sb <- TBS1Sb + 11;
     if(cxr_pre_hil.factor==1) TBS1Sb <- TBS1Sb + 6;
     if(cxr_pre_alv.factor==1) TBS1Sb <- TBS1Sb + 4;
@@ -152,7 +158,7 @@ TBS1s.algorithm <- function(D){
   ## TB screening - none - all receive tbs1
   ## treatment decision
     D[,tbs1.ATT:=fcase(
-    TBS1Sa>=10 | (TBS1Sa<10 & TBS1Sb>=10), 1,
+    TBS1Sb>=10, 1,
     default=0
   )]
   
@@ -162,7 +168,7 @@ TBS1s.algorithm <- function(D){
   D[tbs1.ATT==0 & reassess==1 & TB=='not TB',tbs1.ATT:=1-clin.spec]
   ## costs
   D[TBS1Sa>=10,tbs1.cost:=tbs1.cost+c.s.tbs1step.diag.clin]                  #clinical score only (and CXR, Xpert for non-diag purpose)
-  D[TBS1Sa<10 & TBS1Sb>=10,tbs1.cost:=tbs1.cost+c.s.tbs1step.diag.test]      #clinical, CXR, Xpert, AUS scoring
+  D[TBS1Sa<10,tbs1.cost:=tbs1.cost+c.s.tbs1step.diag.test]      #clinical, CXR, Xpert, AUS scoring
   D[tbs1.ATT==1,tbs1.cost:=tbs1.cost + c.s.ATT] #ATT costs
 }
 
