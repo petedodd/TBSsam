@@ -1,19 +1,21 @@
 ,,,,Cambodia,,,Cameroon,,,Côte d'Ivoire,,,Mozambique,,,Sierra Leone,,,Uganda,,,Zambia,
 COSTS,NAME,DESCRIPTION,,Low,High,,Low,High,,Low,High,,Low,High,,Low,High,,Low,High,,Low,High
-,c.s.soc.scre,SOC: TB screening,,,,,,,,,,,,,,,,,0.28,0.33,,0.21,0.28
-,c.s.soc.exam,SOC: initial clinical assessment,,,,,,,,,,,,,,,,,2.78,3.61,,3.88,4.58
-,c.s.soc.CXR,SOC: CXR [for all],,,,,,,,,,,,,,,,,7.65,8.52,,8.29,8.91
-,c.s.soc.CXRxga,SOC: CXR [for all] + Xpert Ultra on GA [for all] + Urine LF-LAM,,,,,,,,,,,,,,,,,49.45,61.76,,57.78,70.42
-,c.s.soc.reassessCXRxga,SOC: reassessment exam + CXR [for all] + Xpert Ultra on GA [for all] + Urine LF-LAM,,,,,,,,,,,,,,,,,52.23,65.36,,61.66,75
-,c.s.tbs1step.diag,INT: TB-Speed one-step algo: clinical exam + CXR + Xpert on NPA and stool + abdo US,,,,,,,,,,,,,,,,,60.35,72.24,,66.92,78.65
-,c.s.tbs2step.scre,INT: TB-Speed two-steps algo: screening: clinical exam + HIV test ,,,,,,,,,,,,,,,,,6.65,7.77,,7.64,8.67
-,c.s.tbs2step.diag,INT: TB-Speed two-steps algo: diagnostic: CXR + Xpert on NPA and stool + abdo US,,,,,,,,,,,,,,,,,57.57,68.64,,63.05,74.07
-,c.s.who.scre,INT: WHO algo: TB screening,,,,,,,,,,,,,,,,,0.28,0.33,,0.21,0.28
-,c.s.who.hiv.diag,INT: WHO algo: clinical exam + TB contact + CXR + Xpert on NPA and stool + HIV test + Urine LF-LAM,,,,,,,,,,,,,,,,,69.33,85.14,,73.78,90.02
-,c.s.who.diag,INT: WHO algo: clinical exam + TB contact + CXR + Xpert on NPA and stool + HIV test,,,,,,,,,,,,,,,,,60.18,70.25,,64.63,75.13
-,c.s.who.exam,INT: WHO algo: clinical exam + HIV test ,,,,,,,,,,,,,,,,,6.65,7.77,,7.64,8.67
-,c.s.who.examCXR,INT: WHO algo: clinical exam + CXR,,,,,,,,,,,,,,,,,10.43,12.13,,12.16,13.49
-,c.s.who.xns,INT: WHO algo: Xpert Ultra on NPA & stool,,,,,,,,,,,,,,,,,45.88,53.96,,48.71,57.55
-,c.s.who.hist,INT: WHO algo: assessment of TB contacts in the previous 12 months,,,,,,,,,,,,,,,,,0.00,0.00,,0.00,0.00
-,c.s.rsATT,Rifampicin-sensitive anti-TB treatment in SAM children,,,,,,,,,,,,,,,,,34.69,40.67,,43.21,47.79
-,c.s.rrATT,Rifampicin-resistant anti-TB treatment in SAM children,,,,,,,,,,,,,,,,,1458.94,1506.09,,1526.15,1562.24
+,c.s.soc.scre,SOC: TB screening,,,,,,,,,,,,,,,,,0.276831758,0.329519246,,0.213941446,0.275735906
+,c.s.soc.exam,SOC: initial clinical assessment,,,,,,,,,,,,,,,,,2.776717515,3.606275885,,3.87698736,4.576422093
+,c.s.soc.CXR,SOC: CXR [for all],,,,,,,,,,,,,,,,,7.129547679,7.999995658,,7.758535251,8.385306764
+,c.s.soc.CXRxga,SOC: CXR [for all] + Xpert Ultra on GA [for all] + Urine LF-LAM,,,,,,,,,,,,,,,,,52.79143028,65.09638013,,61.05832822,73.70095591
+,c.s.soc.xga,SOC: Xpert Ultra on GA [for all] + Urine LF-LAM,,,,,,,,,,,,,,,,,45.6618826,57.09638447,,53.29979296,65.31564915
+,c.s.soc.reassessCXRxga,SOC: reassessment exam + CXR [for all] + Xpert Ultra on GA [for all] + Urine LF-LAM,,,,,,,,,,,,,,,,,55.56814779,68.70265601,,64.93531557,78.277378
+,c.s.tbs1step.diag.clin,INT: TB-Speed one-step algo: clinical exam + CXR + Xpert on GA and stool,,,,,,,,,,,,,,,,,69.10148426,79.23829826,,79.16035477,89.91348062
+,c.s.tbs1step.diag.test,INT: TB-Speed one-step algo: clinical exam + CXR + Xpert on GA and stool + abdo US,,,,,,,,,,,,,,,,,72.90129887,85.15103332,,84.96758153,97.27720054
+,c.s.tbs2step.scre,INT: TB-Speed two-steps algo: screening: clinical exam + HIV test ,,,,,,,,,,,,,,,,,6.645836435,7.769186158,,7.635793743,8.665447715
+,c.s.tbs2step.diag,INT: TB-Speed two-steps algo: diagnostic: CXR + Xpert on GA and stool + abdo US,,,,,,,,,,,,,,,,,70.12458136,81.54475744,,81.09059417,92.70077845
+,c.s.who.scre,INT: WHO algo: TB screening,,,,,,,,,,,,,,,,,0.276831758,0.329519246,,0.213941446,0.275735906
+,c.s.who.hiv.diag,INT: WHO algo: clinical exam + TB contact + CXR + Xpert on GA and stool + HIV test + Urine LF-LAM,,,,,,,,,,,,,,,,,82.12060318,98.29120853,,92.06916115,108.8925062
+,c.s.who.diag,INT: WHO algo: clinical exam + TB contact + CXR + Xpert on GA and stool + HIV test,,,,,,,,,,,,,,,,,72.97060318,83.40120853,,82.91916115,94.00250624
+,c.s.rsATT,Rifampicin-sensitive anti-TB treatment in SAM children ,,,,,,,,,,,,,,,,,34.68502635,40.66743492,,43.21242949,47.79064782
+,c.s.rrATT,Rifampicin-resistant anti-TB treatment in SAM children,,,,,,,,,,,,,,,,,1458.935619,1506.091701,,1526.152513,1562.240124
+,c.s.tbs1step.reassessCXRxgaall,reassessment exam + CXR [for all] + Xpert Ultra on GA and stool [for all] ,,,,,,,,,,,,,,,,,67.64490745,77.62874708,,77.70302807,88.28300334
+,c.s.tbs1step.reassessCXRxga50,reassessment exam + CXR [50%] + Xpert Ultra on GA and stool [50%] ,,,,,,,,,,,,,,,,,34.48252408,39.81273589,,40.06134437,45.61447408
+,c.s.tbs1step.reassessCXR30,reassessment exam + CXR [30%],,,,,,,,,,,,,,,,,3.459005015,4.396723404,,4.747221239,5.461536846
+,c.s.tbs1step.reassess,reassessment exam,,,,,,,,,,,,,,,,,1.320140712,1.996724706,,2.419660663,2.945944817
