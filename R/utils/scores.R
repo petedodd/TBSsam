@@ -58,7 +58,7 @@ appendTBSscores <- function(D){
     if(tachycardia==1) TBS1Sa <- TBS1Sa + 6;
     if(itb_app_2==1) TBS1Sa <- TBS1Sa + 2;
     if(Dep_csc==1) TBS1Sa <- TBS1Sa + 1;
-    
+
     ## one-step part 2
     if(Contact_TB==1) TBS1Sb <- TBS1Sb + 8;
     if(ice_ind_bin.factor==1) TBS1Sb <- TBS1Sb + 7;
@@ -102,7 +102,7 @@ appendTBSscores <- function(D){
     if(aus_sma.factor==1) TBS2Sb <- TBS2Sb + 6;
     if(aus_effusion==1) TBS2Sb <- TBS2Sb + 4;
     TBS2Sb <- replace(TBS2Sb,TBS2Sa<1,NA);
-    
+
     ## return
     list(TBS1Sa, TBS1Sb, TBS2Sa, TBS2Sb)
   }, by=id]
@@ -113,7 +113,7 @@ appendTBSscores <- function(D){
 ## NOTE costs must be initialized to zero
 
 ## WHO algorithm
-WHO.algorithm <- function(D,resample=FALSE){
+WHO.algorithm <- function(D){
   if(!is.data.table(D)) stop('Input data must be data.table!')
   cat('...',nrow(D),'\n')
   D[,who.ATT:=0]
@@ -121,32 +121,14 @@ WHO.algorithm <- function(D,resample=FALSE){
   D[who_scre>=1 & (is.na(Xpert_res) | Xpert_res==0) & Contact_TB==1,who.ATT:=1] #HH contact
   D[who_scre>=1 & (is.na(Xpert_res) | Xpert_res==0) & Contact_TB==0 & CXR.avail==1,who.ATT:=ifelse(score_X>10,1,0)]
   D[who_scre>=1 & (is.na(Xpert_res) | Xpert_res==0) & Contact_TB==0 & CXR.avail==0,who.ATT:=ifelse(score_noX>10,1,0)]
-  
+
   ## costs
   D[,who.cost:=who.cost+c.s.who.scre]                                         #everyone gets
   D[who_scre>=1,who.cost:=who.cost+c.s.who.diag]                              #if presents one of the chronic symptoms
   D[who_scre>=1 & hiv_res.factor==1,who.cost:=who.cost+c.s.who.hiv.diag]      #if presents one of the chronic symptoms and is HIV+, also receive urine LAM
   D[who.ATT==1,who.cost:=who.cost + c.s.ATT]                                  #ATT costs
-  
 
-  ## resample approach to reassessment
-  whovrs <- c('Xpert_res','score_X','score_noX') #variables to overwrite in resmple  'who.ATT',
-  if(resample){
-    for(h in 0:1){                     #resample signs stratified by TB/HIV
-      for(tb in c('TB','not TB')){
-        cat('h=',h,' , tb=',tb,'\n')
-        n <- nrow(D[who.ATT==0 & reassess==1 & TB==tb & hiv_res.factor==h])
-        N <- nrow(D[TB==tb & hiv_res.factor==h])
-        if(n>0){ #resample signs
-          ns <- D[TB==tb & hiv_res.factor==h,..whovrs] #new sample frame
-          D[who.ATT==0 & reassess==1 & TB==tb & hiv_res.factor==h,(whovrs):=ns[sample(N,n)]]
-          ans <- WHO.algorithm(D[who.ATT==0 & reassess==1 & TB==tb & hiv_res.factor==h],
-                               resample=FALSE) #recurse, depth 1
-          D[who.ATT==0 & reassess==1 & TB==tb & hiv_res.factor==h,c('who.ATT','who.cost'):=ans]
-        }
-      }
-    }
-  }
+
   return(data.table(who.ATT=D$who.ATT,who.cost=D$who.cost))
 }
 
@@ -193,7 +175,7 @@ TBS2s.algorithm <- function(D){
 
 
 ## SOC
-SOC.algorithm <- function(D,resample=FALSE){
+SOC.algorithm <- function(D){
   if(!is.data.table(D)) stop('Input data must be data.table!')
   socvrs <- c('ptb','testing.done','xray.only','clin.senseX','clin.specX',
               'clin.sense','clin.spec','clin.senseU','clin.specU')
@@ -214,23 +196,7 @@ SOC.algorithm <- function(D,resample=FALSE){
   D[ptb==1 & testing.done==1 & xray.only==0,soc.cost:=soc.cost + c.s.soc.exam + c.s.soc.xga] #clinical+Xpert
   D[ptb==1 & testing.done==1 & xray.only==1,soc.cost:=soc.cost + c.s.soc.exam + c.s.soc.CXRxga] #clinical+CXR+Xpert
   D[soc.ATT==1,soc.cost:=soc.cost + c.s.ATT] #ATT costs
-  ## resample approach to reassessment
-  if(resample){
-    for(h in 0:1){                     #resample signs stratified by TB/HIV
-      for(tb in c('TB','not TB')){
-        cat('h=',h,' , tb=',tb,'\n')
-        n <- nrow(D[soc.ATT==0 & reassess==1 & TB==tb & hiv_res.factor==h])
-        N <- nrow(D[TB==tb & hiv_res.factor==h])
-        if(n>0){ #resample signs
-          ns <- D[TB==tb & hiv_res.factor==h,..socvrs] #new sample frame
-          D[soc.ATT==0 & reassess==1 & TB==tb & hiv_res.factor==h,(socvrs):=ns[sample(N,n)]]
-          ans <- SOC.algorithm(D[soc.ATT==0 & reassess==1 & TB==tb & hiv_res.factor==h],
-                               resample=FALSE) #recurse, depth 1
-          D[soc.ATT==0 & reassess==1 & TB==tb & hiv_res.factor==h,c('soc.ATT','soc.cost'):=ans]
-        }
-      }
-    }
-  }
+
   return(data.table(soc.ATT=D$soc.ATT,soc.cost=D$soc.cost))
 }
 
