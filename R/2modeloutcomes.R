@@ -50,14 +50,14 @@ popt[,mean(score_X>10)] #sensitivity =75%
 popt[,mean(score_noX>10)] #sensitivity =46%
 
 ## check se/sp
-pop[,1-mean(TBS1Sb>=10)] #specificity =79%    
-pop[,1-mean(TBS2Sa>=1 & TBS2Sb>=10, na.rm = TRUE)] #specificity =84%     
-popt[,mean(TBS1Sb>=10)] #sensitivity =83%     
-popt[,mean(TBS2Sa>=1 & TBS2Sb>=10, na.rm = TRUE)] #sensitivity =76%      
+pop[,1-mean(TBS1Sb>=10)] #specificity =79%
+pop[,1-mean(TBS2Sa>=1 & TBS2Sb>=10, na.rm = TRUE)] #specificity =84%
+popt[,mean(TBS1Sb>=10)] #sensitivity =83%
+popt[,mean(TBS2Sa>=1 & TBS2Sb>=10, na.rm = TRUE)] #sensitivity =76%
 
 
 ##
-## Compare synthetic and real populations 
+## Compare synthetic and real populations
 
 ## add in scores to real populations
 
@@ -133,10 +133,10 @@ realpop <- appendTBSscores(realpop)
 realpopt <- appendTBSscores(realpopt)
 
 ## check se/sp using Minh's variables
-realpop[,1-mean(realpop$SCO_ORG_tot>=10)] #specificity =81%    
-realpop[,1-mean(realpop$SCO_SCR_tot>=1 & realpop$SCO_DIA_tot>=10)] #specificity =84%     
-realpopt[,mean(realpopt$SCO_ORG_tot>=10)] #sensitivity =86%     
-realpopt[,mean(realpopt$SCO_SCR_tot>=1 & realpopt$SCO_DIA_tot>=10)] #sensitivity =79%      
+realpop[,1-mean(realpop$SCO_ORG_tot>=10)] #specificity =81%
+realpop[,1-mean(realpop$SCO_SCR_tot>=1 & realpop$SCO_DIA_tot>=10)] #specificity =84% BUG
+realpopt[,mean(realpopt$SCO_ORG_tot>=10)] #sensitivity =86%
+realpopt[,mean(realpopt$SCO_SCR_tot>=1 & realpopt$SCO_DIA_tot>=10)] #sensitivity =79% BUG
 
 # ## check se/sp using our score
 realpop[,1-mean(TBS1Sb>=10)] #real pop sp = 81%
@@ -195,6 +195,7 @@ popt0[,TB:='TB']
 popt[,TB:='TB']
 CF <- rbindlist(list(pop,popt,pop0,popt0)) #all
 
+## NOTE in TBS2Sb==NA when TBS2Sa==0
 
 CFS <- CF[,.(CXR=mean(score_X),noCXR=mean(score_noX),
              CXR.sd=sd(score_X),noCXR.sd=sd(score_noX),
@@ -218,7 +219,8 @@ CF[,id:=1:Nreps]
 
 ## extend across countries & append:
 ## AddAlgoParms(CF) #mainly/all for SOC
-CF[,CXR.avail:=1] #code as available
+CF[, CXR.avail := 1] # code as available
+## NOTE parameters in data/SAMparameters.csv including reassess
 AP <- getAlgoParms(Nreps,CF$hiv_res.factor) #mainly/all for SOC NOTE all stochastic elts here
 ## ## check
 ## AP[,hiv:=CF$hiv_res.factor]
@@ -229,7 +231,7 @@ CF <- merge(CF,AP,by='id')
 CF <- CF[rep(1:nrow(CF),length(cnz))]
 CF[,country:=rep(cnz,each=nrow(CF)/length(cnz))]
 
-## add in RR status
+## add in Rif-Resistance status
 RR <- makeRRdata(Nreps)
 CF <- merge(CF,RR,by=c('country','id'))
 
@@ -252,10 +254,9 @@ CF[,c('who.cost','soc.cost','tbs1.cost','tbs2.cost'):=0.0] #initialize costs
 ## === WHO algorithm
 ## apply to data (appends ATT)
 ## WHO.algorithm(CF)
-## WHO.algorithm(CF,resample = TRUE) #including re-assessment via stratified resampling
 
-## ans0 <- WHO.algorithm(CF,resample = TRUE)
-ans <- WHO.algorithm(CF,resample = TRUE) 
+## ans0 <- WHO.algorithm(CF)
+ans <- WHO.algorithm(CF)
 CF[,c('who.ATT','who.cost'):=ans]
 
 ## summary(ans0)
@@ -271,8 +272,8 @@ CF[,c('who.ATT','who.cost'):=ans]
 
 
 ## === SOC algorithm
-## SOC.algorithm(CF,resample = TRUE)
-ans <- SOC.algorithm(CF,resample = TRUE)
+## SOC.algorithm(CF)
+ans <- SOC.algorithm(CF)
 CF[,c('soc.ATT','soc.cost'):=ans]
 
 ## ## checks
