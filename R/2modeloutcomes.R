@@ -195,7 +195,7 @@ popt0[,TB:='TB']
 popt[,TB:='TB']
 CF <- rbindlist(list(pop,popt,pop0,popt0)) #all
 
-## BUG in TBS2Sb
+## NOTE in TBS2Sb==NA when TBS2Sa==0
 
 CFS <- CF[,.(CXR=mean(score_X),noCXR=mean(score_noX),
              CXR.sd=sd(score_X),noCXR.sd=sd(score_noX),
@@ -219,7 +219,8 @@ CF[,id:=1:Nreps]
 
 ## extend across countries & append:
 ## AddAlgoParms(CF) #mainly/all for SOC
-CF[,CXR.avail:=1] #code as available
+CF[, CXR.avail := 1] # code as available
+## NOTE parameters in data/SAMparameters.csv including reassess
 AP <- getAlgoParms(Nreps,CF$hiv_res.factor) #mainly/all for SOC NOTE all stochastic elts here
 ## ## check
 ## AP[,hiv:=CF$hiv_res.factor]
@@ -230,7 +231,7 @@ CF <- merge(CF,AP,by='id')
 CF <- CF[rep(1:nrow(CF),length(cnz))]
 CF[,country:=rep(cnz,each=nrow(CF)/length(cnz))]
 
-## add in RR status
+## add in Rif-Resistance status
 RR <- makeRRdata(Nreps)
 CF <- merge(CF,RR,by=c('country','id'))
 

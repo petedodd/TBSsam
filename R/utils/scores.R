@@ -111,6 +111,12 @@ appendTBSscores <- function(D){
 
 
 ## NOTE costs must be initialized to zero
+## reassessment TODO:
+## parameter choice for fraction reassessed
+## sens/spec for reassessment & same for choice to reassess = 4 parameters based on numbers in TBS data (default choice scaling with prevalence)
+## check reassessment cost: to be added = 30% CXR + clinical assessment + no GXP
+## is the randomness (on tx decision) in functions below or in cohort generation
+
 
 ## WHO algorithm
 WHO.algorithm <- function(D){
@@ -128,6 +134,8 @@ WHO.algorithm <- function(D){
   D[who_scre>=1 & hiv_res.factor==1,who.cost:=who.cost+c.s.who.hiv.diag]      #if presents one of the chronic symptoms and is HIV+, also receive urine LAM
   D[who.ATT==1,who.cost:=who.cost + c.s.ATT]                                  #ATT costs
 
+  ## reassessment
+  ## TODO
 
   return(data.table(who.ATT=D$who.ATT,who.cost=D$who.cost))
 }
@@ -143,7 +151,7 @@ TBS1s.algorithm <- function(D){
     TBS1Sb>=10, 1,
     default=0
   )]
-  
+
   ## treatment despite score
   D[tbs1.ATT==0 & reassess==1,tbs1.cost:=tbs1.cost+0] #cost NOTE assumed zero like in SOC
   D[tbs1.ATT==0 & reassess==1 & TB=='TB',tbs1.ATT:=clin.sense]
@@ -180,7 +188,7 @@ SOC.algorithm <- function(D){
   socvrs <- c('ptb','testing.done','xray.only','clin.senseX','clin.specX',
               'clin.sense','clin.spec','clin.senseU','clin.specU')
   cat('...',nrow(D),'\n')
-  
+
   ## treatment decision
   D[,soc.ATT:=fcase(
        ptb==0,0,                                    #if not considered presumptive (screening rate=80% based on expert opinion)
@@ -196,6 +204,7 @@ SOC.algorithm <- function(D){
   D[ptb==1 & testing.done==1 & xray.only==0,soc.cost:=soc.cost + c.s.soc.exam + c.s.soc.xga] #clinical+Xpert
   D[ptb==1 & testing.done==1 & xray.only==1,soc.cost:=soc.cost + c.s.soc.exam + c.s.soc.CXRxga] #clinical+CXR+Xpert
   D[soc.ATT==1,soc.cost:=soc.cost + c.s.ATT] #ATT costs
+  ## TODO reassessment
 
   return(data.table(soc.ATT=D$soc.ATT,soc.cost=D$soc.cost))
 }
