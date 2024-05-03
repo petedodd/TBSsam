@@ -79,15 +79,14 @@ flz <- c('SAM_notTB.csv',
          'SAM_TB.csv')
 
 ## hash for N
-NL <- list(SAM_notTB.csv = 431,
-           SAM_TB.csv = 104
+NL <- list(SAM_notTB.csv = 434,
+           SAM_TB.csv = 101
            )
 
 ## run loop
 SDS <- KZ <- NZ <- PZ <- list()
 for(fn in flz){
-  ffn <- gh('data/') + fn
-  D <- fread(ffn)
+    D <- fread(paste(gh('data'),fn,sep='/'))
   tmp <- emp.plot(NL[[fn]],D,'')
   fn2 <- gsub('csv','pdf',fn)
   fn2 <- gh('graphs/') + fn2
@@ -110,9 +109,9 @@ save(PZ,file=gh('data/PZ.Rdata'))
 ## ===  data from paper:
 
 ## night sweats
-## CTB: 206, 187
-## TB: 422, 577
-## uTB: 568, 1845
+## CTB: yes=206, no=187
+## TB: yes=422, no=577
+## uTB: yes=568, no=1845
 
 ## y/n
 ns.TB <- c(206+422,
@@ -122,9 +121,9 @@ ns.nTB <- c(568,
 
 
 ## haemoptysis
-## ctb: 2,88
-## tb: 13, 410
-## utb: 12, 851
+## ctb: yes=2, no=88
+## tb: yes=13, no=410
+## utb: yes=12, no=851
 
 ## y/n
 hs.TB <- c(2+13,

@@ -201,7 +201,8 @@ makeTable <- function(MZ){
         `100x DALYs averted, TBS2`=brkt(-1e2*DD_TBS2,-1e2*DD_TBS2.hi,-1e2*DD_TBS2.lo),
         `ICER, WHO`=round(ICER_WHO,2),
         `ICER, TBS1`=round(ICER_TBS1,2),
-        `ICER, TBS2 vs WHO`=round(wICER_TBS2,2),
-        `ICER, TBS1 vs WHO`=round(wICER_TBS1,2)
+        `ICER, TBS2`=round(ICER_TBS2,2),
+        `ICER, TBS1 vs WHO`=round(wICER_TBS1,2),
+        `ICER, TBS2 vs WHO`=round(wICER_TBS2,2)
         )]
 }

@@ -4,15 +4,18 @@ library(here)
 library(glue)
 library(data.table)
 library(ggplot2)
+library(readxl)
 gh <- function(x) glue(here(x))
-cnz <- c("Cambodia","Cameroon","Côte d'Ivoire","Mozambique",
-         "Sierra Leone","Uganda","Zambia")
+cnz <- c("Uganda","Zambia")
 
 ## load dependencies
 source(gh('R/utils/scores.R')) #scores are coded in here
 source(gh('R/utils/costutils.R')) #cost data parser
 source(here('R/utils/readyoutcomes.R')) #parameters & life-years
 source(here('R/utils/HEoutputs.R')) #various outputters
+
+realpopt <- read_excel("data/realpopt.xlsx")
+realpop <- read_excel("data/realpop.xlsx")
 
 
 ## load synthetic populations
@@ -41,16 +44,145 @@ popt <- appendTBSscores(popt)
 popt0 <- appendTBSscores(popt0)
 
 ## check se/sp
-pop[,1-mean(score_X>10)] #specificity =51%
-pop[,1-mean(score_noX>10)] #specificity =87%
-popt[,mean(score_X>10)] #sensitivity =71%
-popt[,mean(score_noX>10)] #sensitivity =39%
+pop[,1-mean(score_X>10)] #specificity =46%
+pop[,1-mean(score_noX>10)] #specificity =83%
+popt[,mean(score_X>10)] #sensitivity =75%
+popt[,mean(score_noX>10)] #sensitivity =46%
 
 ## check se/sp
-pop[,1-mean(TBS1S>10)] #specificity =76%
-pop[,1-mean(TBS2Sa>10 & TBS2Sb>10)] #specificity =86%
-popt[,mean(TBS1S>10)] #sensitivity =84%
-popt[,mean(TBS2Sa>10 & TBS2Sb>10)] #sensitivity =63%
+pop[,1-mean(TBS1Sb>=10)] #specificity =79%    
+pop[,1-mean(TBS2Sa>=1 & TBS2Sb>=10, na.rm = TRUE)] #specificity =84%     
+popt[,mean(TBS1Sb>=10)] #sensitivity =83%     
+popt[,mean(TBS2Sa>=1 & TBS2Sb>=10, na.rm = TRUE)] #sensitivity =76%      
+
+
+##
+## Compare synthetic and real populations 
+
+## add in scores to real populations
+
+# TB pop
+names(realpopt)[names(realpopt) == "pat_ide"] <- "id"
+
+realpopt$Contact_TB<-ifelse(realpopt$Contact_TB=="Yes",1,0)
+realpopt$itb_fat_2<-ifelse(realpopt$itb_fat_2=="Yes",1,0)
+realpopt$itb_fev_2<-ifelse(realpopt$itb_fev_2=="Yes",1,0)
+realpopt$itb_cou_2<-ifelse(realpopt$itb_cou_2=="Yes",1,0)
+realpopt$itb_cou_3<-ifelse(realpopt$itb_cou_3=="Yes",1,0)
+realpopt$itb_app_2<-ifelse(realpopt$itb_app_2=="Yes",1,0)
+realpopt$temp_38<-ifelse(realpopt$temp_38=="Yes",1,0)
+realpopt$itb_wgt.factor<-ifelse(realpopt$itb_wgt.factor=="Yes",1,0)
+realpopt$tachycardia<-ifelse(realpopt$tachycardia=="Yes",1,0)
+realpopt$tachypnea<-ifelse(realpopt$tachypnea=="Yes",1,0)
+realpopt$ice_ind_bin.factor<-ifelse(realpopt$ice_ind_bin.factor=="Yes",1,0)
+realpopt$ice_cra.factor<-ifelse(realpopt$ice_cra.factor=="Yes",1,0)
+realpopt$Dep_csc<-ifelse(realpopt$Dep_csc=="Yes",1,0)
+realpopt$ice_ade_bin.factor<-ifelse(realpopt$ice_ade_bin.factor=="Yes",1,0)
+realpopt$cxr_pre_mil.factor<-ifelse(realpopt$cxr_pre_mil.factor=="Yes",1,0)
+realpopt$cxr_pre_alv.factor<-ifelse(realpopt$cxr_pre_alv.factor=="Yes",1,0)
+realpopt$cxr_pre_hil.factor<-ifelse(realpopt$cxr_pre_hil.factor=="Yes",1,0)
+realpopt$cxr_pre_exc.factor<-ifelse(realpopt$cxr_pre_exc.factor=="Yes",1,0)
+realpopt$cxr_pre_ple.factor<-ifelse(realpopt$cxr_pre_ple.factor=="Yes",1,0)
+realpopt$cxr_pre_eff.factor<-ifelse(realpopt$cxr_pre_eff.factor=="Yes",1,0)
+realpopt$cxr_pre_ple_per_eff.factor<-ifelse(realpopt$cxr_pre_ple_per_eff.factor=="Yes",1,0)
+realpopt$aus_sma.factor<-ifelse(realpopt$aus_sma.factor=="Yes",1,0)
+realpopt$aus_hma.factor<-ifelse(realpopt$aus_hma.factor=="Yes",1,0)
+realpopt$aus_effusion<-ifelse(realpopt$aus_effusion=="Yes",1,0)
+realpopt$aus_asc.factor<-ifelse(realpopt$aus_asc.factor=="Yes",1,0)
+
+realpopt$hiv_res.factor<-ifelse(realpopt$hiv_res.factor=="Positive",1,0)
+realpopt$Xpert_res<-ifelse(realpopt$Xpert_res=="Positive",1,0)
+
+#Not TB pop
+names(realpop)[names(realpop) == "pat_ide"] <- "id"
+
+realpop$Contact_TB<-ifelse(realpop$Contact_TB=="Yes",1,0)
+realpop$itb_fat_2<-ifelse(realpop$itb_fat_2=="Yes",1,0)
+realpop$itb_fev_2<-ifelse(realpop$itb_fev_2=="Yes",1,0)
+realpop$itb_cou_2<-ifelse(realpop$itb_cou_2=="Yes",1,0)
+realpop$itb_cou_3<-ifelse(realpop$itb_cou_3=="Yes",1,0)
+realpop$itb_app_2<-ifelse(realpop$itb_app_2=="Yes",1,0)
+realpop$temp_38<-ifelse(realpop$temp_38=="Yes",1,0)
+realpop$itb_wgt.factor<-ifelse(realpop$itb_wgt.factor=="Yes",1,0)
+realpop$tachycardia<-ifelse(realpop$tachycardia=="Yes",1,0)
+realpop$tachypnea<-ifelse(realpop$tachypnea=="Yes",1,0)
+realpop$ice_ind_bin.factor<-ifelse(realpop$ice_ind_bin.factor=="Yes",1,0)
+realpop$ice_cra.factor<-ifelse(realpop$ice_cra.factor=="Yes",1,0)
+realpop$Dep_csc<-ifelse(realpop$Dep_csc=="Yes",1,0)
+realpop$ice_ade_bin.factor<-ifelse(realpop$ice_ade_bin.factor=="Yes",1,0)
+realpop$cxr_pre_mil.factor<-ifelse(realpop$cxr_pre_mil.factor=="Yes",1,0)
+realpop$cxr_pre_alv.factor<-ifelse(realpop$cxr_pre_alv.factor=="Yes",1,0)
+realpop$cxr_pre_hil.factor<-ifelse(realpop$cxr_pre_hil.factor=="Yes",1,0)
+realpop$cxr_pre_exc.factor<-ifelse(realpop$cxr_pre_exc.factor=="Yes",1,0)
+realpop$cxr_pre_ple.factor<-ifelse(realpop$cxr_pre_ple.factor=="Yes",1,0)
+realpop$cxr_pre_eff.factor<-ifelse(realpop$cxr_pre_eff.factor=="Yes",1,0)
+realpop$cxr_pre_ple_per_eff.factor<-ifelse(realpop$cxr_pre_ple_per_eff.factor=="Yes",1,0)
+realpop$aus_sma.factor<-ifelse(realpop$aus_sma.factor=="Yes",1,0)
+realpop$aus_hma.factor<-ifelse(realpop$aus_hma.factor=="Yes",1,0)
+realpop$aus_effusion<-ifelse(realpop$aus_effusion=="Yes",1,0)
+realpop$aus_asc.factor<-ifelse(realpop$aus_asc.factor=="Yes",1,0)
+
+realpop$hiv_res.factor<-ifelse(realpop$hiv_res.factor=="Positive",1,0)
+realpop$Xpert_res<-ifelse(realpop$Xpert_res=="Positive",1,0)
+
+# --- TB Speed
+setDT(realpop)
+setDT(realpopt)
+
+realpop <- appendTBSscores(realpop)
+realpopt <- appendTBSscores(realpopt)
+
+## check se/sp using Minh's variables
+realpop[,1-mean(realpop$SCO_ORG_tot>=10)] #specificity =81%    
+realpop[,1-mean(realpop$SCO_SCR_tot>=1 & realpop$SCO_DIA_tot>=10)] #specificity =84%     
+realpopt[,mean(realpopt$SCO_ORG_tot>=10)] #sensitivity =86%     
+realpopt[,mean(realpopt$SCO_SCR_tot>=1 & realpopt$SCO_DIA_tot>=10)] #sensitivity =79%      
+
+# ## check se/sp using our score
+realpop[,1-mean(TBS1Sb>=10)] #real pop sp = 81%
+                           #synthetic pop sp: 81%
+                           #clinical paper sp: 81% [77-84]
+realpop[,1-mean(TBS2Sa>=1 & TBS2Sb>=10, na.rm = TRUE)] #real pop sp = 84%
+                                                      #synthetic pop sp: 84%
+                                                      #clinical paper sp: 84% [80-87]
+realpopt[,mean(TBS1Sb>=10)] #real pop se = 86%
+                          #synthetic pop se: 86%
+                          #clinical paper se: 86% [78-92]
+realpopt[,mean(TBS2Sa>=1 & TBS2Sb>=10, na.rm = TRUE)] #real pop se = 79%
+                                                     #synthetic pop se: 79%
+                                                     #clinical paper se: 79% [70-86]
+# Compare Minh's scores and ours
+table(realpopt$SCO_ORG_SCR_tot>=10) # 28/101
+table(realpopt$SCO_ORG_tot>=10) # 87/101
+table(realpop$SCO_ORG_tot<10) # 351/434
+table(realpopt$TBS1Sa>=10) # 28/101
+table(realpopt$TBS1Sb>=10) # 87/101
+table(realpop$TBS1Sb<10) # 351/434
+
+table(realpopt$SCO_SCR_tot>=10) # 90/101
+table(realpop$SCO_SCR_tot<10) # 151/434
+table(realpopt$TBS2Sa>=1) # 90/101
+table(realpop$TBS2Sa<1) # 151/434
+
+table(realpopt$SCO_DIA_tot>=10) # 80/101
+table(realpop$SCO_DIA_tot<10) # 212+151= 363/434
+summary(is.na(realpop$SCO_DIA_tot))
+table(realpopt$TBS2Sb>=10) # 80/101
+table(realpop$TBS2Sb<10) # 212+151= 363/434
+summary(is.na(realpop$TBS2Sb))
+
+all(realpopt$SCO_ORG_SCR_tot == realpopt$TBS1Sa)
+all(realpop$SCO_ORG_SCR_tot == realpop$TBS1Sa)
+
+all(realpopt$SCO_ORG_tot == realpopt$TBS1Sb)
+all(realpop$SCO_ORG_tot == realpop$TBS1Sb)
+
+all(realpopt$SCO_SCR_tot == realpopt$TBS2Sa, na.rm = TRUE) # Minh kept original scores in DB (!=1 par sign/symptom), so not matching
+all(realpop$SCO_SCR_tot == realpop$TBS2Sa, na.rm = TRUE)  # Minh kept original scores in DB (!=1 par sign/symptom), so not matching
+
+all(realpopt$SCO_DIA_tot == realpopt$TBS2Sb, na.rm = TRUE)
+all(realpop$SCO_DIA_tot == realpop$TBS2Sb, na.rm = TRUE)
+
 
 ## compare
 pop0[,method:='no correlation']
@@ -66,8 +198,8 @@ CF <- rbindlist(list(pop,popt,pop0,popt0)) #all
 
 CFS <- CF[,.(CXR=mean(score_X),noCXR=mean(score_noX),
              CXR.sd=sd(score_X),noCXR.sd=sd(score_noX),
-             TBS1S=mean(TBS1S),TBS2Sa=mean(TBS2Sa),TBS2Sb=mean(TBS2Sb),
-             TBS1S.sd=sd(TBS1S),TBS2Sa.sd=sd(TBS2Sa),TBS2Sb.sd=sd(TBS2Sb)),
+             TBS1Sa=mean(TBS1Sa),TBS1Sb=mean(TBS1Sb),TBS2Sa=mean(TBS2Sa),TBS2Sb=mean(TBS2Sb),
+             TBS1Sa.sd=sd(TBS1Sa),TBS1Sb.sd=sd(TBS1Sb),TBS2Sa.sd=sd(TBS2Sa),TBS2Sb.sd=sd(TBS2Sb)),
           by=.(TB,method)][order(TB)] #very similar
 CFS
 
@@ -122,9 +254,12 @@ CF[,c('who.cost','soc.cost','tbs1.cost','tbs2.cost'):=0.0] #initialize costs
 ## WHO.algorithm(CF)
 ## WHO.algorithm(CF,resample = TRUE) #including re-assessment via stratified resampling
 
-ans <- WHO.algorithm(CF,resample = TRUE)
+## ans0 <- WHO.algorithm(CF,resample = TRUE)
+ans <- WHO.algorithm(CF,resample = TRUE) 
 CF[,c('who.ATT','who.cost'):=ans]
 
+## summary(ans0)
+## summary(ans)
 
 ## ## checks
 ## CF[,.(who=mean(who.ATT)),by=TB]
@@ -179,6 +314,12 @@ CF[,.(who=mean(who.cfr),soc=mean(soc.cfr),
 CF[,.(who=mean(who.ATT),soc=mean(soc.ATT),
       tbs1=mean(tbs1.ATT),tbs2=mean(tbs2.ATT)),by=TB]
 
+## costs of algs as a whole
+CF[,.(who=mean(who.cost),soc=mean(soc.cost),
+      tbs1=mean(tbs1.cost),tbs2=mean(tbs2.cost)),by=TB]
+CF[,.(who=mean(who.cost),soc=mean(soc.cost),
+      tbs1=mean(tbs1.cost),tbs2=mean(tbs2.cost))]
+
 
 ## merge in Life-years
 CF <- merge(CF,LYKc[,.(country,dLYS=LYS)],by='country',all.x=TRUE)
@@ -200,6 +341,7 @@ ALL[,c('wDD_TBS1','wDD_TBS2'):=.(tbs1.DALYs-who.DALYs,tbs2.DALYs-who.DALYs)]
 
 
 ## quick looks
+
 clz <- names(ALL)
 clz <- clz[-c(1,2)]
 MZ <- ALL[,lapply(.SD,mean),by=country,.SDcols=clz]
@@ -225,9 +367,13 @@ fwrite(tab,file = here('data/ICERtable.csv'))
 keep <- c('country','id',grep('\\.',names(ALL),value = TRUE))
 M <- reshapeINC(ALL[,..keep])
 
-
-GP <- CEAplots(M[algorithm!='tbs2'],ring=TRUE,alph=0.05)
+#GP <- CEAplots(M[algorithm!='tbs2'],ring=TRUE,alph=0.05)
+GP <- CEAplots(M[],ring=TRUE,alph=0.05)
 GP
+
+M[,.(`DALYs averted`=mean(`DALYs averted`),
+     `Incremental cost`=mean(`Incremental cost`)),
+  by=.(country,algorithm)]
 
 ggsave(GP,file=here('graphs/CEhull.pdf'),h=8,w=10)
 
@@ -237,7 +383,7 @@ CEAC <- make.ceacs(M,seq(from=0,to=500,by=0.5))
 GP <- ggplot(CEAC[algorithm!='tbs2' & country %in% c('Uganda','Zambia')],
              aes(lambda,`Probability CE`,col=country,lty=algorithm))+
   geom_line(lwd=1)+scale_y_continuous(label=percent)+
-  xlab('Cost effectiveness threshold (USD per DALY averted)')+
+  xlab('Cost effectiveness threshold (US$ per DALY averted)')+
   ylab('Probability cost-effective')
 GP
 
