@@ -111,34 +111,34 @@ appendTBSscores <- function(D){
 
 
 ## NOTE costs must be initialized to zero
-## reassessment TODO:
-## parameter choice for fraction reassessed
-## sens/spec for reassessment & same for choice to reassess = 4 parameters based on numbers in TBS data (default choice scaling with prevalence)
-## check reassessment cost: to be added = 30% CXR + clinical assessment + no GXP
-## is the randomness (on tx decision) in functions below or in cohort generation
-
 
 ## WHO algorithm
 WHO.algorithm <- function(D){
   if(!is.data.table(D)) stop('Input data must be data.table!')
   cat('...',nrow(D),'\n')
+  ## initial assessment
   D[,who.ATT:=0]
   D[who_scre>=1 & !is.na(Xpert_res),who.ATT:=ifelse(Xpert_res==1,1,0)] #Xpert result available
   D[who_scre>=1 & (is.na(Xpert_res) | Xpert_res==0) & Contact_TB==1,who.ATT:=1] #HH contact
-  D[who_scre>=1 & (is.na(Xpert_res) | Xpert_res==0) & Contact_TB==0 & CXR.avail==1,who.ATT:=ifelse(score_X>10,1,0)]
-  D[who_scre>=1 & (is.na(Xpert_res) | Xpert_res==0) & Contact_TB==0 & CXR.avail==0,who.ATT:=ifelse(score_noX>10,1,0)]
+  D[who_scre>=1 & (is.na(Xpert_res) | Xpert_res==0) & Contact_TB==0 & CXR.avail==1,
+    who.ATT:=ifelse(score_X>10,1,0)]
+  D[who_scre>=1 & (is.na(Xpert_res) | Xpert_res==0) & Contact_TB==0 & CXR.avail==0,
+    who.ATT:=ifelse(score_noX>10,1,0)]
+
+  ## reassessment (see getAlgoParms for logic)
+  D[reassess==1 & reassess.ATT==1,who.ATT:=1] #if destined for ATT from reassessment
 
   ## costs
   D[,who.cost:=who.cost+c.s.who.scre]                                         #everyone gets
   D[who_scre>=1,who.cost:=who.cost+c.s.who.diag]                              #if presents one of the chronic symptoms
   D[who_scre>=1 & hiv_res.factor==1,who.cost:=who.cost+c.s.who.hiv.diag]      #if presents one of the chronic symptoms and is HIV+, also receive urine LAM
+  D[reassess==1,who.cost:=who.cost + c.s.tbs1step.reassessCXR30]              #NOTE reassessment costs
   D[who.ATT==1,who.cost:=who.cost + c.s.ATT]                                  #ATT costs
-
-  ## reassessment
-  ## TODO
 
   return(data.table(who.ATT=D$who.ATT,who.cost=D$who.cost))
 }
+
+
 
 
 ## TBS 1-step algorithm

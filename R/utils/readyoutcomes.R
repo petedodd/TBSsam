@@ -113,7 +113,17 @@ getAlgoParms <- function(N,hiv=NULL){
   D[,clin.senseU:=ifelse(tmp.sens>runif(nrow(D)),1,0)]
   D[,clin.specU:=ifelse(tmp.spec>runif(nrow(D)),1,0)]
   ## reassessment etc
-  D[,reassess:=ifelse(P$s.reassess$r(nrow(D))>runif(nrow(D)),1,0)]
+  ## D[,reassess:=ifelse(P$s.reassess$r(nrow(D))>runif(nrow(D)),1,0)] #NOTE old version
+  D[,prob.reassess:=ifelse(TB=='TB',
+                           s.reassess.choice.se$r(nrow(D)),
+                           1-s.reassess.choice.sp$r(nrow(D))
+                           )]
+  D[,reassess:=ifelse(prob.reassess>runif(nrow(D)),1,0)]
+  D[,prob.ATT.reassess:=ifelse(TB=='TB',
+                               s.reassess.se$r(nrow(D)),
+                               1-s.reassess.sp$r(nrow(D))
+                           )]
+  D[,reassess.ATT:=ifelse(prob.ATT.reassess>runif(nrow(D)),1,0)]
   ## CFRs for assigment
   D[,cfr.noatt:=P$notx.u5$r(nrow(D))]
   D[,cfr.att:=P$ontx.u5$r(nrow(D))]
