@@ -95,7 +95,8 @@ AddCFRs <- function(D){
 
 
 ## ## NOTE try to gather all stochastic things into there
-## note we have a stochastic model
+## note we have a stochastic model: variables returned typically 0/1
+## NOTE this is applied before TB disease status is available
 getAlgoParms <- function(N,hiv=NULL){
   D <- data.table(id=1:N)
   ## coverage of elements
@@ -114,16 +115,10 @@ getAlgoParms <- function(N,hiv=NULL){
   D[,clin.specU:=ifelse(tmp.spec>runif(nrow(D)),1,0)]
   ## reassessment etc
   ## D[,reassess:=ifelse(P$s.reassess$r(nrow(D))>runif(nrow(D)),1,0)] #NOTE old version
-  D[,prob.reassess:=ifelse(TB=='TB',
-                           s.reassess.choice.se$r(nrow(D)),
-                           1-s.reassess.choice.sp$r(nrow(D))
-                           )]
-  D[,reassess:=ifelse(prob.reassess>runif(nrow(D)),1,0)]
-  D[,prob.ATT.reassess:=ifelse(TB=='TB',
-                               s.reassess.se$r(nrow(D)),
-                               1-s.reassess.sp$r(nrow(D))
-                           )]
-  D[,reassess.ATT:=ifelse(prob.ATT.reassess>runif(nrow(D)),1,0)]
+  D[,s.reassess.choice.se := ifelse(P$s.reassess.choice.se$r(nrow(D))>runif(nrow(D)),1,0)]
+  D[,s.reassess.choice.sp := ifelse(P$s.reassess.choice.sp$r(nrow(D))>runif(nrow(D)),1,0)]
+  D[,s.reassess.se := ifelse(P$s.reassess.se$r(nrow(D))>runif(nrow(D)),1,0)]
+  D[,s.reassess.sp := ifelse(P$s.reassess.sp$r(nrow(D))>runif(nrow(D)),1,0)]
   ## CFRs for assigment
   D[,cfr.noatt:=P$notx.u5$r(nrow(D))]
   D[,cfr.att:=P$ontx.u5$r(nrow(D))]
