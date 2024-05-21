@@ -203,8 +203,10 @@ SOC.algorithm <- function(D){
   D[ptb==1 & testing.done==0 & xray.only==1,soc.cost:=soc.cost + c.s.soc.exam + c.s.soc.CXR] #clinical+CXR
   D[ptb==1 & testing.done==1 & xray.only==0,soc.cost:=soc.cost + c.s.soc.exam + c.s.soc.xga] #clinical+Xpert
   D[ptb==1 & testing.done==1 & xray.only==1,soc.cost:=soc.cost + c.s.soc.exam + c.s.soc.CXRxga] #clinical+CXR+Xpert
+  D[reassess==1,soc.cost:=soc.cost + c.s.tbs1step.reassessCXR30]              #NOTE reassessment costs
+  ## reassessment (see getAlgoParms for logic)
+  D[reassess==1 & reassess.ATT==1,soc.ATT:=1] #if destined for ATT from reassessment
   D[soc.ATT==1,soc.cost:=soc.cost + c.s.ATT] #ATT costs
-  ## TODO reassessment
 
   return(data.table(soc.ATT=D$soc.ATT,soc.cost=D$soc.cost))
 }
