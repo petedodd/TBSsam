@@ -15,7 +15,7 @@ spec.clin,"B(694.552101135748,76.3159356408868)",0.901 (0.894 - 0.908),"SOC, at 
 sens.clinCXR.soc,"B(492.167344045368,292.788547574039)",0.627 (0.615 - 0.639),"SOC, at DH/PHC: sensitivity of clinical diagnosis with CXR",62.7% (59.2-66.1%). Assumed to be the same as Marais 2006,,,,
 spec.clinCXR.soc,"B(694.552101135748,76.3159356408868)",0.901 (0.894 - 0.908),"SOC, at DH/PHC: specificity of clinical diagnosis with CXR",90.1% (87.8-92.1%). Assumed to be the same as Marais 2006,,,,
 s.TBprev,"B(104,431)",,True TB prevalence (committee definition),Study,,,,
-s.reassess,"B(4.835556,4.835556)",,"SAM: fraction reassessed SOC, WHO, and diagnosed despite score TB Speed",Expert opinion,Check necessary?,,,
+s.despite,"B(4.835556,4.835556)",,"SAM: fraction reassessed SOC, WHO, and diagnosed despite score TB Speed",Expert opinion,Check necessary?,,,
 s.SAMmort,"B(14,87)",,SAM: CFR from SAM applicable to all,TB Speed data,Check,,,
 s.reassess.choice.sp,"B(355,129)",,Specificity of choice to reassess,placeholder,Check,,,
 s.reassess.choice.se,"B(41,4)",,Sensitivity of choice to reassess,placeholder,Check,,,

@@ -326,7 +326,7 @@ CF[,.(who=mean(who.cost),soc=mean(soc.cost),
 CF <- merge(CF,LYKc[,.(country,dLYS=LYS)],by='country',all.x=TRUE)
 CF <- merge(CF,LYK[,.(country,LYS)],by='country',all.x=TRUE) #undiscounted
 
-
+## TODO check logic and whether still needed
 ## NOTE this step resamples Npops times with popsize and calculates means
 ALL <- combineHE(CF,popsize = 5e2,Npops=1e3)
 
@@ -369,7 +369,7 @@ keep <- c('country','id',grep('\\.',names(ALL),value = TRUE))
 M <- reshapeINC(ALL[,..keep])
 
 #GP <- CEAplots(M[algorithm!='tbs2'],ring=TRUE,alph=0.05)
-GP <- CEAplots(M[],ring=TRUE,alph=0.05)
+GP <- CEAplots(M[],ring=FALSE,alph=0.05)
 GP
 
 M[,.(`DALYs averted`=mean(`DALYs averted`),

@@ -155,10 +155,10 @@ TBS1s.algorithm <- function(D){
     default=0
   )]
 
-  ## ## treatment despite score TODO revisit
-  ## D[tbs1.ATT==0 & reassess==1,tbs1.cost:=tbs1.cost+0] #cost NOTE assumed zero like in SOC
-  ## D[tbs1.ATT==0 & reassess==1 & TB=='TB',tbs1.ATT:=clin.sense]
-  ## D[tbs1.ATT==0 & reassess==1 & TB=='not TB',tbs1.ATT:=1-clin.spec]
+  ## treatment despite score
+  D[tbs1.ATT==0 & despite==1,tbs1.cost:=tbs1.cost+0] #cost NOTE assumed zero like in SOC
+  D[tbs1.ATT==0 & despite==1 & TB=='TB',tbs1.ATT:=clin.sense]
+  D[tbs1.ATT==0 & despite==1 & TB=='not TB',tbs1.ATT:=1-clin.spec]
   ## costs
   D[TBS1Sa>=10,tbs1.cost:=tbs1.cost+c.s.tbs1step.diag.clin]                  #clinical score only (and CXR, Xpert for non-diag purpose)
   D[TBS1Sa<10,tbs1.cost:=tbs1.cost+c.s.tbs1step.diag.test]      #clinical, CXR, Xpert, AUS scoring
@@ -174,10 +174,10 @@ TBS2s.algorithm <- function(D){
        TBS2Sa>=1 & TBS2Sb>=10, 1,
        default=0
      )]
-  ## ## treatment despite score TODO
-  ## D[tbs2.ATT==0 & reassess==1,tbs2.cost:=tbs2.cost+0] #cost NOTE assumed zero like in SOC
-  ## D[tbs2.ATT==0 & reassess==1 & TB=='TB',tbs2.ATT:=clin.sense]
-  ## D[tbs2.ATT==0 & reassess==1 & TB=='not TB',tbs2.ATT:=1-clin.spec]
+  ## treatment despite score
+  D[tbs2.ATT==0 & despite==1,tbs2.cost:=tbs2.cost+0] #cost NOTE assumed zero like in SOC
+  D[tbs2.ATT==0 & despite==1 & TB=='TB',tbs2.ATT:=clin.sense]
+  D[tbs2.ATT==0 & despite==1 & TB=='not TB',tbs2.ATT:=1-clin.spec]
   ## costs
   D[,tbs2.cost:=tbs2.cost+c.s.tbs2step.scre]                             #everyone gets
   D[TBS2Sa>=1,tbs2.cost:=tbs2.cost + c.s.tbs2step.diag]                  #only those @ s2 
