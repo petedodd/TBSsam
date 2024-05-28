@@ -124,14 +124,12 @@ WHO.algorithm <- function(D){
     who.ATT:=ifelse(score_X>10,1,0)]
   D[who_scre>=1 & (is.na(Xpert_res) | Xpert_res==0) & Contact_TB==0 & CXR.avail==0,
     who.ATT:=ifelse(score_noX>10,1,0)]
-
   ## reassessment (see getAlgoParms for logic)
   D[,reassess:=ifelse(who.ATT==1, #treated initially
                       0,          #no reassessment as on treatment
                ifelse(TB=='TB',s.reassess.choice.se,1-s.reassess.choice.sp))]
   D[reassess==1,who.cost:=who.cost + c.s.tbs1step.reassessCXR30]              #NOTE reassessment costs
   D[reassess==1,who.ATT:=ifelse(TB=='TB',s.reassess.se,1-s.reassess.sp)]      #treatment from reassessment
-
   ## costs
   D[,who.cost:=who.cost+c.s.who.scre]                                         #everyone gets
   D[who_scre>=1,who.cost:=who.cost+c.s.who.diag]                              #if presents one of the chronic symptoms
@@ -154,11 +152,12 @@ TBS1s.algorithm <- function(D){
     TBS1Sb>=10, 1,
     default=0
   )]
-
-  ## treatment despite score
-  D[tbs1.ATT==0 & despite==1,tbs1.cost:=tbs1.cost+0] #cost NOTE assumed zero like in SOC
-  D[tbs1.ATT==0 & despite==1 & TB=='TB',tbs1.ATT:=clin.sense]
-  D[tbs1.ATT==0 & despite==1 & TB=='not TB',tbs1.ATT:=1-clin.spec]
+  ## reassessment
+  D[,reassess:=ifelse(soc.ATT==1, #treated initially
+                      0,          #no reassessment as on treatment
+               ifelse(TB=='TB',s.reassess.choice.se,1-s.reassess.choice.sp))]
+  D[reassess==1,soc.cost:=soc.cost + c.s.tbs1step.reassessCXR30]              #NOTE reassessment costs
+  D[reassess==1,soc.ATT:=ifelse(TB=='TB',s.reassess.se,1-s.reassess.sp)]      #treatment from reassessment
   ## costs
   D[TBS1Sa>=10,tbs1.cost:=tbs1.cost+c.s.tbs1step.diag.clin]                  #clinical score only (and CXR, Xpert for non-diag purpose)
   D[TBS1Sa<10,tbs1.cost:=tbs1.cost+c.s.tbs1step.diag.test]      #clinical, CXR, Xpert, AUS scoring
@@ -174,10 +173,12 @@ TBS2s.algorithm <- function(D){
        TBS2Sa>=1 & TBS2Sb>=10, 1,
        default=0
      )]
-  ## treatment despite score
-  D[tbs2.ATT==0 & despite==1,tbs2.cost:=tbs2.cost+0] #cost NOTE assumed zero like in SOC
-  D[tbs2.ATT==0 & despite==1 & TB=='TB',tbs2.ATT:=clin.sense]
-  D[tbs2.ATT==0 & despite==1 & TB=='not TB',tbs2.ATT:=1-clin.spec]
+  ## reassessment
+  D[,reassess:=ifelse(soc.ATT==1, #treated initially
+                      0,          #no reassessment as on treatment
+               ifelse(TB=='TB',s.reassess.choice.se,1-s.reassess.choice.sp))]
+  D[reassess==1,soc.cost:=soc.cost + c.s.tbs1step.reassessCXR30]              #NOTE reassessment costs
+  D[reassess==1,soc.ATT:=ifelse(TB=='TB',s.reassess.se,1-s.reassess.sp)]      #treatment from reassessment
   ## costs
   D[,tbs2.cost:=tbs2.cost+c.s.tbs2step.scre]                             #everyone gets
   D[TBS2Sa>=1,tbs2.cost:=tbs2.cost + c.s.tbs2step.diag]                  #only those @ s2 

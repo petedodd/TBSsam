@@ -114,7 +114,6 @@ getAlgoParms <- function(N,hiv=NULL){
   D[,clin.senseU:=ifelse(tmp.sens>runif(nrow(D)),1,0)]
   D[,clin.specU:=ifelse(tmp.spec>runif(nrow(D)),1,0)]
   ## reassessment etc
-  D[,despite:=ifelse(P$s.despite$r(nrow(D))>runif(nrow(D)),1,0)] #NOTE new version
   D[,s.reassess.choice.se := ifelse(P$s.reassess.choice.se$r(nrow(D))>runif(nrow(D)),1,0)]
   D[,s.reassess.choice.sp := ifelse(P$s.reassess.choice.sp$r(nrow(D))>runif(nrow(D)),1,0)]
   D[,s.reassess.se := ifelse(P$s.reassess.se$r(nrow(D))>runif(nrow(D)),1,0)]
