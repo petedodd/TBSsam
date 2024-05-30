@@ -267,9 +267,6 @@ ggsave(GP,file=here('graphs/CEAC.pdf'),h=8,w=10)
 ## https://docs.google.com/presentation/d/1dTrmzyfHa0KAja2ODXiQvRnpTYj1xmD2/edit#slide=id.p8
 
 
-## TODO
-## sense/spec check
-
 ## NOTE
 ## presumptive TB same w/ & w/o TB - no info on spec
 ## unc stoch vs parm
