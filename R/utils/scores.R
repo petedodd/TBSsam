@@ -111,34 +111,35 @@ appendTBSscores <- function(D){
 
 
 ## NOTE costs must be initialized to zero
-## reassessment TODO:
-## parameter choice for fraction reassessed
-## sens/spec for reassessment & same for choice to reassess = 4 parameters based on numbers in TBS data (default choice scaling with prevalence)
-## check reassessment cost: to be added = 30% CXR + clinical assessment + no GXP
-## is the randomness (on tx decision) in functions below or in cohort generation
-
-
+## TODO check above
 ## WHO algorithm
 WHO.algorithm <- function(D){
   if(!is.data.table(D)) stop('Input data must be data.table!')
   cat('...',nrow(D),'\n')
+  ## initial assessment
   D[,who.ATT:=0]
   D[who_scre>=1 & !is.na(Xpert_res),who.ATT:=ifelse(Xpert_res==1,1,0)] #Xpert result available
   D[who_scre>=1 & (is.na(Xpert_res) | Xpert_res==0) & Contact_TB==1,who.ATT:=1] #HH contact
-  D[who_scre>=1 & (is.na(Xpert_res) | Xpert_res==0) & Contact_TB==0 & CXR.avail==1,who.ATT:=ifelse(score_X>10,1,0)]
-  D[who_scre>=1 & (is.na(Xpert_res) | Xpert_res==0) & Contact_TB==0 & CXR.avail==0,who.ATT:=ifelse(score_noX>10,1,0)]
-
+  D[who_scre>=1 & (is.na(Xpert_res) | Xpert_res==0) & Contact_TB==0 & CXR.avail==1,
+    who.ATT:=ifelse(score_X>10,1,0)]
+  D[who_scre>=1 & (is.na(Xpert_res) | Xpert_res==0) & Contact_TB==0 & CXR.avail==0,
+    who.ATT:=ifelse(score_noX>10,1,0)]
+  ## reassessment (see getAlgoParms for logic)
+  D[,reassess:=ifelse(who.ATT==1, #treated initially
+                      0,          #no reassessment as on treatment
+               ifelse(TB=='TB',s.reassess.choice.se,1-s.reassess.choice.sp))]
+  D[reassess==1,who.cost:=who.cost + c.s.tbs1step.reassessCXR30]              #NOTE reassessment costs
+  D[reassess==1,who.ATT:=ifelse(TB=='TB',s.reassess.se,1-s.reassess.sp)]      #treatment from reassessment
   ## costs
   D[,who.cost:=who.cost+c.s.who.scre]                                         #everyone gets
   D[who_scre>=1,who.cost:=who.cost+c.s.who.diag]                              #if presents one of the chronic symptoms
   D[who_scre>=1 & hiv_res.factor==1,who.cost:=who.cost+c.s.who.hiv.diag]      #if presents one of the chronic symptoms and is HIV+, also receive urine LAM
   D[who.ATT==1,who.cost:=who.cost + c.s.ATT]                                  #ATT costs
 
-  ## reassessment
-  ## TODO
-
   return(data.table(who.ATT=D$who.ATT,who.cost=D$who.cost))
 }
+
+
 
 
 ## TBS 1-step algorithm
@@ -151,11 +152,12 @@ TBS1s.algorithm <- function(D){
     TBS1Sb>=10, 1,
     default=0
   )]
-
-  ## treatment despite score
-  D[tbs1.ATT==0 & reassess==1,tbs1.cost:=tbs1.cost+0] #cost NOTE assumed zero like in SOC
-  D[tbs1.ATT==0 & reassess==1 & TB=='TB',tbs1.ATT:=clin.sense]
-  D[tbs1.ATT==0 & reassess==1 & TB=='not TB',tbs1.ATT:=1-clin.spec]
+  ## reassessment
+  D[,reassess:=ifelse(soc.ATT==1, #treated initially
+                      0,          #no reassessment as on treatment
+               ifelse(TB=='TB',s.reassess.choice.se,1-s.reassess.choice.sp))]
+  D[reassess==1,soc.cost:=soc.cost + c.s.tbs1step.reassessCXR30]              #NOTE reassessment costs
+  D[reassess==1,soc.ATT:=ifelse(TB=='TB',s.reassess.se,1-s.reassess.sp)]      #treatment from reassessment
   ## costs
   D[TBS1Sa>=10,tbs1.cost:=tbs1.cost+c.s.tbs1step.diag.clin]                  #clinical score only (and CXR, Xpert for non-diag purpose)
   D[TBS1Sa<10,tbs1.cost:=tbs1.cost+c.s.tbs1step.diag.test]      #clinical, CXR, Xpert, AUS scoring
@@ -171,10 +173,12 @@ TBS2s.algorithm <- function(D){
        TBS2Sa>=1 & TBS2Sb>=10, 1,
        default=0
      )]
-  ## treatment despite score
-  D[tbs2.ATT==0 & reassess==1,tbs2.cost:=tbs2.cost+0] #cost NOTE assumed zero like in SOC
-  D[tbs2.ATT==0 & reassess==1 & TB=='TB',tbs2.ATT:=clin.sense]
-  D[tbs2.ATT==0 & reassess==1 & TB=='not TB',tbs2.ATT:=1-clin.spec]
+  ## reassessment
+  D[,reassess:=ifelse(soc.ATT==1, #treated initially
+                      0,          #no reassessment as on treatment
+               ifelse(TB=='TB',s.reassess.choice.se,1-s.reassess.choice.sp))]
+  D[reassess==1,soc.cost:=soc.cost + c.s.tbs1step.reassessCXR30]              #NOTE reassessment costs
+  D[reassess==1,soc.ATT:=ifelse(TB=='TB',s.reassess.se,1-s.reassess.sp)]      #treatment from reassessment
   ## costs
   D[,tbs2.cost:=tbs2.cost+c.s.tbs2step.scre]                             #everyone gets
   D[TBS2Sa>=1,tbs2.cost:=tbs2.cost + c.s.tbs2step.diag]                  #only those @ s2 
@@ -190,8 +194,9 @@ SOC.algorithm <- function(D){
   cat('...',nrow(D),'\n')
 
   ## treatment decision
+  ## NOTE this looks like a probability, but sense/spec from getAlgoParms are sampled 1/0
   D[,soc.ATT:=fcase(
-       ptb==0,0,                                    #if not considered presumptive (screening rate=80% based on expert opinion)
+       ptb==0,0,            #if not considered presumptive (screening rate=80% based on expert opinion)
        ptb==1 & testing.done==0,ifelse(TB=='TB',clin.sense,1-clin.spec), #clinical
        ptb==1 & testing.done==1 & xray.only==1,ifelse(TB=='TB',clin.senseX,1-clin.specX), #clinical+X
        ptb==1 & testing.done==1 & xray.only==0,ifelse(TB=='TB',clin.senseU,1-clin.specU), #inc. bac
@@ -203,8 +208,15 @@ SOC.algorithm <- function(D){
   D[ptb==1 & testing.done==0 & xray.only==1,soc.cost:=soc.cost + c.s.soc.exam + c.s.soc.CXR] #clinical+CXR
   D[ptb==1 & testing.done==1 & xray.only==0,soc.cost:=soc.cost + c.s.soc.exam + c.s.soc.xga] #clinical+Xpert
   D[ptb==1 & testing.done==1 & xray.only==1,soc.cost:=soc.cost + c.s.soc.exam + c.s.soc.CXRxga] #clinical+CXR+Xpert
+  ## reassessment
+  D[,reassess:=ifelse(soc.ATT==1, #treated initially
+                      0,          #no reassessment as on treatment
+               ifelse(TB=='TB',s.reassess.choice.se,1-s.reassess.choice.sp))]
+  D[reassess==1,soc.cost:=soc.cost + c.s.tbs1step.reassessCXR30]              #NOTE reassessment costs
+  D[reassess==1,soc.ATT:=ifelse(TB=='TB',s.reassess.se,1-s.reassess.sp)]      #treatment from reassessment
+
+  ## treatment costs
   D[soc.ATT==1,soc.cost:=soc.cost + c.s.ATT] #ATT costs
-  ## TODO reassessment
 
   return(data.table(soc.ATT=D$soc.ATT,soc.cost=D$soc.cost))
 }
