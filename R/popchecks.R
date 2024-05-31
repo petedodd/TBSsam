@@ -80,9 +80,9 @@ realpopt <- appendTBSscores(realpopt)
 
 ## check se/sp using Minh's variables
 realpop[,1-mean(realpop$SCO_ORG_tot>=10)] #specificity =81%
-realpop[,1-mean(realpop$SCO_SCR_tot>=1 & realpop$SCO_DIA_tot>=10)] #specificity =84% BUG
+realpop[,1-mean(realpop$SCO_SCR_tot>=1 & realpop$SCO_DIA_tot>=10)] #specificity =84%
 realpopt[,mean(realpopt$SCO_ORG_tot>=10)] #sensitivity =86%
-realpopt[,mean(realpopt$SCO_SCR_tot>=1 & realpopt$SCO_DIA_tot>=10)] #sensitivity =79% BUG
+realpopt[,mean(realpopt$SCO_SCR_tot>=1 & realpopt$SCO_DIA_tot>=10)] #sensitivity =79%
 
 # ## check se/sp using our score
 realpop[,1-mean(TBS1Sb>=10)] #real pop sp = 81%
@@ -105,8 +105,8 @@ table(realpopt$TBS1Sa>=10) # 28/101
 table(realpopt$TBS1Sb>=10) # 87/101
 table(realpop$TBS1Sb<10) # 351/434
 
-table(realpopt$SCO_SCR_tot>=10) # 90/101
-table(realpop$SCO_SCR_tot<10) # 151/434
+table(realpopt$SCO_SCR_tot>=1) # 90/101
+table(realpop$SCO_SCR_tot<1) # 151/434
 table(realpopt$TBS2Sa>=1) # 90/101
 table(realpop$TBS2Sa<1) # 151/434
 
@@ -123,8 +123,8 @@ all(realpop$SCO_ORG_SCR_tot == realpop$TBS1Sa)
 all(realpopt$SCO_ORG_tot == realpopt$TBS1Sb)
 all(realpop$SCO_ORG_tot == realpop$TBS1Sb)
 
-all(realpopt$SCO_SCR_tot == realpopt$TBS2Sa, na.rm = TRUE) # Minh kept original scores in DB (!=1 par sign/symptom), so not matching
-all(realpop$SCO_SCR_tot == realpop$TBS2Sa, na.rm = TRUE)  # Minh kept original scores in DB (!=1 par sign/symptom), so not matching
+all(realpopt$SCO_SCR_tot == realpopt$TBS2Sa, na.rm = TRUE) 
+all(realpop$SCO_SCR_tot == realpop$TBS2Sa, na.rm = TRUE)  
 
 all(realpopt$SCO_DIA_tot == realpopt$TBS2Sb, na.rm = TRUE)
 all(realpop$SCO_DIA_tot == realpop$TBS2Sb, na.rm = TRUE)
