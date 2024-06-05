@@ -153,11 +153,11 @@ TBS1s.algorithm <- function(D){
     default=0
   )]
   ## reassessment
-  D[,reassess:=ifelse(soc.ATT==1, #treated initially
+  D[,reassess:=ifelse(tbs1.ATT==1, #treated initially
                       0,          #no reassessment as on treatment
                ifelse(TB=='TB',s.reassess.choice.se,1-s.reassess.choice.sp))]
-  D[reassess==1,soc.cost:=soc.cost + c.s.tbs1step.reassessCXR30]              #NOTE reassessment costs
-  D[reassess==1,soc.ATT:=ifelse(TB=='TB',s.reassess.se,1-s.reassess.sp)]      #treatment from reassessment
+  D[reassess==1,tbs1.cost:=tbs1.cost + c.s.tbs1step.reassessCXR30]              #NOTE reassessment costs
+  D[reassess==1,tbs1.ATT:=ifelse(TB=='TB',s.reassess.se,1-s.reassess.sp)]      #treatment from reassessment
   ## costs
   D[TBS1Sa>=10,tbs1.cost:=tbs1.cost+c.s.tbs1step.diag.clin]                  #clinical score only (and CXR, Xpert for non-diag purpose)
   D[TBS1Sa<10,tbs1.cost:=tbs1.cost+c.s.tbs1step.diag.test]      #clinical, CXR, Xpert, AUS scoring
@@ -174,11 +174,11 @@ TBS2s.algorithm <- function(D){
        default=0
      )]
   ## reassessment
-  D[,reassess:=ifelse(soc.ATT==1, #treated initially
+  D[,reassess:=ifelse(tbs2.ATT==1, #treated initially
                       0,          #no reassessment as on treatment
                ifelse(TB=='TB',s.reassess.choice.se,1-s.reassess.choice.sp))]
-  D[reassess==1,soc.cost:=soc.cost + c.s.tbs1step.reassessCXR30]              #NOTE reassessment costs
-  D[reassess==1,soc.ATT:=ifelse(TB=='TB',s.reassess.se,1-s.reassess.sp)]      #treatment from reassessment
+  D[reassess==1,tbs2.cost:=tbs2.cost + c.s.tbs1step.reassessCXR30]              #NOTE reassessment costs
+  D[reassess==1,tbs2.ATT:=ifelse(TB=='TB',s.reassess.se,1-s.reassess.sp)]      #treatment from reassessment
   ## costs
   D[,tbs2.cost:=tbs2.cost+c.s.tbs2step.scre]                             #everyone gets
   D[TBS2Sa>=1,tbs2.cost:=tbs2.cost + c.s.tbs2step.diag]                  #only those @ s2 
