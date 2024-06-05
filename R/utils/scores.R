@@ -198,7 +198,7 @@ SOC.algorithm <- function(D){
   D[,soc.ATT:=fcase(
        ptb==0,0,            #if not considered presumptive (screening rate=80% based on expert opinion)
        ptb==1 & testing.done==0,ifelse(TB=='TB',clin.sense,1-clin.spec), #clinical
-       ptb==1 & testing.done==1 & xray.only==1,ifelse(TB=='TB',clin.senseX,1-clin.specX), #clinical+X
+       ptb==1 & testing.done==1 & xray.only==1,ifelse(TB=='TB',clin.senseX,1-clin.specX), #clinical+X    #MD: clin.senseX & clin.specX do not to account for Xpert result so we are missing se/sp parms in getAlgoParms for the scenario 'clinical exam + CXR + Xpert(GA)' 
        ptb==1 & testing.done==1 & xray.only==0,ifelse(TB=='TB',clin.senseU,1-clin.specU), #inc. bac
        default=0
      )]
