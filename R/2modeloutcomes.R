@@ -209,6 +209,14 @@ ALL[,c('DM_TBS1','DM_TBS2','DM_WHO'):=.(tbs1.cfr-soc.cfr,tbs2.DALYs-soc.cfr,who.
 ## wrt WHO
 ALL[,c('wDC_TBS1','wDC_TBS2'):=.(tbs1.cost-who.cost,tbs2.cost-who.cost)]
 ALL[,c('wDD_TBS1','wDD_TBS2'):=.(tbs1.DALYs-who.DALYs,tbs2.DALYs-who.DALYs)]
+ALL[,c('wDT_TBS1','wDT_TBS2'):=.(tbs1.ATT-who.ATT,tbs2.ATT-who.ATT)]
+ALL[,c('wDM_TBS1','wDM_TBS2'):=.(tbs1.cfr-who.cfr,tbs2.DALYs-who.cfr)]
+
+## wrt TBS1 for TBS2
+ALL[,c('tDC_TBS2'):=.(tbs2.cost-tbs1.cost)]
+ALL[,c('tDD_TBS2'):=.(tbs2.DALYs-tbs1.DALYs)]
+ALL[,c('tDT_TBS2'):=.(tbs2.ATT-tbs1.ATT)]
+ALL[,c('tDM_TBS2'):=.(tbs2.DALYs-tbs1.cfr)]
 
 
 ## quick looks
@@ -227,6 +235,8 @@ MZ <- merge(MZ,MZh,by='country')
 MZ[,c('ICER_TBS1','ICER_TBS2','ICER_WHO'):=.(-DC_TBS1/DD_TBS1,-DC_TBS2/DD_TBS2,-DC_WHO/DD_WHO)]
 ## wrt WHO
 MZ[,c('wICER_TBS1','wICER_TBS2'):=.(-wDC_TBS1/wDD_TBS1,-wDC_TBS2/wDD_TBS2)]
+## wrt TBS1
+MZ[,c('tICER_TBS2'):=.(-tDC_TBS2/tDD_TBS2)]
 
 
 tab <- makeTable(MZ)
