@@ -182,8 +182,16 @@ CF[,.(who=mean(who.cfr),soc=mean(soc.cfr),
 
 
 ## se/sp of algs as a whole
-CF[,.(who=mean(who.ATT),soc=mean(soc.ATT),
-      tbs1=mean(tbs1.ATT),tbs2=mean(tbs2.ATT)),by=TB]
+SESP <- CF[,.(who=ifelse(TB=='TB',mean(who.ATT),mean(1-who.ATT)),
+              soc=ifelse(TB=='TB',mean(soc.ATT),mean(1-soc.ATT)),
+              tbs1=ifelse(TB=='TB',mean(tbs1.ATT),mean(1-tbs1.ATT)),
+              tbs2=ifelse(TB=='TB',mean(tbs2.ATT),mean(1-tbs2.ATT))),
+           by=TB]
+SESP[,qty:=ifelse(TB=='TB','Se','Sp')]
+SESP[,TB:=NULL]
+fwrite(SESP,file = here('data/SESP.csv'))
+
+
 
 ## costs of algs as a whole
 CF[,.(who=mean(who.cost),soc=mean(soc.cost),
@@ -199,17 +207,7 @@ CF <- merge(CF,LYK[,.(country,LYS)],by='country',all.x=TRUE) #undiscounted
 ## TODO check logic and whether still needed
 ## NOTE this step resamples Npops times with popsize and calculates means
 ALL <- combineHE(CF,popsize = 5e2,Npops=1e3)
-
-## incremental wrt SOC
-ALL[,c('DC_TBS1','DC_TBS2','DC_WHO'):=.(tbs1.cost-soc.cost,tbs2.cost-soc.cost,who.cost-soc.cost)]
-ALL[,c('DD_TBS1','DD_TBS2','DD_WHO'):=.(tbs1.DALYs-soc.DALYs,tbs2.DALYs-soc.DALYs,who.DALYs-soc.DALYs)]
-ALL[,c('DT_TBS1','DT_TBS2','DT_WHO'):=.(tbs1.ATT-soc.ATT,tbs2.ATT-soc.ATT,who.ATT-soc.ATT)]
-ALL[,c('DM_TBS1','DM_TBS2','DM_WHO'):=.(tbs1.cfr-soc.cfr,tbs2.DALYs-soc.cfr,who.cfr-soc.cfr)]
-
-## wrt WHO
-ALL[,c('wDC_TBS1','wDC_TBS2'):=.(tbs1.cost-who.cost,tbs2.cost-who.cost)]
-ALL[,c('wDD_TBS1','wDD_TBS2'):=.(tbs1.DALYs-who.DALYs,tbs2.DALYs-who.DALYs)]
-
+## NOTE incrementals now included in combineHE
 
 ## quick looks
 
@@ -225,14 +223,24 @@ MZ <- merge(MZ,MZh,by='country')
 
 ## wrt SOC
 MZ[,c('ICER_TBS1','ICER_TBS2','ICER_WHO'):=.(-DC_TBS1/DD_TBS1,-DC_TBS2/DD_TBS2,-DC_WHO/DD_WHO)]
+MZ[,c('ICER0_TBS1','ICER0_TBS2','ICER0_WHO'):=.(-DC_TBS1/DD0_TBS1,-DC_TBS2/DD0_TBS2,-DC_WHO/DD0_WHO)]
 ## wrt WHO
 MZ[,c('wICER_TBS1','wICER_TBS2'):=.(-wDC_TBS1/wDD_TBS1,-wDC_TBS2/wDD_TBS2)]
+MZ[,c('wICER0_TBS1','wICER0_TBS2'):=.(-wDC_TBS1/wDD0_TBS1,-wDC_TBS2/wDD0_TBS2)]
+## wrt TBS1
+MZ[,c('tICER_TBS2'):=.(-tDC_TBS2/tDD_TBS2)]
+MZ[,c('tICER0_TBS2'):=.(-tDC_TBS2/tDD0_TBS2)]
 
 
 tab <- makeTable(MZ)
 tab
 
 fwrite(tab,file = here('data/ICERtable.csv'))
+
+## transposed version
+TT <- transpose(tab,make.names = TRUE)
+rownames(TT) <- names(tab)[-1]
+write.csv(TT,file = here('data/tICERtable.csv'))
 
 ## reshape data
 keep <- c('country','id',grep('\\.',names(ALL),value = TRUE))
