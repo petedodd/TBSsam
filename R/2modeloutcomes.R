@@ -251,7 +251,7 @@ ggsave(GP,file=here('graphs/CEhull.pdf'),h=8,w=10)
 
 CEAC <- make.ceacs(M,seq(from=0,to=500,by=0.5))
 
-GP <- ggplot(CEAC[algorithm!='tbs2' & country %in% c('Uganda','Zambia')],
+GP <- ggplot(CEAC[country %in% c('Uganda','Zambia')],
              aes(lambda,`Probability CE`,col=country,lty=algorithm))+
   geom_line(lwd=1)+scale_y_continuous(label=percent)+
   xlab('Cost effectiveness threshold (US$ per DALY averted)')+
