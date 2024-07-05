@@ -52,24 +52,48 @@ combineHE <- function(WS,
     ALL[[n]] <- WH[,.(id=n,
                       who.cost=mean(who.cost),
                       who.DALYs=mean(who.cfr*dLYS),
+                      who.DALYs0=mean(who.cfr*LYS),
                       who.cfr=mean(who.cfr),
                       who.ATT=mean(who.ATT),
                       soc.cost=mean(soc.cost),
                       soc.DALYs=mean(soc.cfr*dLYS),
+                      soc.DALYs0=mean(soc.cfr*LYS),
                       soc.cfr=mean(soc.cfr),
                       soc.ATT=mean(soc.ATT),
                       tbs1.cost=mean(tbs1.cost),
                       tbs1.DALYs=mean(tbs1.cfr*dLYS),
+                      tbs1.DALYs0=mean(tbs1.cfr*LYS),
                       tbs1.cfr=mean(tbs1.cfr),
                       tbs1.ATT=mean(tbs1.ATT),
                       tbs2.cost=mean(tbs2.cost),
                       tbs2.DALYs=mean(tbs2.cfr*dLYS),
+                      tbs2.DALYs0=mean(tbs2.cfr*LYS),
                       tbs2.cfr=mean(tbs2.cfr),
                       tbs2.ATT=mean(tbs2.ATT)),
                    by=country]
   }
-  ## return
   ALL <- rbindlist(ALL)
+  ## --- include increments:
+  ## incremental wrt SOC
+  ALL[,c('DC_TBS1','DC_TBS2','DC_WHO'):=.(tbs1.cost-soc.cost,tbs2.cost-soc.cost,who.cost-soc.cost)]
+  ALL[,c('DD_TBS1','DD_TBS2','DD_WHO'):=.(tbs1.DALYs-soc.DALYs,tbs2.DALYs-soc.DALYs,who.DALYs-soc.DALYs)]
+  ALL[,c('DD0_TBS1','DD0_TBS2','DD0_WHO'):=.(tbs1.DALYs0-soc.DALYs0,tbs2.DALYs0-soc.DALYs0,who.DALYs0-soc.DALYs0)]
+  ALL[,c('DT_TBS1','DT_TBS2','DT_WHO'):=.(tbs1.ATT-soc.ATT,tbs2.ATT-soc.ATT,who.ATT-soc.ATT)]
+  ALL[,c('DM_TBS1','DM_TBS2','DM_WHO'):=.(tbs1.cfr-soc.cfr,tbs2.cfr-soc.cfr,who.cfr-soc.cfr)]
+  ## wrt WHO
+  ALL[,c('wDC_TBS1','wDC_TBS2'):=.(tbs1.cost-who.cost,tbs2.cost-who.cost)]
+  ALL[,c('wDD_TBS1','wDD_TBS2'):=.(tbs1.DALYs-who.DALYs,tbs2.DALYs-who.DALYs)]
+  ALL[,c('wDD0_TBS1','wDD0_TBS2'):=.(tbs1.DALYs0-who.DALYs0,tbs2.DALYs0-who.DALYs0)]
+  ALL[,c('wDT_TBS1','wDT_TBS2'):=.(tbs1.ATT-who.ATT,tbs2.ATT-who.ATT)]
+  ALL[,c('wDM_TBS1','wDM_TBS2'):=.(tbs1.cfr-who.cfr,tbs2.cfr-who.cfr)]
+  ## wrt TBS1 for TBS2
+  ALL[,c('tDC_TBS2'):=.(tbs2.cost-tbs1.cost)]
+  ALL[,c('tDD_TBS2'):=.(tbs2.DALYs-tbs1.DALYs)]
+  ALL[,c('tDD0_TBS2'):=.(tbs2.DALYs0-tbs1.DALYs0)]
+  ALL[,c('tDT_TBS2'):=.(tbs2.ATT-tbs1.ATT)]
+  ALL[,c('tDM_TBS2'):=.(tbs2.cfr-tbs1.cfr)]
+
+  ## return
   return(ALL)
 }
 
@@ -194,6 +218,13 @@ makeTable <- function(MZ){
         `100x incremental deaths, TBS1 v WHO`=brkt(1e2*wDM_TBS1,1e2*wDM_TBS1.lo,1e2*wDM_TBS1.hi),
         `100x incremental deaths, TBS2 v WHO`=brkt(1e2*wDM_TBS2,1e2*wDM_TBS2.lo,1e2*wDM_TBS2.hi),
         `100x incremental deaths, TBS2 v TBS1`=brkt(1e2*tDM_TBS2,1e2*tDM_TBS2.lo,1e2*tDM_TBS2.hi),
+        ## --- D undiscounted dalys
+        `100x undiscounted LYS, WHO v SOC`=brkt(-1e2*DD0_WHO,-1e2*DD0_WHO.hi,-1e2*DD0_WHO.lo),
+        `100x undiscounted LYS, TBS1 v SOC`=brkt(-1e2*DD0_TBS1,-1e2*DD0_TBS1.hi,-1e2*DD0_TBS1.lo),
+        `100x undiscounted LYS, TBS2 v SOC`=brkt(-1e2*DD0_TBS2,-1e2*DD0_TBS2.hi,-1e2*DD0_TBS2.lo),
+        `100x undiscounted LYS, TBS1 v WHO`=brkt(-1e2*wDD0_TBS1,-1e2*wDD0_TBS1.hi,-1e2*wDD0_TBS1.lo),
+        `100x undiscounted LYS, TBS2 v WHO`=brkt(-1e2*wDD0_TBS2,-1e2*wDD0_TBS2.hi,-1e2*wDD0_TBS2.lo),
+        `100x undiscounted LYS, TBS2 v TBS1`=brkt(-1e2*tDD0_TBS2,-1e2*tDD0_TBS2.hi,-1e2*tDD0_TBS2.lo),
         ## --- D dalys
         `100x DALYs averted, WHO v SOC`=brkt(-1e2*DD_WHO,-1e2*DD_WHO.hi,-1e2*DD_WHO.lo),
         `100x DALYs averted, TBS1 v SOC`=brkt(-1e2*DD_TBS1,-1e2*DD_TBS1.hi,-1e2*DD_TBS1.lo),
@@ -213,6 +244,13 @@ makeTable <- function(MZ){
         `incremental cost, TBS1 v WHO`=brkt(wDC_TBS1,wDC_TBS1.lo,wDC_TBS1.hi),
         `incremental cost, TBS2 v WHO`=brkt(wDC_TBS2,wDC_TBS2.lo,wDC_TBS2.hi),
         `incremental cost, TBS2 v TBS1`=brkt(tDC_TBS2,tDC_TBS2.lo,tDC_TBS2.hi),
+        ## --- undiscounted ICERS
+        `ICER (no discounting), WHO v SOC`=round(ICER0_WHO,2),
+        `ICER (no discounting), TBS1 v SOC`=round(ICER0_TBS1,2),
+        `ICER (no discounting), TBS2 v SOC`=round(ICER0_TBS2,2),
+        `ICER (no discounting), TBS1 v WHO`=round(wICER0_TBS1,2),
+        `ICER (no discounting), TBS2 v WHO`=round(wICER0_TBS2,2),
+        `ICER (no discounting), TBS2 v TBS1`=round(tICER0_TBS2,2),
         ## --- ICERS
         `ICER, WHO v SOC`=round(ICER_WHO,2),
         `ICER, TBS1 v SOC`=round(ICER_TBS1,2),
