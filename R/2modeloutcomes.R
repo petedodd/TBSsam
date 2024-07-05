@@ -182,8 +182,16 @@ CF[,.(who=mean(who.cfr),soc=mean(soc.cfr),
 
 
 ## se/sp of algs as a whole
-CF[,.(who=mean(who.ATT),soc=mean(soc.ATT),
-      tbs1=mean(tbs1.ATT),tbs2=mean(tbs2.ATT)),by=TB]
+SESP <- CF[,.(who=ifelse(TB=='TB',mean(who.ATT),mean(1-who.ATT)),
+              soc=ifelse(TB=='TB',mean(soc.ATT),mean(1-soc.ATT)),
+              tbs1=ifelse(TB=='TB',mean(tbs1.ATT),mean(1-tbs1.ATT)),
+              tbs2=ifelse(TB=='TB',mean(tbs2.ATT),mean(1-tbs2.ATT))),
+           by=TB]
+SESP[,qty:=ifelse(TB=='TB','Se','Sp')]
+SESP[,TB:=NULL]
+fwrite(SESP,file = here('data/SESP.csv'))
+
+
 
 ## costs of algs as a whole
 CF[,.(who=mean(who.cost),soc=mean(soc.cost),
