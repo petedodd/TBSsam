@@ -20,3 +20,4 @@ s.reassess.choice.sp,"B(356,130)",,Specificity of choice to reassess,placeholder
 s.reassess.choice.se,"B(42,5)",,Sensitivity of choice to reassess,placeholder,Check,,,
 s.reassess.sp,"B(28,10)",,Specificity of  reassessment,placeholder,Check,,,
 s.reassess.se,"B(28,15)",,Sensitivity of reassessment,placeholder,https://docs.google.com/document/d/1k4gsRi_eDgB-5MDUvmnWlZe_mc-2nT_BmWnfAd7UkOg/edit?pli=1,,,
+s.soc.scrcov,"B(696, 3.35744)",90 (80-100),Proportion (%) of children being screened for TB when admitted to hospital with SAM,Expert opinion,,,,
