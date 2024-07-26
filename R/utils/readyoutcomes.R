@@ -100,10 +100,12 @@ AddCFRs <- function(D){
 getAlgoParms <- function(N,hiv=NULL){
   D <- data.table(id=1:N)
   ## coverage of elements
-  D[,ptb:=ifelse(P$s.soc.ptbcov$r(nrow(D))>runif(nrow(D)),1,0)]
+  D[,soc.screened:=ifelse(P$s.soc.scrcov$r(nrow(D))>runif(nrow(D)),1,0)]
   D[,testing.done:=ifelse(P$s.soc.testingcov$r(nrow(D))>runif(nrow(D)),1,0)]
   D[,xray.only:=ifelse(P$s.soc.CXRonly$r(nrow(D))>runif(nrow(D)),1,0)]
   ## accuracy
+  D[,s.screen.se := ifelse(P$s.reassess.choice.se$r(nrow(D))>runif(nrow(D)),1,0)]
+  D[,s.screen.sp := ifelse(P$s.reassess.choice.sp$r(nrow(D))>runif(nrow(D)),1,0)]
   D[,clin.sense:=ifelse(P$sens.clin$r(nrow(D))>runif(nrow(D)),1,0)]
   D[,clin.spec:=ifelse(P$spec.clin$r(nrow(D))>runif(nrow(D)),1,0)]
   D[,clin.senseX:=ifelse(P$sens.clinCXR.soc$r(nrow(D))>runif(nrow(D)),1,0)]

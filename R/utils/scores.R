@@ -189,25 +189,34 @@ TBS2s.algorithm <- function(D){
 ## SOC
 SOC.algorithm <- function(D){
   if(!is.data.table(D)) stop('Input data must be data.table!')
-  socvrs <- c('ptb','testing.done','xray.only','clin.senseX','clin.specX',
-              'clin.sense','clin.spec','clin.senseU','clin.specU')
   cat('...',nrow(D),'\n')
 
   ## treatment decision
   ## NOTE this looks like a probability, but sense/spec from getAlgoParms are sampled 1/0
-  D[,soc.ATT:=fcase(
-       ptb==0,0,            #if not considered presumptive (screening rate=80% based on expert opinion)
-       ptb==1 & testing.done==0,ifelse(TB=='TB',clin.sense,1-clin.spec), #clinical
-       ptb==1 & testing.done==1 & xray.only==1,ifelse(TB=='TB',clin.senseX,1-clin.specX), #clinical+X
-       ptb==1 & testing.done==1 & xray.only==0,ifelse(TB=='TB',clin.senseU,1-clin.specU), #inc. bac
+  D[,soc.ptb:=fcase(
+       soc.screened==0,0,            #if not screened
+       soc.screened==1,ifelse(TB=='TB',s.screen.se,1-s.screen.se), #screening accuracy
        default=0
      )]
+  ## applies to those presumed
+  D[,soc.ATT:=fcase(
+       soc.ptb==1 & testing.done==0,ifelse(TB=='TB',clin.sense,1-clin.spec), #clinical
+       soc.ptb==1 & testing.done==1 & xray.only==1,ifelse(TB=='TB',clin.senseX,1-clin.specX), #clinical+X
+       soc.ptb==1 & testing.done==1 & xray.only==0,ifelse(TB=='TB',clin.senseU,1-clin.specU), #inc. bac
+       default=0
+     )]
+  ## NOTE currently no reassessment for those not ptb TODO
+
   ## costs
-  D[,soc.cost:=soc.cost+c.s.soc.scre]                             #everyone gets
-  D[ptb==1 & testing.done==0 & xray.only==0,soc.cost:=soc.cost + c.s.soc.exam] #clinical
-  D[ptb==1 & testing.done==0 & xray.only==1,soc.cost:=soc.cost + c.s.soc.exam + c.s.soc.CXR] #clinical+CXR
-  D[ptb==1 & testing.done==1 & xray.only==0,soc.cost:=soc.cost + c.s.soc.exam + c.s.soc.xga] #clinical+Xpert
-  D[ptb==1 & testing.done==1 & xray.only==1,soc.cost:=soc.cost + c.s.soc.exam + c.s.soc.CXRxga] #clinical+CXR+Xpert
+  D[soc.screened==1,soc.cost:=soc.cost+c.s.soc.scre]       #screening costs on those screened
+  D[soc.screened==1 & testing.done==0 & xray.only==0,
+    soc.cost:=soc.cost + c.s.soc.exam] #clinical
+  D[soc.screened==1 & testing.done==0 & xray.only==1,
+    soc.cost:=soc.cost + c.s.soc.exam + c.s.soc.CXR] #clinical+CXR
+  D[soc.screened==1 & testing.done==1 & xray.only==0,
+    soc.cost:=soc.cost + c.s.soc.exam + c.s.soc.xga] #clinical+Xpert
+  D[soc.screened==1 & testing.done==1 & xray.only==1,
+    soc.cost:=soc.cost + c.s.soc.exam + c.s.soc.CXRxga] #clinical+CXR+Xpert
   ## reassessment
   D[,reassess:=ifelse(soc.ATT==1, #treated initially
                       0,          #no reassessment as on treatment
