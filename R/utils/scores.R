@@ -193,17 +193,9 @@ SOC.algorithm <- function(D){
 
   ## treatment decision
   ## NOTE this looks like a probability, but sense/spec from getAlgoParms are sampled 1/0
-<<<<<<< HEAD
-  D[,soc.ATT:=fcase(
-       ptb==0,0,            #if not considered presumptive (screening rate=80% based on expert opinion)
-       ptb==1 & testing.done==0,ifelse(TB=='TB',clin.sense,1-clin.spec), #clinical
-       ptb==1 & testing.done==1 & xray.only==1,ifelse(TB=='TB',clin.senseX,1-clin.specX), #clinical+X    #MD: clin.senseX & clin.specX do not to account for Xpert result so we are missing se/sp parms in getAlgoParms for the scenario 'clinical exam + CXR + Xpert(GA)' 
-       ptb==1 & testing.done==1 & xray.only==0,ifelse(TB=='TB',clin.senseU,1-clin.specU), #inc. bac
-=======
   D[,soc.ptb:=fcase(
        soc.screened==0,0,            #if not screened
        soc.screened==1,ifelse(TB=='TB',s.screen.se,1-s.screen.se), #screening accuracy
->>>>>>> 8333cfb84a9accf97d87801d8359db6718777486
        default=0
      )]
   ## applies to those presumed
