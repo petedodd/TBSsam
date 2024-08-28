@@ -19,7 +19,7 @@ s.reassess.choice.sp,"B(356,130)",0.733 (0.686 - 0.780),Specificity of choice to
 s.reassess.choice.se,"B(42,5)",0.911 (0.822 - 1.000),Sensitivity of choice to reassess,TB-Speed SAM cohort data,,,,
 s.reassess.sp,"B(28,10)",0.750 (0.583 - 0.912),Specificity of  reassessment,TB-Speed SAM cohort data,,,,
 s.reassess.se,"B(28,15)",0.658 (0.476 - 0.841),Sensitivity of reassessment,TB-Speed SAM cohort data,https://docs.google.com/document/d/1k4gsRi_eDgB-5MDUvmnWlZe_mc-2nT_BmWnfAd7UkOg/edit?pli=1,,,
-s.soc.scrcov,"B(696, 3.35744)",0.900 (0.800 - 1.000),Proportion (%) of children being screened for TB when admitted to hospital with SAM,Expert opinion,,,,
+s.soc.scrcov,"B(30.21696,3.35744)",0.900 (0.800 - 1.000),Proportion (%) of children being screened for TB when admitted to hospital with SAM,Expert opinion,,,,
 s.soc.screen.se,"B(26.00785,1.572055)",0.370 (0.285 - 0.464),Sensitivity of the SOC screening,TB-Speed SAM cohort data,,,,
 s.soc.screen.sp,"B(395.0861,102.5034)",0.794 (0.756 - 0.827),Specificity of the SOC screening,TB-Speed SAM cohort data,,,,
 ,,,,,,,,
