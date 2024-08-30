@@ -103,6 +103,7 @@ getAlgoParms <- function(N,hiv=NULL){
   D[,soc.screened:=ifelse(P$s.soc.scrcov$r(nrow(D))>runif(nrow(D)),1,0)]
   D[,testing.done:=ifelse(P$s.soc.testingcov$r(nrow(D))>runif(nrow(D)),1,0)]
   D[,xray.only:=ifelse(P$s.soc.CXRonly$r(nrow(D))>runif(nrow(D)),1,0)]
+  D[,xpert.only:=ifelse(P$s.soc.Xpertonly$r(nrow(D))>runif(nrow(D)),1,0)]
   ## accuracy
   D[,s.screen.se := ifelse(P$s.reassess.choice.se$r(nrow(D))>runif(nrow(D)),1,0)]
   D[,s.screen.sp := ifelse(P$s.reassess.choice.sp$r(nrow(D))>runif(nrow(D)),1,0)]
@@ -115,6 +116,11 @@ getAlgoParms <- function(N,hiv=NULL){
   tmp.spec <- 1 - (P$spec.clin$r(nrow(D))) * (1-P$spec.xga$r(nrow(D)))
   D[,clin.senseU:=ifelse(tmp.sens>runif(nrow(D)),1,0)]
   D[,clin.specU:=ifelse(tmp.spec>runif(nrow(D)),1,0)]
+  ## combining clinical, CXR and GA
+  tmp.sens <- 1 - (1-P$sens.clinCXR.soc$r(nrow(D))) * (1-P$sens.xga$r(nrow(D)))
+  tmp.spec <- 1 - (P$spec.clinCXR.soc$r(nrow(D))) * (1-P$spec.xga$r(nrow(D)))
+  D[,clin.senseXU:=ifelse(tmp.sens>runif(nrow(D)),1,0)]
+  D[,clin.specXU:=ifelse(tmp.spec>runif(nrow(D)),1,0)]
   ## reassessment etc
   D[,s.reassess.choice.se := ifelse(P$s.reassess.choice.se$r(nrow(D))>runif(nrow(D)),1,0)]
   D[,s.reassess.choice.sp := ifelse(P$s.reassess.choice.sp$r(nrow(D))>runif(nrow(D)),1,0)]
