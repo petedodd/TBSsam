@@ -201,22 +201,23 @@ SOC.algorithm <- function(D){
   ## applies to those presumed
   D[,soc.ATT:=fcase(
        soc.ptb==1 & testing.done==0,ifelse(TB=='TB',clin.sense,1-clin.spec), #clinical
-       soc.ptb==1 & testing.done==1 & xray.only==1,ifelse(TB=='TB',clin.senseX,1-clin.specX), #clinical+X
-       soc.ptb==1 & testing.done==1 & xray.only==0,ifelse(TB=='TB',clin.senseU,1-clin.specU), #inc. bac
+       soc.ptb==1 & testing.done==1 & xray.only==1 & xpert.only==0,ifelse(TB=='TB',clin.senseX,1-clin.specX), #clin+CXR
+       soc.ptb==1 & testing.done==1 & xray.only==0 & xpert.only==1,ifelse(TB=='TB',clin.senseU,1-clin.specU), #clin+Xpert
+       soc.ptb==1 & testing.done==1 & xray.only==0 & xpert.only==0,ifelse(TB=='TB',clin.senseXU,1-clin.specXU), #clin+CXR+Xpert
        default=0
      )]
   ## NOTE currently no reassessment for those not ptb TODO
 
   ## costs
   D[soc.screened==1,soc.cost:=soc.cost+c.s.soc.scre]       #screening costs on those screened
-  D[soc.screened==1 & testing.done==0 & xray.only==0,
+  D[soc.screened==1 & testing.done==0 & xray.only==0 & xpert.only==0,
     soc.cost:=soc.cost + c.s.soc.exam] #clinical
-  D[soc.screened==1 & testing.done==0 & xray.only==1,
-    soc.cost:=soc.cost + c.s.soc.exam + c.s.soc.CXR] #clinical+CXR
-  D[soc.screened==1 & testing.done==1 & xray.only==0,
-    soc.cost:=soc.cost + c.s.soc.exam + c.s.soc.xga] #clinical+Xpert
-  D[soc.screened==1 & testing.done==1 & xray.only==1,
-    soc.cost:=soc.cost + c.s.soc.exam + c.s.soc.CXRxga] #clinical+CXR+Xpert
+  D[soc.screened==1 & testing.done==1 & xray.only==1 & xpert.only==0,
+    soc.cost:=soc.cost + c.s.soc.exam + c.s.soc.CXR] #clin+CXR
+  D[soc.screened==1 & testing.done==1 & xray.only==0 & xpert.only==1,
+    soc.cost:=soc.cost + c.s.soc.exam + c.s.soc.xga] #clin+Xpert
+  D[soc.screened==1 & testing.done==1 & xray.only==0 & xpert.only==0,
+    soc.cost:=soc.cost + c.s.soc.exam + c.s.soc.CXRxga] #clin+CXR+Xpert
   ## reassessment
   D[,reassess:=ifelse(soc.ATT==1, #treated initially
                       0,          #no reassessment as on treatment
