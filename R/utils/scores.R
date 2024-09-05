@@ -122,8 +122,8 @@ WHO.algorithm <- function(D){
   D[who_scre>=1 & (is.na(Xpert_res) | Xpert_res==0) & Contact_TB==1,who.ATT:=1] #HH contact
   D[who_scre>=1 & (is.na(Xpert_res) | Xpert_res==0) & Contact_TB==0 & CXR.avail==1,
     who.ATT:=ifelse(score_X>10,1,0)]
-  D[who_scre>=1 & (is.na(Xpert_res) | Xpert_res==0) & Contact_TB==0 & CXR.avail==0,
-    who.ATT:=ifelse(score_noX>10,1,0)]
+  #D[who_scre>=1 & (is.na(Xpert_res) | Xpert_res==0) & Contact_TB==0 & CXR.avail==0,
+  #  who.ATT:=ifelse(score_noX>10,1,0)]
   ## reassessment (see getAlgoParms for logic)
   D[,reassess:=ifelse(who.ATT==1, #treated initially
                       0,          #no reassessment as on treatment
