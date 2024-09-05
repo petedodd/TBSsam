@@ -128,7 +128,7 @@ WHO.algorithm <- function(D){
   D[,reassess:=ifelse(who.ATT==1, #treated initially
                       0,          #no reassessment as on treatment
                ifelse(TB=='TB',s.reassess.choice.se,1-s.reassess.choice.sp))]
-  D[reassess==1,who.cost:=who.cost + c.s.tbs1step.reassessCXR30]              #NOTE reassessment costs
+  D[reassess==1,who.cost:=who.cost + c.s.reassessCXR30]              #NOTE reassessment costs
   D[reassess==1,who.ATT:=ifelse(TB=='TB',s.reassess.se,1-s.reassess.sp)]      #treatment from reassessment
   ## costs
   D[,who.cost:=who.cost+c.s.who.scre]                                         #everyone gets
@@ -156,7 +156,7 @@ TBS1s.algorithm <- function(D){
   D[,reassess:=ifelse(tbs1.ATT==1, #treated initially
                       0,          #no reassessment as on treatment
                ifelse(TB=='TB',s.reassess.choice.se,1-s.reassess.choice.sp))]
-  D[reassess==1,tbs1.cost:=tbs1.cost + c.s.tbs1step.reassessCXR30]              #NOTE reassessment costs
+  D[reassess==1,tbs1.cost:=tbs1.cost + c.s.reassessCXR30]              #NOTE reassessment costs
   D[reassess==1,tbs1.ATT:=ifelse(TB=='TB',s.reassess.se,1-s.reassess.sp)]      #treatment from reassessment
   ## costs
   D[TBS1Sa>=10,tbs1.cost:=tbs1.cost+c.s.tbs1step.diag.clin]                  #clinical score only (and CXR, Xpert for non-diag purpose)
@@ -177,7 +177,7 @@ TBS2s.algorithm <- function(D){
   D[,reassess:=ifelse(tbs2.ATT==1, #treated initially
                       0,          #no reassessment as on treatment
                ifelse(TB=='TB',s.reassess.choice.se,1-s.reassess.choice.sp))]
-  D[reassess==1,tbs2.cost:=tbs2.cost + c.s.tbs1step.reassessCXR30]              #NOTE reassessment costs
+  D[reassess==1,tbs2.cost:=tbs2.cost + c.s.reassessCXR30]              #NOTE reassessment costs
   D[reassess==1,tbs2.ATT:=ifelse(TB=='TB',s.reassess.se,1-s.reassess.sp)]      #treatment from reassessment
   ## costs
   D[,tbs2.cost:=tbs2.cost+c.s.tbs2step.scre]                             #everyone gets
@@ -222,7 +222,7 @@ SOC.algorithm <- function(D){
   D[,reassess:=ifelse(soc.ATT==1, #treated initially
                       0,          #no reassessment as on treatment
                ifelse(TB=='TB',s.reassess.choice.se,1-s.reassess.choice.sp))]
-  D[reassess==1,soc.cost:=soc.cost + c.s.tbs1step.reassessCXR30]              #NOTE reassessment costs
+  D[reassess==1,soc.cost:=soc.cost + c.s.reassessCXR30]              #NOTE reassessment costs
   D[reassess==1,soc.ATT:=ifelse(TB=='TB',s.reassess.se,1-s.reassess.sp)]      #treatment from reassessment
 
   ## treatment costs
