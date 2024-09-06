@@ -40,7 +40,8 @@ GetLifeYears <- function(isolist,discount.rate,yearfrom){
 
 
 ## actually do work if needed
-isoz <- c('KHM','CMR','CIV','MOZ','SLE','UGA','ZMB')
+isoz <- c("KHM", "CMR", "CIV", "MOZ", "SLE", "UGA", "ZMB")
+cnz <- c("Cambodia", "Cameroon", "Côte d'Ivoire", "Mozambique", "Sierra Leone", "Uganda", "Zambia")
 key <- data.table(iso3=isoz,country=cnz)
 fn <- here('data/LYK.Rdata')
 if(!file.exists(fn)){
@@ -61,36 +62,39 @@ if(!file.exists(fn)){
 ## prior parameters
 PD0 <- read.csv(here('data/SAMparameters.csv')) #read in
 
+
 ## combine different parameter types
-P <- parse.parmtable(PD0)             #convert into parameter object
+P <- parse.parmtable(PD0[,1:2])             #convert into parameter object
 
 ## for now neglect HIV
 AddCFRs <- function(D){
   ## background SAM mortality
-  D[,SAMmort:= P$s.SAMmort$r(nrow(D))]
+  D[, SAMmort := P$s.CFR.sam.noTB$r(nrow(D))]
+  D[, SAMmortTBATT := P$s.CFR.sam.TBATT$r(nrow(D))]
+  D[, SAMmortTBnoATT := P$s.CFR.sam.TBnoATT$r(nrow(D))]
   ## WHO version
-  D[TB=='not TB' & who.ATT==0,who.cfr:=0+SAMmort]
-  D[TB=='not TB' & who.ATT==1,who.cfr:=0+SAMmort]
-  D[TB=='TB' & who.ATT==0,who.cfr:=cfr.noatt+SAMmort]
-  D[TB=='TB' & who.ATT==1,who.cfr:=cfr.att+SAMmort]
+  D[TB == "not TB" & who.ATT == 0, who.cfr := SAMmort]
+  D[TB == "not TB" & who.ATT == 1, who.cfr := SAMmort]
+  D[TB == "TB" & who.ATT == 0, who.cfr := SAMmortTBnoATT]
+  D[TB == "TB" & who.ATT == 1, who.cfr := SAMmortTBATT]
   ## SOC
-  D[TB=='not TB' & soc.ATT==0,soc.cfr:=0+SAMmort]
-  D[TB=='not TB' & soc.ATT==1,soc.cfr:=0+SAMmort]
-  D[TB=='TB' & soc.ATT==0,soc.cfr:=cfr.noatt+SAMmort]
-  D[TB=='TB' & soc.ATT==1,soc.cfr:=cfr.att+SAMmort]
+  D[TB == "not TB" & soc.ATT == 0, soc.cfr := SAMmort]
+  D[TB == "not TB" & soc.ATT == 1, soc.cfr := SAMmort]
+  D[TB == "TB" & soc.ATT == 0, soc.cfr := SAMmortTBnoATT]
+  D[TB == "TB" & soc.ATT == 1, soc.cfr := SAMmortTBATT]
   ## 1 step
-  D[TB=='not TB' & tbs1.ATT==0,tbs1.cfr:=0+SAMmort]
-  D[TB=='not TB' & tbs1.ATT==1,tbs1.cfr:=0+SAMmort]
-  D[TB=='TB' & tbs1.ATT==0,tbs1.cfr:=cfr.noatt+SAMmort]
-  D[TB=='TB' & tbs1.ATT==1,tbs1.cfr:=cfr.att+SAMmort]
+  D[TB == "not TB" & tbs1.ATT == 0, tbs1.cfr := SAMmort]
+  D[TB == "not TB" & tbs1.ATT == 1, tbs1.cfr := SAMmort]
+  D[TB == "TB" & tbs1.ATT == 0, tbs1.cfr := SAMmortTBnoATT]
+  D[TB == "TB" & tbs1.ATT == 1, tbs1.cfr := SAMmortTBATT]
   ## 2 step
-  D[TB=='not TB' & tbs2.ATT==0,tbs2.cfr:=0+SAMmort]
-  D[TB=='not TB' & tbs2.ATT==1,tbs2.cfr:=0+SAMmort]
-  D[TB=='TB' & tbs2.ATT==0,tbs2.cfr:=cfr.noatt+SAMmort]
-  D[TB=='TB' & tbs2.ATT==1,tbs2.cfr:=cfr.att+SAMmort]
+  D[TB == "not TB" & tbs2.ATT == 0, tbs2.cfr := SAMmort]
+  D[TB == "not TB" & tbs2.ATT == 1, tbs2.cfr := SAMmort]
+  D[TB == "TB" & tbs2.ATT == 0, tbs2.cfr := SAMmortTBnoATT]
+  D[TB == "TB" & tbs2.ATT == 1, tbs2.cfr := SAMmortTBATT]
   ## cap
-  cap <- c('who.cfr','soc.cfr','tbs1.cfr','tbs2.cfr')
-  D[,(cap):=lapply(.SD,function(x)pmin(1,x)),.SDcols=cap]
+  cap <- c("who.cfr", "soc.cfr", "tbs1.cfr", "tbs2.cfr")
+  D[, (cap) := lapply(.SD, function(x) pmin(1, x)), .SDcols = cap]
 }
 
 
@@ -126,19 +130,6 @@ getAlgoParms <- function(N,hiv=NULL){
   D[,s.reassess.choice.sp := ifelse(P$s.reassess.choice.sp$r(nrow(D))>runif(nrow(D)),1,0)]
   D[,s.reassess.se := ifelse(P$s.reassess.se$r(nrow(D))>runif(nrow(D)),1,0)]
   D[,s.reassess.sp := ifelse(P$s.reassess.sp$r(nrow(D))>runif(nrow(D)),1,0)]
-  ## CFRs for assigment
-  D[,cfr.noatt:=P$notx.u5$r(nrow(D))]
-  D[,cfr.att:=P$ontx.u5$r(nrow(D))]
-  if(!is.null(hiv)){
-    ## -- hivartOR on tx
-    Z <- P$hivartOR$r(nrow(D))
-    Z <- rowSums(Z) #HIV+/ART+
-    D[,cfr.att:=ilogit(
-         logit(cfr.att) + Z * hiv
-       )]
-    ## -- HIV/ART off tx
-    D[hiv==1,cfr.noatt:=P$notxHA.u5$r(sum(hiv==1))]
-  }
   return(D)
 }
 

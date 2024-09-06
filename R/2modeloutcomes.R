@@ -6,7 +6,6 @@ library(data.table)
 library(ggplot2)
 library(readxl)
 gh <- function(x) glue(here(x))
-cnz <- c("Uganda","Zambia")
 
 ## load dependencies
 source(gh('R/utils/scores.R')) #scores are coded in here
@@ -121,6 +120,10 @@ CF[,c.s.ATT:= rrp * c.s.rrATT + (1-rrp) * c.s.rsATT] #use a mean cost (same outc
 CF[,c('who.cost','soc.cost','tbs1.cost','tbs2.cost'):=0.0] #initialize costs
 
 
+CF0 <- copy(CF) #for easier re-running/expst
+## CF <- copy(CF0)
+
+
 ## === WHO algorithm
 ## apply to data (appends ATT)
 ## WHO.algorithm(CF)
@@ -177,18 +180,38 @@ CF <- CF[,.(country,id,TB,
 summary(CF)
 
 ## CFRs
+## check: should be same
+CF[, mean(soc.cfr), by = .(TB,soc.ATT)]
+CF[, mean(who.cfr), by = .(TB, who.ATT)]
+CF[, mean(tbs1.cfr), by = .(TB, tbs1.ATT)]
+CF[, mean(tbs2.cfr), by = .(TB, tbs2.ATT)]
+
+## mean by TB including se/sp
 CF[,.(who=mean(who.cfr),soc=mean(soc.cfr),
       tbs1=mean(tbs1.cfr),tbs2=mean(tbs2.cfr)),by=TB]
 
+## differential CFR x 1000
+fac <- 1e3
+CF[, .(
+  dwho = fac * (mean(who.cfr) - mean(soc.cfr)), dsoc = fac * (mean(soc.cfr) - mean(soc.cfr)),
+  dtbs1 = fac * (mean(tbs1.cfr) - mean(soc.cfr)), dtbs2 = fac * (mean(tbs2.cfr) - mean(soc.cfr))
+)]
+
+
 
 ## se/sp of algs as a whole
-SESP <- CF[,.(who=ifelse(TB=='TB',mean(who.ATT),mean(1-who.ATT)),
-              soc=ifelse(TB=='TB',mean(soc.ATT),mean(1-soc.ATT)),
-              tbs1=ifelse(TB=='TB',mean(tbs1.ATT),mean(1-tbs1.ATT)),
-              tbs2=ifelse(TB=='TB',mean(tbs2.ATT),mean(1-tbs2.ATT))),
-           by=TB]
-SESP[,qty:=ifelse(TB=='TB','Se','Sp')]
-SESP[,TB:=NULL]
+SESP <- CF[, .(
+  who = ifelse(TB == "TB", mean(who.ATT), mean(1 - who.ATT)),
+  soc = ifelse(TB == "TB", mean(soc.ATT), mean(1 - soc.ATT)),
+  tbs1 = ifelse(TB == "TB", mean(tbs1.ATT), mean(1 - tbs1.ATT)),
+  tbs2 = ifelse(TB == "TB", mean(tbs2.ATT), mean(1 - tbs2.ATT))
+),
+by = TB
+]
+SESP[, qty := ifelse(TB == "TB", "Se", "Sp")]
+SESP[, TB := NULL]
+SESP
+
 fwrite(SESP,file = here('data/SESP.csv'))
 
 
@@ -247,7 +270,7 @@ keep <- c('country','id',grep('\\.',names(ALL),value = TRUE))
 M <- reshapeINC(ALL[,..keep])
 
 #GP <- CEAplots(M[algorithm!='tbs2'],ring=TRUE,alph=0.05)
-GP <- CEAplots(M[],ring=FALSE,alph=0.05)
+GP <- CEAplots(M[country=='Zambia'],ring=FALSE,alph=0.05)
 GP
 
 M[,.(`DALYs averted`=mean(`DALYs averted`),
