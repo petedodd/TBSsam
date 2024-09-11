@@ -81,7 +81,17 @@ combineHE <- function(WS,
     by = country
     ]
     result <- merge(all.all, all.nottb, by = c("country", "id"))
-    ALL[[n]] <- result
+    all.tb <- WH[TB == "TB", .(
+      id = n,
+      who.FN = 1-mean(who.ATT),
+      soc.FN = 1-mean(soc.ATT),
+      tbs1.FN = 1-mean(tbs1.ATT),
+      tbs2.FN = 1-mean(tbs2.ATT)
+    ),
+    by = country
+    ]
+    result2 <- merge(result, all.tb, by = c("country", "id"))
+    ALL[[n]] <- result2
   }
   ALL <- rbindlist(ALL)
   ## --- include increments:
@@ -215,6 +225,11 @@ makeTable <- function(MZ){
         `% FP, WHO`=brkt(1e2*who.FP,1e2*who.FP.lo,1e2*who.FP.hi),
         `% FP, TBS1`=brkt(1e2*tbs1.FP,1e2*tbs1.FP.lo,1e2*tbs1.FP.hi),
         `% FP, TBS2`=brkt(1e2*tbs2.FP,1e2*tbs2.FP.lo,1e2*tbs2.FP.hi),
+        ## --- FNs
+        `% FN, SOC`=brkt(1e2*soc.FN,1e2*soc.FN.lo,1e2*soc.FN.hi),
+        `% FN, WHO`=brkt(1e2*who.FN,1e2*who.FN.lo,1e2*who.FN.hi),
+        `% FN, TBS1`=brkt(1e2*tbs1.FN,1e2*tbs1.FN.lo,1e2*tbs1.FN.hi),
+        `% FN, TBS2`=brkt(1e2*tbs2.FN,1e2*tbs2.FN.lo,1e2*tbs2.FN.hi),
         ## --- D ATT
         `100x incremental ATT, WHO v SOC`=brkt(1e2*DT_WHO,1e2*DT_WHO.lo,1e2*DT_WHO.hi),
         `100x incremental ATT, TBS1 v SOC`=brkt(1e2*DT_TBS1,1e2*DT_TBS1.lo,1e2*DT_TBS1.hi),
