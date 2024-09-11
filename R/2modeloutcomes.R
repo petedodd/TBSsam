@@ -227,6 +227,12 @@ CF[,.(who=mean(who.cost),soc=mean(soc.cost),
 CF <- merge(CF,LYKc[,.(country,dLYS=LYS)],by='country',all.x=TRUE)
 CF <- merge(CF,LYK[,.(country,LYS)],by='country',all.x=TRUE) #undiscounted
 
+## ## NOTE CHECK with TB prevalence set to close to 1 if run (P object will need correcting afterwards)
+## P$s.TBprev$r <- function(n) rbeta(n,500,2) #overwrite
+## summary(P$s.TBprev$r(1e4))                 #check
+## # P <- parse.parmtable(PD0[, 1:2]) # correct afterwards
+
+
 ## TODO check logic and whether still needed
 ## NOTE this step resamples Npops times with popsize and calculates means
 ALL <- combineHE(CF,popsize = 5e2,Npops=1e3)
@@ -263,6 +269,8 @@ fwrite(tab,file = here('data/ICERtable.csv'))
 ## transposed version
 TT <- transpose(tab,make.names = TRUE)
 rownames(TT) <- names(tab)[-1]
+TT
+
 write.csv(TT,file = here('data/tICERtable.csv'))
 
 ## reshape data

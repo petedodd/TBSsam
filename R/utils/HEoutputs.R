@@ -49,7 +49,7 @@ combineHE <- function(WS,
     ## also sample across reassess
     ## ======== CEA outputs
     ## combined data
-    ALL[[n]] <- WH[,.(id=n,
+    all.all <- WH[,.(id=n,
                       who.cost=mean(who.cost),
                       who.DALYs=mean(who.cfr*dLYS),
                       who.DALYs0=mean(who.cfr*LYS),
@@ -70,7 +70,18 @@ combineHE <- function(WS,
                       tbs2.DALYs0=mean(tbs2.cfr*LYS),
                       tbs2.cfr=mean(tbs2.cfr),
                       tbs2.ATT=mean(tbs2.ATT)),
-                   by=country]
+                  by=country]
+    all.nottb <- WH[TB == "not TB", .(
+      id = n,
+      who.FP = mean(who.ATT),
+      soc.FP = mean(soc.ATT),
+      tbs1.FP = mean(tbs1.ATT),
+      tbs2.FP = mean(tbs2.ATT)
+    ),
+    by = country
+    ]
+    result <- merge(all.all, all.nottb, by = c("country", "id"))
+    ALL[[n]] <- result
   }
   ALL <- rbindlist(ALL)
   ## --- include increments:
@@ -199,6 +210,11 @@ makeTable <- function(MZ){
         `100x ATT per child, WHO`=brkt(1e2*who.ATT,1e2*who.ATT.lo,1e2*who.ATT.hi),
         `100x ATT per child, TBS1`=brkt(1e2*tbs1.ATT,1e2*tbs1.ATT.lo,1e2*tbs1.ATT.hi),
         `100x ATT per child, TBS2`=brkt(1e2*tbs2.ATT,1e2*tbs2.ATT.lo,1e2*tbs2.ATT.hi),
+        ## --- FPs
+        `% FP, SOC`=brkt(1e2*soc.FP,1e2*soc.FP.lo,1e2*soc.FP.hi),
+        `% FP, WHO`=brkt(1e2*who.FP,1e2*who.FP.lo,1e2*who.FP.hi),
+        `% FP, TBS1`=brkt(1e2*tbs1.FP,1e2*tbs1.FP.lo,1e2*tbs1.FP.hi),
+        `% FP, TBS2`=brkt(1e2*tbs2.FP,1e2*tbs2.FP.lo,1e2*tbs2.FP.hi),
         ## --- D ATT
         `100x incremental ATT, WHO v SOC`=brkt(1e2*DT_WHO,1e2*DT_WHO.lo,1e2*DT_WHO.hi),
         `100x incremental ATT, TBS1 v SOC`=brkt(1e2*DT_TBS1,1e2*DT_TBS1.lo,1e2*DT_TBS1.hi),
