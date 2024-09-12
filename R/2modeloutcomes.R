@@ -167,17 +167,17 @@ TBS2s.algorithm(CF)
 ## ======== outcomes
 AddCFRs(CF)
 
-CF
+## CFfull <- copy(CF)
 
 
-## NOTE
-## ditch most signs for simplificty
-CF <- CF[,.(country,id,TB,
-            who.ATT,who.cost,who.cfr,
-            soc.ATT,soc.cost,soc.cfr,
-            tbs1.ATT,tbs1.cost,tbs1.cfr,
-            tbs2.ATT,tbs2.cost,tbs2.cfr)] #lose lots of info for now for simplicity
-summary(CF)
+## ## NOTE
+## ## ditch most signs for simplificty
+## CF <- CF[,.(country,id,TB,
+##             who.ATT,who.cost,who.cfr,
+##             soc.ATT,soc.cost,soc.cfr,
+##             tbs1.ATT,tbs1.cost,tbs1.cfr,
+##             tbs2.ATT,tbs2.cost,tbs2.cfr)] #lose lots of info for now for simplicity
+## summary(CF)
 
 ## CFRs
 ## check: should be same
@@ -232,14 +232,50 @@ CF <- merge(CF,LYK[,.(country,LYS)],by='country',all.x=TRUE) #undiscounted
 ## summary(P$s.TBprev$r(1e4))                 #check
 ## # P <- parse.parmtable(PD0[, 1:2]) # correct afterwards
 
+## parm names
+pnmz <- c(
+  "Contact_TB", "itb_fat_2", "itb_fev_2", "itb_cou_2",
+  "itb_cou_3", "itb_app_2", "temp_38",
+  "itb_wgt_2", "itb_wgt.factor", "tachycardia",
+  "tachypnea", "ice_ind_bin.factor", "ice_cra.factor",
+  "Dep_csc", "ice_ade_bin.factor", "cxr_pre_mil.factor",
+  "cxr_pre_alv.factor", "cxr_pre_hil.factor", "cxr_pre_exc.factor",
+  "cxr_pre_ple.factor", "cxr_pre_eff.factor", "cxr_pre_ple_per_eff.factor",
+  "aus_sma.factor", "aus_hma.factor", "aus_effusion",
+  "aus_asc.factor", "reassessment", "hiv_res.factor",
+  "Xpert_res", "night.sweats", "haemoptysis", "who_scre",
+  "soc.screened", "testing.done",
+  "xray.only", "xpert.only", "s.screen.se",
+  "s.screen.sp", "clin.sense", "clin.spec",
+  "clin.senseX", "clin.specX", "clin.senseU",
+  "clin.specU", "clin.senseXU", "clin.specXU",
+  "s.reassess.choice.se", "s.reassess.choice.sp", "s.reassess.se",
+  "s.reassess.sp", "rrp", "c.s.reassess",
+  "c.s.reassessCXR30", "c.s.reassessCXRxga50", "c.s.reassessCXRxgaall",
+  "c.s.rrATT", "c.s.rsATT", "c.s.soc.CXR",
+  "c.s.soc.CXRxga", "c.s.soc.exam", "c.s.soc.reassessCXRxga",
+  "c.s.soc.scre", "c.s.soc.xga", "c.s.tbs1step.diag.clin",
+  "c.s.tbs1step.diag.test", "c.s.tbs2step.diag", "c.s.tbs2step.scre",
+  "c.s.who.diag", "c.s.who.hiv.diag", "c.s.who.scre", "c.s.ATT",
+  "reassess", "soc.ptb",  "SAMmort",
+  "SAMmortTBATT", "SAMmortTBnoATT"
+)
 
-## TODO check logic and whether still needed
+
+
 ## NOTE this step resamples Npops times with popsize and calculates means
-ALL <- combineHE(CF,popsize = 5e2,Npops=1e3)
+ALL <- combineHE(CF,popsize = 5e2,Npops=1e3,
+                 parnmz = pnmz) #optional argument: if included calx mean parms (eg for SAVI); SLOWER!
 ## NOTE incrementals now included in combineHE
 
-## quick looks
+## SAVI output: NOTE only possible if using pnmz in combineHE above, o/w skip
+tmp <- ALL[country=='Uganda']
+fwrite(tmp[, .(-who.DALYs, -tbs1.DALYs, -tbs2.DALYs)], file = "SAVI.Q.csv")
+fwrite(tmp[, .(who.cost, tbs1.cost, tbs2.cost)], file = "SAVI.C.csv")
+fwrite(tmp[, ..pnmz], file = "SAVI.P.csv")
 
+
+## quick looks
 clz <- names(ALL)
 clz <- clz[-c(1,2)]
 MZ <- ALL[,lapply(.SD,mean),by=country,.SDcols=clz]

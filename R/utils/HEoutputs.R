@@ -32,9 +32,9 @@ makeCostPSA <- function(N){
 ## partially because with stochastic output get hard to interpret quadrimodal outputs ~ ATT+/- x death+/-
 combineHE <- function(WS,
                       popsize=1e3,
-                      Npops=1
+                      Npops=1,
+                      parnmz=c() #if to compute means for parameters
                       ){
-
   ALL <- list()
   sfr <- unique(WS[,.(id,TB)])
   for(n in 1:Npops){
@@ -81,6 +81,11 @@ combineHE <- function(WS,
     by = country
     ]
     result <- merge(all.all, all.nottb, by = c("country", "id"))
+    if(length(parnmz)>0){ #include parameters as outputs
+      pobj <- WH[, lapply(.SD, mean), by = country, .SDcols = parnmz]
+      pobj[, id := n]
+      result <- merge(result, pobj, by = c("country", "id"))
+    }
     ALL[[n]] <- result
   }
   ALL <- rbindlist(ALL)
