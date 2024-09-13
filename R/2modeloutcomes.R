@@ -264,16 +264,17 @@ pnmz <- c(
 
 
 ## NOTE this step resamples Npops times with popsize and calculates means
-ALL <- combineHE(CF,popsize = 5e2,Npops=1e3,
-                 parnmz = pnmz) #optional argument: if included calx mean parms (eg for SAVI); SLOWER!
-## NOTE incrementals now included in combineHE
+ALL <- combineHE(CF,popsize = 5e2,Npops=1e3)## ,
+##                  parnmz = pnmz) #optional argument: if included calx mean parms (eg for SAVI); SLOWER!
+## ## NOTE incrementals now included in combineHE
 
-## SAVI output: NOTE only possible if using pnmz in combineHE above, o/w skip
-tmp <- ALL[country=='Uganda']
-fwrite(tmp[, .(-who.DALYs, -tbs1.DALYs, -tbs2.DALYs)], file = "SAVI.Q.csv")
-fwrite(tmp[, .(who.cost, tbs1.cost, tbs2.cost)], file = "SAVI.C.csv")
-fwrite(tmp[, ..pnmz], file = "SAVI.P.csv")
-
+## ## SAVI output: NOTE only possible if using pnmz in combineHE above, o/w skip
+## tmp <- ALL[country=='Uganda']
+## fwrite(tmp[, .(-who.DALYs, -tbs1.DALYs, -tbs2.DALYs)], file = "SAVI.Q.csv")
+## fwrite(tmp[, .(who.cost, tbs1.cost, tbs2.cost)], file = "SAVI.C.csv")
+## fwrite(tmp[, ..pnmz], file = "SAVI.P.csv")
+## NOTE TODO the above does not vary prevalence, which is a major shortcoming
+## NOTE see below for how to systematically vary prevalence
 
 ## quick looks
 clz <- names(ALL)
@@ -334,6 +335,40 @@ GP <- ggplot(CEAC[country %in% c('Uganda','Zambia')],
 GP
 
 ggsave(GP,file=here('graphs/CEAC.pdf'),h=8,w=10)
+
+
+## -------- varying prevalence
+
+## NOTE this step resamples Npops times with popsize and calculates means
+ALL2 <- combineHE(CF,popsize = 5e2,Npops=1e3,
+                  prevdist = function(n) rbeta(n,2,98) #define a random prevalence via beta distribution
+                  )
+
+## NOTE if this chunk gets used again - move into function
+## quick looks
+clz <- names(ALL2)
+clz <- clz[-c(1,2)]
+MZ2 <- ALL2[,lapply(.SD,mean),by=country,.SDcols=clz]
+MZ2h <- ALL2[,lapply(.SD,hi),by=country,.SDcols=clz]
+MZ2l <- ALL2[,lapply(.SD,lo),by=country,.SDcols=clz]
+names(MZ2h)[2:ncol(MZ2h)] <- paste0(names(MZ2h)[2:ncol(MZ2h)],'.hi')
+names(MZ2l)[2:ncol(MZ2l)] <- paste0(names(MZ2l)[2:ncol(MZ2l)],'.lo')
+MZ2 <- merge(MZ2,MZ2l,by='country')
+MZ2 <- merge(MZ2,MZ2h,by='country')
+## wrt SOC
+MZ2[,c('ICER_TBS1','ICER_TBS2','ICER_WHO'):=.(-DC_TBS1/DD_TBS1,-DC_TBS2/DD_TBS2,-DC_WHO/DD_WHO)]
+MZ2[,c('ICER0_TBS1','ICER0_TBS2','ICER0_WHO'):=.(-DC_TBS1/DD0_TBS1,-DC_TBS2/DD0_TBS2,-DC_WHO/DD0_WHO)]
+## wrt WHO
+MZ2[,c('wICER_TBS1','wICER_TBS2'):=.(-wDC_TBS1/wDD_TBS1,-wDC_TBS2/wDD_TBS2)]
+MZ2[,c('wICER0_TBS1','wICER0_TBS2'):=.(-wDC_TBS1/wDD0_TBS1,-wDC_TBS2/wDD0_TBS2)]
+## wrt TBS1
+MZ2[,c('tICER_TBS2'):=.(-tDC_TBS2/tDD_TBS2)]
+MZ2[,c('tICER0_TBS2'):=.(-tDC_TBS2/tDD0_TBS2)]
+
+
+tab <- makeTable(MZ2)
+tab[6:7,.(`ICER, WHO v SOC`,`ICER, TBS1 v SOC`, `ICER, TBS2 v SOC`)]
+##at 2% prev, ICERs WHO < TBS2 < TBS1
 
 
 ## NOTE

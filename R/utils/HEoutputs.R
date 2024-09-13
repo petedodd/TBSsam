@@ -33,14 +33,20 @@ makeCostPSA <- function(N){
 combineHE <- function(WS,
                       popsize=1e3,
                       Npops=1,
-                      parnmz=c() #if to compute means for parameters
+                      ## optional:
+                      parnmz=c(), #if to compute means for parameters
+                      prevdist=NULL #if not NULL, will use a different prevalence.
                       ){
   ALL <- list()
   sfr <- unique(WS[,.(id,TB)])
   for(n in 1:Npops){
     if(!n %% round(0.1*Npops)) cat(' [ ',n,' / ',Npops,' ] pops...\n')
     ## construct sampled population
-    prev <- P$s.TBprev$r(1)
+    if (is.null(prevdist)) {
+      prev <- P$s.TBprev$r(1)
+    } else {
+      prev <- prevdist(1)
+    }
     nprev <- rbinom(1,popsize,prev)
     idz1 <- sample(sfr[TB=='TB',id],nprev)
     idz0 <- sample(sfr[TB!='TB',id],popsize-nprev)
