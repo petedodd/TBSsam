@@ -75,7 +75,8 @@ combineHE <- function(WS,
                       tbs2.DALYs=mean(tbs2.cfr*dLYS),
                       tbs2.DALYs0=mean(tbs2.cfr*LYS),
                       tbs2.cfr=mean(tbs2.cfr),
-                      tbs2.ATT=mean(tbs2.ATT)),
+                     tbs2.ATT=mean(tbs2.ATT),
+                     tbprev=mean(TB == "TB")),
                   by=country]
     all.nottb <- WH[TB == "not TB", .(
       id = n,

@@ -264,15 +264,16 @@ pnmz <- c(
 
 
 ## NOTE this step resamples Npops times with popsize and calculates means
-ALL <- combineHE(CF,popsize = 5e2,Npops=1e3)## ,
-##                  parnmz = pnmz) #optional argument: if included calx mean parms (eg for SAVI); SLOWER!
+ALL <- combineHE(CF,popsize = 5e2,Npops=1e3,
+                 parnmz = pnmz) #optional argument: if included calx mean parms (eg for SAVI); SLOWER!
 ## ## NOTE incrementals now included in combineHE
 
 ## ## SAVI output: NOTE only possible if using pnmz in combineHE above, o/w skip
-## tmp <- ALL[country=='Uganda']
-## fwrite(tmp[, .(-who.DALYs, -tbs1.DALYs, -tbs2.DALYs)], file = "SAVI.Q.csv")
-## fwrite(tmp[, .(who.cost, tbs1.cost, tbs2.cost)], file = "SAVI.C.csv")
-## fwrite(tmp[, ..pnmz], file = "SAVI.P.csv")
+tmp <- ALL[country=='Uganda']
+fwrite(tmp[, .(-who.DALYs, -tbs1.DALYs, -tbs2.DALYs)], file = "~/Downloads/SAVI.Q.csv")
+fwrite(tmp[, .(who.cost, tbs1.cost, tbs2.cost)], file = "~/Downloads/SAVI.C.csv")
+pnmze <- c(pnmz,'tbprev')
+fwrite(tmp[, ..pnmze], file = "~/Downloads/SAVI.P.csv")
 ## NOTE TODO the above does not vary prevalence, which is a major shortcoming
 ## NOTE see below for how to systematically vary prevalence
 
