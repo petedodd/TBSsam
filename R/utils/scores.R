@@ -125,11 +125,11 @@ WHO.algorithm <- function(D){
   #D[who_scre>=1 & (is.na(Xpert_res) | Xpert_res==0) & Contact_TB==0 & CXR.avail==0,
   #  who.ATT:=ifelse(score_noX>10,1,0)]
   ## reassessment (see getAlgoParms for logic)
-  D[,reassess:=ifelse(who.ATT==1, #treated initially
+  D[,who.reassess:=ifelse(who.ATT==1 | who_scre==0, #treated initially or screened negative
                       0,          #no reassessment as on treatment
                ifelse(TB=='TB',s.reassess.choice.se,1-s.reassess.choice.sp))]
-  D[reassess==1,who.cost:=who.cost + c.s.reassessCXR30]              #NOTE reassessment costs
-  D[reassess==1,who.ATT:=ifelse(TB=='TB',s.reassess.se,1-s.reassess.sp)]      #treatment from reassessment
+  D[who.reassess!=0,who.cost:=who.cost + c.s.reassessCXR30]              #NOTE reassessment costs
+  D[who.reassess!=0,who.ATT:=ifelse(TB=='TB',s.reassess.se,1-s.reassess.sp)]      #treatment from reassessment
   ## costs
   D[,who.cost:=who.cost+c.s.who.scre]                                         #everyone gets
   D[who_scre>=1 & hiv_res.factor==0,who.cost:=who.cost+c.s.who.diag]                              #if presents one of the chronic symptoms
@@ -153,11 +153,11 @@ TBS1s.algorithm <- function(D){
     default=0
   )]
   ## reassessment
-  D[,reassess:=ifelse(tbs1.ATT==1, #treated initially
+  D[,tbs1s.reassess:=ifelse(tbs1.ATT==1, #treated initially
                       0,          #no reassessment as on treatment
                ifelse(TB=='TB',s.reassess.choice.se,1-s.reassess.choice.sp))]
-  D[reassess==1,tbs1.cost:=tbs1.cost + c.s.reassessCXR30]              #NOTE reassessment costs
-  D[reassess==1,tbs1.ATT:=ifelse(TB=='TB',s.reassess.se,1-s.reassess.sp)]      #treatment from reassessment
+  D[tbs1s.reassess!=0,tbs1.cost:=tbs1.cost + c.s.reassessCXR30]              #NOTE reassessment costs
+  D[tbs1s.reassess!=0,tbs1.ATT:=ifelse(TB=='TB',s.reassess.se,1-s.reassess.sp)]      #treatment from reassessment
   ## costs
   D[TBS1Sa>=10,tbs1.cost:=tbs1.cost+c.s.tbs1step.diag.clin]                  #clinical score only (and CXR, Xpert for non-diag purpose)
   D[TBS1Sa<10,tbs1.cost:=tbs1.cost+c.s.tbs1step.diag.test]      #clinical, CXR, Xpert, AUS scoring
@@ -174,11 +174,11 @@ TBS2s.algorithm <- function(D){
        default=0
      )]
   ## reassessment
-  D[,reassess:=ifelse(tbs2.ATT==1, #treated initially
+  D[,tbs2s.reassess:=ifelse(tbs2.ATT==1 | TBS2Sa==0, #treated initially or screened negative
                       0,          #no reassessment as on treatment
                ifelse(TB=='TB',s.reassess.choice.se,1-s.reassess.choice.sp))]
-  D[reassess==1,tbs2.cost:=tbs2.cost + c.s.reassessCXR30]              #NOTE reassessment costs
-  D[reassess==1,tbs2.ATT:=ifelse(TB=='TB',s.reassess.se,1-s.reassess.sp)]      #treatment from reassessment
+  D[tbs2s.reassess!=0,tbs2.cost:=tbs2.cost + c.s.reassessCXR30]              #NOTE reassessment costs
+  D[tbs2s.reassess!=0,tbs2.ATT:=ifelse(TB=='TB',s.reassess.se,1-s.reassess.sp)]      #treatment from reassessment
   ## costs
   D[,tbs2.cost:=tbs2.cost+c.s.tbs2step.scre]                             #everyone gets
   D[TBS2Sa>=1,tbs2.cost:=tbs2.cost + c.s.tbs2step.diag]                  #only those @ s2 
@@ -219,11 +219,11 @@ SOC.algorithm <- function(D){
   D[soc.screened==1 & testing.done==1 & xray.only==0 & xpert.only==0,
     soc.cost:=soc.cost + c.s.soc.exam + c.s.soc.CXRxga] #clin+CXR+Xpert
   ## reassessment
-  D[,reassess:=ifelse(soc.ATT==1, #treated initially
+  D[,soc.reassess:=ifelse(soc.ATT==1 | soc.ptb==0, #treated initially or screened negative (note that if not screened, soc.ptb==0)
                       0,          #no reassessment as on treatment
                ifelse(TB=='TB',s.reassess.choice.se,1-s.reassess.choice.sp))]
-  D[reassess==1,soc.cost:=soc.cost + c.s.reassessCXR30]              #NOTE reassessment costs
-  D[reassess==1,soc.ATT:=ifelse(TB=='TB',s.reassess.se,1-s.reassess.sp)]      #treatment from reassessment
+  D[soc.reassess!=0,soc.cost:=soc.cost + c.s.reassessCXR30]              #NOTE reassessment costs
+  D[soc.reassess!=0,soc.ATT:=ifelse(TB=='TB',s.reassess.se,1-s.reassess.sp)]      #treatment from reassessment
 
   ## treatment costs
   D[soc.ATT==1,soc.cost:=soc.cost + c.s.ATT] #ATT costs
