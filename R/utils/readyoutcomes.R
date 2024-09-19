@@ -117,12 +117,12 @@ getAlgoParms <- function(N,hiv=NULL){
   D[,clin.specX:=ifelse(P$spec.clinCXR.soc$r(nrow(D))>runif(nrow(D)),1,0)]
   ## combining clinical and GA
   tmp.sens <- 1 - (1-P$sens.clin$r(nrow(D))) * (1-P$sens.xga$r(nrow(D)))
-  tmp.spec <- 1 - (P$spec.clin$r(nrow(D))) * (1-P$spec.xga$r(nrow(D)))
+  tmp.spec <- P$spec.clin$r(nrow(D)) * P$spec.xga$r(nrow(D))
   D[,clin.senseU:=ifelse(tmp.sens>runif(nrow(D)),1,0)]
   D[,clin.specU:=ifelse(tmp.spec>runif(nrow(D)),1,0)]
   ## combining clinical, CXR and GA
   tmp.sensXU <- 1 - (1-P$sens.clinCXR.soc$r(nrow(D))) * (1-P$sens.xga$r(nrow(D)))
-  tmp.specXU <- 1 - (P$spec.clinCXR.soc$r(nrow(D))) * (1-P$spec.xga$r(nrow(D)))
+  tmp.specXU <- P$spec.clinCXR.soc$r(nrow(D)) * P$spec.xga$r(nrow(D))
   D[,clin.senseXU:=ifelse(tmp.sensXU>runif(nrow(D)),1,0)]
   D[,clin.specXU:=ifelse(tmp.specXU>runif(nrow(D)),1,0)]
   ## reassessment etc
