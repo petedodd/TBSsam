@@ -313,6 +313,7 @@ write.csv(TT,file = here('data/tICERtable.csv'))
 
 ## reshape data
 keep <- c('country','id',grep('\\.',names(ALL),value = TRUE))
+keep <- keep[1:30] #don't include extras that confuse reshapeINC
 M <- reshapeINC(ALL[,..keep])
 
 #GP <- CEAplots(M[algorithm!='tbs2'],ring=TRUE,alph=0.05)
