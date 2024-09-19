@@ -7,9 +7,9 @@ COSTS,NAME,DESCRIPTION,,Low,High,,Low,High,,Low,High,,Low,High,,Low,High,,Low,Hi
 ,c.s.soc.xga,SOC: Xpert Ultra on GA [for all] + Urine LF-LAM,,,,,,,,,,,,,,,,,45.66,57.1,,53.3,65.32
 ,c.s.soc.reassessCXRxga,SOC: reassessment exam + CXR [for all] + Xpert Ultra on GA [for all] + Urine LF-LAM,,,,,,,,,,,,,,,,,55.57,68.7,,64.94,78.28
 ,c.s.tbs1step.diag.clin,INT: TB-Speed one-step algo: clinical exam + CXR + Xpert on GA and stool,,,,,,,,,,,,,,,,,69.1,79.24,,79.16,89.91
-,c.s.tbs1step.diag.test,INT: TB-Speed one-step algo: clinical exam + CXR + Xpert on GA and stool + abdo US,,,,,,,,,,,,,,,,,72.9,85.15,,84.97,97.28
+,c.s.tbs1step.diag.test,INT: TB-Speed one-step algo: clinical exam + CXR + Xpert on GA and stool + abdo US,,,,,,,,,,,,,,,,,72.74,84.98,,84.80,97.10
 ,c.s.tbs2step.scre,INT: TB-Speed two-steps algo: screening: clinical exam + HIV test ,,,,,,,,,,,,,,,,,6.65,7.77,,7.64,8.67
-,c.s.tbs2step.diag,INT: TB-Speed two-steps algo: diagnostic: CXR + Xpert on GA and stool + abdo US,,,,,,,,,,,,,,,,,70.12,81.54,,81.09,92.7
+,c.s.tbs2step.diag,INT: TB-Speed two-steps algo: diagnostic: CXR + Xpert on GA and stool + abdo US,,,,,,,,,,,,,,,,,69.96,81.37,,80.93,92.53
 ,c.s.who.scre,INT: WHO algo: TB screening,,,,,,,,,,,,,,,,,0.28,0.33,,0.21,0.28
 ,c.s.who.hiv.diag,INT: WHO algo: clinical exam + TB contact + CXR + Xpert on GA and stool + HIV test + Urine LF-LAM,,,,,,,,,,,,,,,,,82.12,98.29,,92.07,108.89
 ,c.s.who.diag,INT: WHO algo: clinical exam + TB contact + CXR + Xpert on GA and stool + HIV test,,,,,,,,,,,,,,,,,72.97,83.4,,82.92,94
