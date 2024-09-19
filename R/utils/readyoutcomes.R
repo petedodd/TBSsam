@@ -109,8 +109,8 @@ getAlgoParms <- function(N,hiv=NULL){
   D[,xray.only:=ifelse(P$s.soc.CXRonly$r(nrow(D))>runif(nrow(D)),1,0)]
   D[,xpert.only:=ifelse(P$s.soc.Xpertonly$r(nrow(D))>runif(nrow(D)),1,0)]
   ## accuracy
-  D[,s.screen.se := ifelse(P$s.reassess.choice.se$r(nrow(D))>runif(nrow(D)),1,0)]
-  D[,s.screen.sp := ifelse(P$s.reassess.choice.sp$r(nrow(D))>runif(nrow(D)),1,0)]
+  D[,s.screen.se := ifelse(P$s.soc.screen.se$r(nrow(D))>runif(nrow(D)),1,0)]
+  D[,s.screen.sp := ifelse(P$s.soc.screen.sp$r(nrow(D))>runif(nrow(D)),1,0)]
   D[,clin.sense:=ifelse(P$sens.clin$r(nrow(D))>runif(nrow(D)),1,0)]
   D[,clin.spec:=ifelse(P$spec.clin$r(nrow(D))>runif(nrow(D)),1,0)]
   D[,clin.senseX:=ifelse(P$sens.clinCXR.soc$r(nrow(D))>runif(nrow(D)),1,0)]
