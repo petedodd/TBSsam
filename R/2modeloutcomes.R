@@ -257,7 +257,7 @@ pnmz <- c(
   "c.s.soc.scre", "c.s.soc.xga", "c.s.tbs1step.diag.clin",
   "c.s.tbs1step.diag.test", "c.s.tbs2step.diag", "c.s.tbs2step.scre",
   "c.s.who.diag", "c.s.who.hiv.diag", "c.s.who.scre", "c.s.ATT",
-  "reassess", "soc.ptb",  "SAMmort",
+   "soc.ptb",  "SAMmort",
   "SAMmortTBATT", "SAMmortTBnoATT"
 )
 
