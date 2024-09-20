@@ -195,7 +195,7 @@ SOC.algorithm <- function(D){
   ## NOTE this looks like a probability, but sense/spec from getAlgoParms are sampled 1/0
   D[,soc.ptb:=fcase(
        soc.screened==0,0,            #if not screened
-       soc.screened==1,ifelse(TB=='TB',s.screen.se,1-s.screen.se), #screening accuracy
+       soc.screened==1,ifelse(TB=='TB',s.screen.se,1-s.screen.sp), #screening accuracy
        default=0
      )]
   ## applies to those presumed
@@ -219,7 +219,7 @@ SOC.algorithm <- function(D){
   D[soc.screened==1 & testing.done==1 & xray.only==0 & xpert.only==0,
     soc.cost:=soc.cost + c.s.soc.exam + c.s.soc.CXRxga] #clin+CXR+Xpert
   ## reassessment
-  D[,soc.reassess:=ifelse(soc.ATT==1 | soc.ptb==0, #treated initially or screened negative (note that if not screened, soc.ptb==0)
+  D[,soc.reassess:=ifelse(soc.ATT==1 | soc.screened==0 | soc.ptb==0, #treated initially or screened negative (note that if not screened, soc.ptb==0)
                       0,          #no reassessment as on treatment
                ifelse(TB=='TB',s.reassess.choice.se,1-s.reassess.choice.sp))]
   D[soc.reassess!=0,soc.cost:=soc.cost + c.s.reassessCXR30]              #NOTE reassessment costs
