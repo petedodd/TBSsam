@@ -251,7 +251,7 @@ pnmz <- c(
   "clin.specU", "clin.senseXU", "clin.specXU",
   "s.reassess.choice.se", "s.reassess.choice.sp", "s.reassess.se",
   "s.reassess.sp", "rrp", "c.s.reassess",
-  "c.s.reassessCXR30", "c.s.reassessCXRxga50", "c.s.reassessCXRxgaall",
+  "c.s.reassessCXR30", "c.s.reassessCXRxga50", "c.s.reassessCXRxgastall",
   "c.s.rrATT", "c.s.rsATT", "c.s.soc.CXR",
   "c.s.soc.CXRxga", "c.s.soc.exam", "c.s.soc.reassessCXRxga",
   "c.s.soc.scre", "c.s.soc.xga", "c.s.tbs1step.diag.clin",
