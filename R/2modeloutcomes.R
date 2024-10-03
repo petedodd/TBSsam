@@ -264,7 +264,7 @@ pnmz <- c(
 
 
 ## NOTE this step resamples Npops times with popsize and calculates means
-ALL <- combineHE(CF,popsize = 5e2,Npops=1e3,
+ALL <- combineHE(CF,popsize = 5e0,Npops=1e3,
                  parnmz = pnmz) #optional argument: if included calx mean parms (eg for SAVI); SLOWER!
 ## ## NOTE incrementals now included in combineHE
 
@@ -317,7 +317,7 @@ keep <- keep[1:30] #don't include extras that confuse reshapeINC
 M <- reshapeINC(ALL[,..keep])
 
 #GP <- CEAplots(M[algorithm!='tbs2'],ring=TRUE,alph=0.05)
-GP <- CEAplots(M[country=='Zambia'],ring=FALSE,alph=0.05)
+GP <- CEAplots(M[country=='Zambia'],ring=FALSE,alph=0.2)
 GP
 
 M[,.(`DALYs averted`=mean(`DALYs averted`),
@@ -343,7 +343,7 @@ ggsave(GP,file=here('graphs/CEAC.pdf'),h=8,w=10)
 
 ## NOTE this step resamples Npops times with popsize and calculates means
 ALL2 <- combineHE(CF,popsize = 5e2,Npops=1e3,
-                  prevdist = function(n) rbeta(n,2,98) #define a random prevalence via beta distribution
+                  prevdist = function(n) rbeta(n,2,200) #define a random prevalence via beta distribution
                   )
 
 ## NOTE if this chunk gets used again - move into function
