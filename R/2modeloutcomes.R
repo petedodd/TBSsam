@@ -251,7 +251,7 @@ pnmz <- c(
   "clin.specU", "clin.senseXU", "clin.specXU",
   "s.reassess.choice.se", "s.reassess.choice.sp", "s.reassess.se",
   "s.reassess.sp", "rrp", "c.s.reassess",
-  "c.s.reassessCXR30", "c.s.reassessCXRxga50", "c.s.reassessCXRxgastall",
+  "c.s.reassessCXR30", "c.s.reassessCXRxga50",
   "c.s.rrATT", "c.s.rsATT", "c.s.soc.CXR",
   "c.s.soc.CXRxga", "c.s.soc.exam", "c.s.soc.reassessCXRxga",
   "c.s.soc.scre", "c.s.soc.xga", "c.s.tbs1step.diag.clin",
@@ -317,26 +317,29 @@ keep <- keep[1:30] #don't include extras that confuse reshapeINC
 M <- reshapeINC(ALL[,..keep])
 
 #GP <- CEAplots(M[algorithm!='tbs2'],ring=TRUE,alph=0.05)
-GP <- CEAplots(M[country=='Zambia'],ring=FALSE,alph=0.2)
+GP <- CEAplots(M[country == "Zambia"], ring = TRUE, alph = 0.5)
 GP
 
 M[,.(`DALYs averted`=mean(`DALYs averted`),
      `Incremental cost`=mean(`Incremental cost`)),
   by=.(country,algorithm)]
 
-ggsave(GP,file=here('graphs/CEhull.pdf'),h=8,w=10)
+ggsave(GP, file = here("graphs/CEhull.pdf"), h = 8, w = 10)
 
 
-CEAC <- make.ceacs(M,seq(from=0,to=500,by=0.5))
+CEAC <- make.ceacs(M[country == "Zambia"], seq(from = 0, to = 500, by = 0.5))
 
-GP <- ggplot(CEAC[country %in% c('Uganda','Zambia')],
-             aes(lambda,`Probability CE`,col=country,lty=algorithm))+
-  geom_line(lwd=1)+scale_y_continuous(label=percent)+
-  xlab('Cost effectiveness threshold (US$ per DALY averted)')+
-  ylab('Probability cost-effective')
+GP <- ggplot(
+  CEAC[country == "Zambia"],
+  aes(lambda, `Probability CE`, col = country, lty = algorithm)
+) +
+  geom_line(lwd = 1) +
+  scale_y_continuous(label = percent) +
+  xlab("Cost effectiveness threshold (US$ per DALY averted)") +
+  ylab("Probability cost-effective")
 GP
 
-ggsave(GP,file=here('graphs/CEAC.pdf'),h=8,w=10)
+ggsave(GP, file = here("graphs/CEAC.pdf"), h = 8, w = 10)
 
 
 ## -------- varying prevalence
