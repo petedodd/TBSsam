@@ -317,7 +317,7 @@ keep <- keep[1:30] #don't include extras that confuse reshapeINC
 M <- reshapeINC(ALL[,..keep])
 
 #GP <- CEAplots(M[algorithm!='tbs2'],ring=TRUE,alph=0.05)
-GP <- CEAplots(M[country == "Zambia"], ring = TRUE, alph = 0.5)
+GP <- CEAplots(M[country %in% c("Zambia","Uganda")], ring = TRUE, alph = 0.5)
 GP
 
 M[,.(`DALYs averted`=mean(`DALYs averted`),
@@ -327,10 +327,10 @@ M[,.(`DALYs averted`=mean(`DALYs averted`),
 ggsave(GP, file = here("graphs/CEhull.pdf"), h = 8, w = 10)
 
 
-CEAC <- make.ceacs(M[country == "Zambia"], seq(from = 0, to = 500, by = 0.5))
+CEAC <- make.ceacs(M[country %in% c("Zambia", "Uganda")], seq(from = 0, to = 500, by = 0.5))
 
 GP <- ggplot(
-  CEAC[country == "Zambia"],
+  CEAC,
   aes(lambda, `Probability CE`, col = country, lty = algorithm)
 ) +
   geom_line(lwd = 1) +
