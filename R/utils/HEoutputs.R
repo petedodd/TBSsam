@@ -154,7 +154,7 @@ make.ceac <- function(CEA,lamz){
 ## across all countries
 make.ceacs <- function(M,lmz){
   CEAC <- list()
-  for( cn in cnz){
+  for( cn in M[,unique(country)]){
     cat('...',cn,'...\n')
     for(alg in M[,unique(algorithm)]){
       pz <- make.ceac(M[country==cn & algorithm==alg,
@@ -198,7 +198,9 @@ getHull <- function(dQ,dC){
 
 CEAplots <- function(M,ring=TRUE,alph=0.1){
   MS <- M[,.(`DALYs averted`=mean(`DALYs averted`),
-             `Incremental cost`=mean(`Incremental cost`)),
+             `Incremental cost`=mean(`Incremental cost`),
+             DALYsd=sd(`DALYs averted`),
+             COSTsd=sd(`Incremental cost`)),
           by=.(country,algorithm)]
   ## mean CEAs
   HZ <- list()
@@ -212,15 +214,19 @@ CEAplots <- function(M,ring=TRUE,alph=0.1){
   names(HZ)[1:2] <- c('DALYs averted','Incremental cost')
   HZ[,algorithm:=NA]
   ## plot
-  GP <- ggplot(MS,aes(`DALYs averted`,`Incremental cost`,fill=algorithm,col=algorithm))+
-    geom_point(data=M,alpha=alph,shape=1)+
+  GP <- ggplot(MS,aes(`DALYs averted`,`Incremental cost`,col=algorithm))+
+    ## geom_point(data=M,alpha=alph,shape=1,show.legend = FALSE)+
+    geom_errorbar(aes(ymin=`Incremental cost`-COSTsd,ymax=`Incremental cost`+COSTsd))+
+    geom_errorbarh(aes(xmin=`DALYs averted`-DALYsd,xmax=`DALYs averted`+DALYsd))+
     geom_point(size=3,shape=3,stroke=2)+
     facet_wrap(~country)+
     geom_hline(yintercept = 0)+geom_vline(xintercept = 0)+
     ylab('Incremental cost (USD)')
   ## return
   if(ring)
-    GP <- GP+geom_line(data=HZ,col=2,lty=2) + geom_point(data=HZ,shape=1,size=3,col=2)
+    GP <- GP +
+      geom_line(data=HZ,col=1,lty=2,show.legend=FALSE) +
+      geom_point(data=HZ,shape=1,size=3,col=1,show.legend=FALSE)
   GP
 }
 

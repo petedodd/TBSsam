@@ -65,6 +65,9 @@ PD0 <- read.csv(here('data/SAMparameters.csv')) #read in
 
 ## combine different parameter types
 P <- parse.parmtable(PD0[,1:2])             #convert into parameter object
+## P <- parse.parmtable(PD0[, 1:2],testdir = here("data/test")) # convert into parameter object
+
+
 
 ## for now neglect HIV
 AddCFRs <- function(D){
@@ -104,32 +107,45 @@ AddCFRs <- function(D){
 getAlgoParms <- function(N,hiv=NULL){
   D <- data.table(id=1:N)
   ## coverage of elements
-  D[,soc.screened:=ifelse(P$s.soc.scrcov$r(nrow(D))>runif(nrow(D)),1,0)]
-  D[,testing.done:=ifelse(P$s.soc.testingcov$r(nrow(D))>runif(nrow(D)),1,0)]
-  D[,xray.only:=ifelse(P$s.soc.CXRonly$r(nrow(D))>runif(nrow(D)),1,0)]
-  D[,xpert.only:=ifelse(P$s.soc.Xpertonly$r(nrow(D))>runif(nrow(D)),1,0)]
+  D[, soc.screened := ifelse(P$s.soc.scrcov$r(nrow(D)) > runif(nrow(D)), 1, 0)]
+  D[, testing.done := ifelse(P$s.soc.testingcov$r(nrow(D)) > runif(nrow(D)), 1, 0)]
+  D[, xray.only := ifelse(P$s.soc.CXRonly$r(nrow(D)) > runif(nrow(D)), 1, 0)]
+  D[, xpert.only := ifelse(P$s.soc.Xpertonly$r(nrow(D)) > runif(nrow(D)), 1, 0)]
   ## accuracy
-  D[,s.screen.se := ifelse(P$s.soc.screen.se$r(nrow(D))>runif(nrow(D)),1,0)]
-  D[,s.screen.sp := ifelse(P$s.soc.screen.sp$r(nrow(D))>runif(nrow(D)),1,0)]
-  D[,clin.sense:=ifelse(P$sens.clin$r(nrow(D))>runif(nrow(D)),1,0)]
-  D[,clin.spec:=ifelse(P$spec.clin$r(nrow(D))>runif(nrow(D)),1,0)]
-  D[,clin.senseX:=ifelse(P$sens.clinCXR.soc$r(nrow(D))>runif(nrow(D)),1,0)]
-  D[,clin.specX:=ifelse(P$spec.clinCXR.soc$r(nrow(D))>runif(nrow(D)),1,0)]
-  ## combining clinical and GA
-  tmp.sens <- 1 - (1-P$sens.clin$r(nrow(D))) * (1-P$sens.xga$r(nrow(D)))
-  tmp.spec <- P$spec.clin$r(nrow(D)) * P$spec.xga$r(nrow(D))
-  D[,clin.senseU:=ifelse(tmp.sens>runif(nrow(D)),1,0)]
-  D[,clin.specU:=ifelse(tmp.spec>runif(nrow(D)),1,0)]
-  ## combining clinical, CXR and GA
-  tmp.sensXU <- 1 - (1-P$sens.clinCXR.soc$r(nrow(D))) * (1-P$sens.xga$r(nrow(D)))
-  tmp.specXU <- P$spec.clinCXR.soc$r(nrow(D)) * P$spec.xga$r(nrow(D))
-  D[,clin.senseXU:=ifelse(tmp.sensXU>runif(nrow(D)),1,0)]
-  D[,clin.specXU:=ifelse(tmp.specXU>runif(nrow(D)),1,0)]
+  D[, s.screen.se := ifelse(P$s.soc.screen.se$r(nrow(D)) > runif(nrow(D)), 1, 0)]
+  D[, s.screen.sp := ifelse(P$s.soc.screen.sp$r(nrow(D)) > runif(nrow(D)), 1, 0)]
+  ## SE/SP of assessment from SAM cohort
+  D[, clin.sense := ifelse(P$s.soc.clin.se$r(nrow(D)) > runif(nrow(D)), 1, 0)]
+  D[, clin.spec := ifelse(P$s.soc.clin.sp$r(nrow(D)) > runif(nrow(D)), 1, 0)]
+  D[, clin.senseX := ifelse(P$s.soc.clinCXR.se$r(nrow(D)) > runif(nrow(D)), 1, 0)]
+  D[, clin.specX := ifelse(P$s.soc.clinCXR.sp$r(nrow(D)) > runif(nrow(D)), 1, 0)]
+  D[, clin.senseU := ifelse(P$s.soc.clinGA.se$r(nrow(D)) > runif(nrow(D)), 1, 0)]
+  D[, clin.specU := ifelse(P$s.soc.clinGA.sp$r(nrow(D)) > runif(nrow(D)), 1, 0)]
+  D[, clin.senseXU := ifelse(P$s.soc.clinCXRGA.se$r(nrow(D)) > runif(nrow(D)), 1, 0)]
+  D[, clin.specXU := ifelse(P$s.soc.clinCXRGA.sp$r(nrow(D)) > runif(nrow(D)), 1, 0)]
   ## reassessment etc
-  D[,s.reassess.choice.se := ifelse(P$s.reassess.choice.se$r(nrow(D))>runif(nrow(D)),1,0)]
-  D[,s.reassess.choice.sp := ifelse(P$s.reassess.choice.sp$r(nrow(D))>runif(nrow(D)),1,0)]
-  D[,s.reassess.se := ifelse(P$s.reassess.se$r(nrow(D))>runif(nrow(D)),1,0)]
-  D[,s.reassess.sp := ifelse(P$s.reassess.sp$r(nrow(D))>runif(nrow(D)),1,0)]
+  D[, s.reassess.choice.se := ifelse(P$s.reassess.choice.se$r(nrow(D)) > runif(nrow(D)), 1, 0)]
+  D[, s.reassess.choice.sp := ifelse(P$s.reassess.choice.sp$r(nrow(D)) > runif(nrow(D)), 1, 0)]
+  D[, s.reassess.se := fcase(
+        testing.done==0, #clinical
+        ifelse(1-P$s.soc.reassessafterclin.sebar$r(nrow(D)) > runif(nrow(D)),1,0), #NOTE sebar
+        testing.done==1 & xray.only==1 & xpert.only==0, #clin+CXR
+        ifelse(1-P$s.soc.reassessafterclinCXR.sebar$r(nrow(D)) > runif(nrow(D)),1,0), #NOTE sebar
+        testing.done==1 & xray.only==0 & xpert.only==1, #clin+Xpert
+        ifelse(1-P$s.soc.reassessafterclinGA.sebar$r(nrow(D)) > runif(nrow(D)),1,0), #NOTE sebar
+        testing.done==1 & xray.only==0 & xpert.only==0, #clin+CXR+Xpert
+        clin.senseXU,                                   #same ans as 1st go
+        default=0)]
+  D[, s.reassess.sp := fcase(
+        testing.done==0, #clinical
+        ifelse(P$s.soc.reassessafterclin.sp$r(nrow(D)) > runif(nrow(D)),1,0),
+        testing.done==1 & xray.only==1 & xpert.only==0, #clin+CXR
+        ifelse(P$s.soc.reassessafterclinCXR.sp$r(nrow(D)) > runif(nrow(D)),1,0),
+        testing.done==1 & xray.only==0 & xpert.only==1, #clin+Xpert
+        ifelse(P$s.soc.reassessafterclinGA.sp$r(nrow(D)) > runif(nrow(D)),1,0),
+        testing.done==1 & xray.only==0 & xpert.only==0, #clin+CXR+Xpert
+        clin.specXU,                                    #same ans as 1st go
+        default=0)]
   return(D)
 }
 
