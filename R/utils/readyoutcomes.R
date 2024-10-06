@@ -65,6 +65,9 @@ PD0 <- read.csv(here('data/SAMparameters.csv')) #read in
 
 ## combine different parameter types
 P <- parse.parmtable(PD0[,1:2])             #convert into parameter object
+## P <- parse.parmtable(PD0[, 1:2],testdir = here("data/test")) # convert into parameter object
+
+
 
 ## for now neglect HIV
 AddCFRs <- function(D){
