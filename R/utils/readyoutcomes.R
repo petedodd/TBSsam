@@ -67,6 +67,20 @@ PD0 <- read.csv(here('data/SAMparameters.csv')) #read in
 P <- parse.parmtable(PD0[,1:2])             #convert into parameter object
 ## P <- parse.parmtable(PD0[, 1:2],testdir = here("data/test")) # convert into parameter object
 
+## NOTE rewrite any parameters specificied for SA
+if (SA != "" & SA %in% names(P)) {
+  cat("SA: Overwriting ", SA, " with ", LM, "!\n")
+  if (LM == "LQ") {
+    val <- P[[SA]]$q(0.25) # what is the LQ value?
+    P[[SA]]$r <- function(n) rep(val, n) # overwrite RNG
+  } else if (LM == "UQ") {
+    val <- P[[SA]]$q(0.75) # what is the UQ value?
+    P[[SA]]$r <- function(n) rep(val, n) # overwrite RNG
+  } else {
+    stop(paste0("LM supplied as ", LM, " but must be UQ or LQ!"))
+  }
+}
+
 
 
 ## for now neglect HIV

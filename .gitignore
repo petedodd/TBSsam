@@ -41,3 +41,6 @@ vignettes/*.pdf
 
 # mac users
 .DS_Store
+
+# any plot output from script-run analyses
+Rplots.pdf

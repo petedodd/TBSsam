@@ -1,5 +1,34 @@
 ## modelling the scores on the synthetic populations
 rm(list=ls())
+
+args <- commandArgs(trailingOnly = TRUE)
+## flags for sensitivity analyses
+shell <- TRUE # whether running from shell script or not
+if (shell) {
+  ## running from shell
+  args <- commandArgs(trailingOnly = TRUE)
+  print(args)
+  SA <- args[1] # none,parameter name
+  LM <- args[2] # LQ or UQ
+  if (SA != "none" & !LM %in% c("UQ", "LQ")) {
+    stop(paste0("LM supplied as ", LM, " but must be UQ or LQ!"))
+  }
+  cat("*** Running SA analysis for ",SA,"!***\n")
+  cat("*** (using ", LM, ") ***\n")
+} else { # set by hand
+  rm(list = ls()) # clear all
+  shell <- FALSE # whether running from shell script or not
+  SA <- "none"
+}
+if (SA == "none") {
+  SA <- ""
+  LM <- ""
+}
+## nargs <- length(args)
+## variant <- as.character(args[1])
+
+
+## libraries
 library(here)
 library(glue)
 library(data.table)
@@ -10,7 +39,7 @@ gh <- function(x) glue(here(x))
 ## load dependencies
 source(gh('R/utils/scores.R')) #scores are coded in here
 source(gh('R/utils/costutils.R')) #cost data parser
-source(here('R/utils/readyoutcomes.R')) #parameters & life-years
+source(here('R/utils/readyoutcomes.R')) #parameters & life-years NOTE flag used to change parms
 source(here('R/utils/HEoutputs.R')) #various outputters
 
 ## load synthetic populations
@@ -114,6 +143,23 @@ CF[,.(mean(Xpert_res)),by=TB]
 ## make cost data
 CDW <- makeCostPSA(Nreps)
 
+## SA if cost parameter selected
+if (substr(SA, 1, 2) == "c.") { #detect a cost parm for SA
+  if (SA %in% names(CDW)){
+     cat("SA: Overwriting cost ", SA, " with ", LM, "!\n")
+  } else{
+    stop(paste0("Cost parm ", SA, " supplied for SA but not found in CDW costs!\n"))
+  }
+  SA <- "c.s.who.diag"
+  if (LM == "LQ") {
+    CDW[, c(SA) := lapply(.SD, function(x) quantile(x,0.25)), by = country, .SDcols = SA]
+  } else if (LM == "UQ") {
+    CDW[, c(SA) := lapply(.SD, function(x) quantile(x, 0.75)), by = country, .SDcols = SA]
+  } else {
+    stop(paste0("LM supplied as ", LM, " but must be UQ or LQ!"))
+  }
+}
+
 ## merge in costs (read in and created in HEoutputs.R)
 CF <- merge(CF,CDW,by=c('id','country'))
 CF[,c.s.ATT:= rrp * c.s.rrATT + (1-rrp) * c.s.rsATT] #use a mean cost (same outcomes)
@@ -212,7 +258,8 @@ SESP[, qty := ifelse(TB == "TB", "Se", "Sp")]
 SESP[, TB := NULL]
 SESP
 
-fwrite(SESP,file = here('data/SESP.csv'))
+if(SA=="")
+  fwrite(SESP,file = here('data/SESP.csv'))
 
 
 
@@ -233,49 +280,48 @@ CF <- merge(CF,LYK[,.(country,LYS)],by='country',all.x=TRUE) #undiscounted
 ## # P <- parse.parmtable(PD0[, 1:2]) # correct afterwards
 
 ## parm names
+
+## "Contact_TB", "itb_fat_2", "itb_fev_2", "itb_cou_2",
+## "itb_cou_3", "itb_app_2", "temp_38",
+## "itb_wgt_2", "itb_wgt.factor", "tachycardia",
+## "tachypnea", "ice_ind_bin.factor", "ice_cra.factor",
+## "Dep_csc", "ice_ade_bin.factor", "cxr_pre_mil.factor",
+## "cxr_pre_alv.factor", "cxr_pre_hil.factor", "cxr_pre_exc.factor",
+## "cxr_pre_ple.factor", "cxr_pre_eff.factor", "cxr_pre_ple_per_eff.factor",
+## "aus_sma.factor", "aus_hma.factor", "aus_effusion",
+## "aus_asc.factor", "reassessment", "hiv_res.factor",
+## "Xpert_res", "night.sweats", "haemoptysis", "who_scre",
+
+## from CF
 pnmz <- c(
-  "Contact_TB", "itb_fat_2", "itb_fev_2", "itb_cou_2",
-  "itb_cou_3", "itb_app_2", "temp_38",
-  "itb_wgt_2", "itb_wgt.factor", "tachycardia",
-  "tachypnea", "ice_ind_bin.factor", "ice_cra.factor",
-  "Dep_csc", "ice_ade_bin.factor", "cxr_pre_mil.factor",
-  "cxr_pre_alv.factor", "cxr_pre_hil.factor", "cxr_pre_exc.factor",
-  "cxr_pre_ple.factor", "cxr_pre_eff.factor", "cxr_pre_ple_per_eff.factor",
-  "aus_sma.factor", "aus_hma.factor", "aus_effusion",
-  "aus_asc.factor", "reassessment", "hiv_res.factor",
-  "Xpert_res", "night.sweats", "haemoptysis", "who_scre",
-  "soc.screened", "testing.done",
-  "xray.only", "xpert.only", "s.screen.se",
-  "s.screen.sp", "clin.sense", "clin.spec",
-  "clin.senseX", "clin.specX", "clin.senseU",
-  "clin.specU", "clin.senseXU", "clin.specXU",
-  "s.reassess.choice.se", "s.reassess.choice.sp", "s.reassess.se",
-  "s.reassess.sp", "rrp", "c.s.reassess",
-  "c.s.reassessCXR30", "c.s.reassessCXRxga50",
-  "c.s.rrATT", "c.s.rsATT", "c.s.soc.CXR",
-  "c.s.soc.CXRxga", "c.s.soc.exam", "c.s.soc.reassessCXRxga",
-  "c.s.soc.scre", "c.s.soc.xga", "c.s.tbs1step.diag.clin",
-  "c.s.tbs1step.diag.test", "c.s.tbs2step.diag", "c.s.tbs2step.scre",
-  "c.s.who.diag", "c.s.who.hiv.diag", "c.s.who.scre", "c.s.ATT",
-   "soc.ptb",  "SAMmort",
-  "SAMmortTBATT", "SAMmortTBnoATT"
+  "soc.screened","testing.done","xray.only","xpert.only",
+  "s.screen.se","s.screen.sp","clin.sense","clin.spec",
+  "clin.senseX","clin.specX","clin.senseU","clin.specU",
+  "clin.senseXU","clin.specXU",
+  "s.reassess.choice.se","s.reassess.choice.sp","s.reassess.se","s.reassess.sp",
+  "rrp","SAMmort","SAMmortTBATT","SAMmortTBnoATT",
+  names(CDW)[-c(1,2)]
 )
 
 
 
 ## NOTE this step resamples Npops times with popsize and calculates means
-ALL <- combineHE(CF,popsize = 5e0,Npops=1e3,
-                 parnmz = pnmz) #optional argument: if included calx mean parms (eg for SAVI); SLOWER!
+ALL <- combineHE(CF, popsize = 1e2, Npops = 1e3) ## ,
+                 ## parnmz = pnmz) #optional argument: if included calx mean parms (eg for SAVI); SLOWER!
 ## ## NOTE incrementals now included in combineHE
 
-## ## SAVI output: NOTE only possible if using pnmz in combineHE above, o/w skip
-tmp <- ALL[country=='Uganda']
-fwrite(tmp[, .(-who.DALYs, -tbs1.DALYs, -tbs2.DALYs)], file = "~/SAVI.Q.csv")
-fwrite(tmp[, .(who.cost, tbs1.cost, tbs2.cost)], file = "~/SAVI.C.csv")
-pnmze <- c(pnmz,'tbprev')
-fwrite(tmp[, ..pnmze], file = "~/SAVI.P.csv")
-## NOTE TODO the above does not vary prevalence, which is a major shortcoming
-## NOTE see below for how to systematically vary prevalence
+## ## ## SAVI output: NOTE only possible if using pnmz in combineHE above, o/w skip
+## tmp <- ALL[country=='Uganda']
+## fwrite(tmp[, .(-who.DALYs, -tbs1.DALYs, -tbs2.DALYs)], file = "~/SAVI.Q.csv")
+## fwrite(tmp[, .(who.cost, tbs1.cost, tbs2.cost)], file = "~/SAVI.C.csv")
+## pnmze <- c(pnmz,'tbprev')
+## fwrite(tmp[, ..pnmze], file = "~/SAVI.P.csv")
+## ## NOTE TODO the above does not vary prevalence, which is a major shortcoming
+## ## NOTE see below for how to systematically vary prevalence
+
+## tmp2 <- tmp[, ..pnmze]
+## for(nm in names(tmp2)) print(c(nm,length(unique(tmp2[[nm]]))))
+
 
 ## quick looks
 clz <- names(ALL)
@@ -301,15 +347,21 @@ MZ[,c('tICER0_TBS2'):=.(-tDC_TBS2/tDD0_TBS2)]
 
 tab <- makeTable(MZ)
 tab
-
-fwrite(tab,file = here('data/ICERtable.csv'))
-
+if (SA == "") {
+  fwrite(tab, file = here("data/ICERtable.csv"))
+} else{
+  fwrite(tab, file = gh("data/SA/ICERtable_{SA}_{LM}.csv"))
+}
 ## transposed version
 TT <- transpose(tab,make.names = TRUE)
 rownames(TT) <- names(tab)[-1]
 TT
 
-write.csv(TT,file = here('data/tICERtable.csv'))
+if (SA == "") {
+  write.csv(TT, file = here("data/tICERtable.csv"))
+} else {
+  fwrite(TT, file = gh("data/SA/tICERtable_{SA}_{LM}.csv"))
+}
 
 ## reshape data
 keep <- c('country','id',grep('\\.',names(ALL),value = TRUE))
@@ -324,7 +376,8 @@ M[,.(`DALYs averted`=mean(`DALYs averted`),
      `Incremental cost`=mean(`Incremental cost`)),
   by=.(country,algorithm)]
 
-ggsave(GP, file = here("graphs/CEhull.pdf"), h = 8, w = 10)
+if(SA=="")
+  ggsave(GP, file = here("graphs/CEhull.pdf"), h = 8, w = 10)
 
 
 CEAC <- make.ceacs(M[country %in% c("Zambia", "Uganda")], seq(from = 0, to = 500, by = 0.5))
@@ -338,42 +391,42 @@ GP <- ggplot(
   xlab("Cost effectiveness threshold (US$ per DALY averted)") +
   ylab("Probability cost-effective")
 GP
-
-ggsave(GP, file = here("graphs/CEAC.pdf"), h = 8, w = 10)
-
-
-## -------- varying prevalence
-
-## NOTE this step resamples Npops times with popsize and calculates means
-ALL2 <- combineHE(CF,popsize = 5e2,Npops=1e3,
-                  prevdist = function(n) rbeta(n,2,200) #define a random prevalence via beta distribution
-                  )
-
-## NOTE if this chunk gets used again - move into function
-## quick looks
-clz <- names(ALL2)
-clz <- clz[-c(1,2)]
-MZ2 <- ALL2[,lapply(.SD,mean),by=country,.SDcols=clz]
-MZ2h <- ALL2[,lapply(.SD,hi),by=country,.SDcols=clz]
-MZ2l <- ALL2[,lapply(.SD,lo),by=country,.SDcols=clz]
-names(MZ2h)[2:ncol(MZ2h)] <- paste0(names(MZ2h)[2:ncol(MZ2h)],'.hi')
-names(MZ2l)[2:ncol(MZ2l)] <- paste0(names(MZ2l)[2:ncol(MZ2l)],'.lo')
-MZ2 <- merge(MZ2,MZ2l,by='country')
-MZ2 <- merge(MZ2,MZ2h,by='country')
-## wrt SOC
-MZ2[,c('ICER_TBS1','ICER_TBS2','ICER_WHO'):=.(-DC_TBS1/DD_TBS1,-DC_TBS2/DD_TBS2,-DC_WHO/DD_WHO)]
-MZ2[,c('ICER0_TBS1','ICER0_TBS2','ICER0_WHO'):=.(-DC_TBS1/DD0_TBS1,-DC_TBS2/DD0_TBS2,-DC_WHO/DD0_WHO)]
-## wrt WHO
-MZ2[,c('wICER_TBS1','wICER_TBS2'):=.(-wDC_TBS1/wDD_TBS1,-wDC_TBS2/wDD_TBS2)]
-MZ2[,c('wICER0_TBS1','wICER0_TBS2'):=.(-wDC_TBS1/wDD0_TBS1,-wDC_TBS2/wDD0_TBS2)]
-## wrt TBS1
-MZ2[,c('tICER_TBS2'):=.(-tDC_TBS2/tDD_TBS2)]
-MZ2[,c('tICER0_TBS2'):=.(-tDC_TBS2/tDD0_TBS2)]
+if(SA=="")
+  ggsave(GP, file = here("graphs/CEAC.pdf"), h = 8, w = 10)
 
 
-tab <- makeTable(MZ2)
-tab[6:7,.(`ICER, WHO v SOC`,`ICER, TBS1 v SOC`, `ICER, TBS2 v SOC`)]
-##at 2% prev, ICERs WHO < TBS2 < TBS1
+## ## -------- varying prevalence
+
+## ## NOTE this step resamples Npops times with popsize and calculates means
+## ALL2 <- combineHE(CF,popsize = 5e2,Npops=1e3,
+##                   prevdist = function(n) rbeta(n,2,200) #define a random prevalence via beta distribution
+##                   )
+
+## ## NOTE if this chunk gets used again - move into function
+## ## quick looks
+## clz <- names(ALL2)
+## clz <- clz[-c(1,2)]
+## MZ2 <- ALL2[,lapply(.SD,mean),by=country,.SDcols=clz]
+## MZ2h <- ALL2[,lapply(.SD,hi),by=country,.SDcols=clz]
+## MZ2l <- ALL2[,lapply(.SD,lo),by=country,.SDcols=clz]
+## names(MZ2h)[2:ncol(MZ2h)] <- paste0(names(MZ2h)[2:ncol(MZ2h)],'.hi')
+## names(MZ2l)[2:ncol(MZ2l)] <- paste0(names(MZ2l)[2:ncol(MZ2l)],'.lo')
+## MZ2 <- merge(MZ2,MZ2l,by='country')
+## MZ2 <- merge(MZ2,MZ2h,by='country')
+## ## wrt SOC
+## MZ2[,c('ICER_TBS1','ICER_TBS2','ICER_WHO'):=.(-DC_TBS1/DD_TBS1,-DC_TBS2/DD_TBS2,-DC_WHO/DD_WHO)]
+## MZ2[,c('ICER0_TBS1','ICER0_TBS2','ICER0_WHO'):=.(-DC_TBS1/DD0_TBS1,-DC_TBS2/DD0_TBS2,-DC_WHO/DD0_WHO)]
+## ## wrt WHO
+## MZ2[,c('wICER_TBS1','wICER_TBS2'):=.(-wDC_TBS1/wDD_TBS1,-wDC_TBS2/wDD_TBS2)]
+## MZ2[,c('wICER0_TBS1','wICER0_TBS2'):=.(-wDC_TBS1/wDD0_TBS1,-wDC_TBS2/wDD0_TBS2)]
+## ## wrt TBS1
+## MZ2[,c('tICER_TBS2'):=.(-tDC_TBS2/tDD_TBS2)]
+## MZ2[,c('tICER0_TBS2'):=.(-tDC_TBS2/tDD0_TBS2)]
+
+
+## tab <- makeTable(MZ2)
+## tab[6:7,.(`ICER, WHO v SOC`,`ICER, TBS1 v SOC`, `ICER, TBS2 v SOC`)]
+## ##at 2% prev, ICERs WHO < TBS2 < TBS1
 
 
 ## NOTE
