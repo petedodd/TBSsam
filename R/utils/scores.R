@@ -134,7 +134,7 @@ WHO.algorithm <- function(D){
   D[,who.cost:=who.cost+c.s.who.scre]                                         #everyone gets
   D[who_scre>=1 & hiv_res.factor==0,who.cost:=who.cost+c.s.who.diag]                              #if presents one of the chronic symptoms
   D[who_scre>=1 & hiv_res.factor==1,who.cost:=who.cost+c.s.who.hiv.diag]      #if presents one of the chronic symptoms and is HIV+, also receive urine LAM
-  D[who.ATT==1,who.cost:=who.cost + c.s.rsATT]                                  #ATT costs
+  D[who.ATT==1,who.cost:=who.cost + c.s.ATT]                                  #ATT costs
 
   return(data.table(who.ATT=D$who.ATT,who.cost=D$who.cost))
 }
@@ -161,7 +161,7 @@ TBS1s.algorithm <- function(D){
   ## costs
   D[TBS1Sa>=10,tbs1.cost:=tbs1.cost+c.s.tbs1step.diag.clin]                  #clinical score only (and CXR, Xpert for non-diag purpose)
   D[TBS1Sa<10,tbs1.cost:=tbs1.cost+c.s.tbs1step.diag.test]      #clinical, CXR, Xpert, AUS scoring
-  D[tbs1.ATT==1,tbs1.cost:=tbs1.cost + c.s.rsATT] #ATT costs
+  D[tbs1.ATT==1,tbs1.cost:=tbs1.cost + c.s.ATT] #ATT costs
 }
 
 ## TBS 2-step algorithm
@@ -182,7 +182,7 @@ TBS2s.algorithm <- function(D){
   ## costs
   D[,tbs2.cost:=tbs2.cost+c.s.tbs2step.scre]                             #everyone gets
   D[TBS2Sa>=1,tbs2.cost:=tbs2.cost + c.s.tbs2step.diag]                  #only those @ s2 
-  D[tbs2.ATT==1,tbs2.cost:=tbs2.cost + c.s.rsATT] #ATT costs
+  D[tbs2.ATT==1,tbs2.cost:=tbs2.cost + c.s.ATT] #ATT costs
 }
 
 
@@ -226,7 +226,7 @@ SOC.algorithm <- function(D){
   D[soc.reassess!=0,soc.ATT:=ifelse(TB=='TB',s.reassess.se,1-s.reassess.sp)]      #treatment from reassessment
 
   ## treatment costs
-  D[soc.ATT==1,soc.cost:=soc.cost + c.s.rsATT] #ATT costs
+  D[soc.ATT==1,soc.cost:=soc.cost + c.s.ATT] #ATT costs
 
   return(data.table(soc.ATT=D$soc.ATT,soc.cost=D$soc.cost))
 }
