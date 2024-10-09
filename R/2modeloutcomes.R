@@ -150,7 +150,6 @@ if (substr(SA, 1, 2) == "c.") { #detect a cost parm for SA
   } else{
     stop(paste0("Cost parm ", SA, " supplied for SA but not found in CDW costs!\n"))
   }
-  SA <- "c.s.who.diag"
   if (LM == "LQ") {
     CDW[, c(SA) := lapply(.SD, function(x) quantile(x,0.25)), by = country, .SDcols = SA]
   } else if (LM == "UQ") {
