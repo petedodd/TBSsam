@@ -14,4 +14,5 @@ COSTS,NAME,DESCRIPTION,,Low,High,,Low,High,,Low,High,,Low,High,,Low,High,,Low,Hi
 ,c.s.who.hiv.diag,INT: WHO algo: clinical exam + TB contact + CXR + Xpert on GA and stool + HIV test + Urine LF-LAM,,,,,,,,,,,,,,,,,82.12,98.29,,92.07,108.89
 ,c.s.who.diag,INT: WHO algo: clinical exam + TB contact + CXR + Xpert on GA and stool + HIV test,,,,,,,,,,,,,,,,,72.97,83.4,,82.92,94
 ,c.s.rsATT,Rifampicin-sensitive anti-TB treatment in SAM children ,,,,,,,,,,,,,,,,,34.69,40.67,,43.21,47.79
+,c.s.rrATT,Rifampicin-resistant anti-TB treatment in SAM children,,,,,,,,,,,,,,,,,1458.94,1506.09,,1526.15,1562.24
 ,c.s.reassessCXRxgastall,reassessment exam + CXR [for all] + Xpert Ultra on GA and stool [for all] ,,,,,,,,,,,,,,,,,67.64,77.63,,77.7,88.28
