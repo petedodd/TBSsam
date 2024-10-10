@@ -215,6 +215,7 @@ CEAplots <- function(M,ring=TRUE,alph=0.1){
   HZ[,algorithm:=NA]
   ## text and locations
   HZ[,txt:=c(as.character(round(`Incremental cost`))[-1],NA_character_),by=country]
+  HZ[,txt:=c(as.character(round(`Incremental cost`/`DALYs averted`))[-1],NA_character_),by=country]
   HZ[,X:=c(`DALYs averted`[-1],NA_real_),by=country]
   HZ[,Y:=c(`Incremental cost`[-1],NA_real_),by=country]
   HZ[,X:=(X+`DALYs averted`)/2]
