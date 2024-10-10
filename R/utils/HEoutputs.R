@@ -213,20 +213,32 @@ CEAplots <- function(M,ring=TRUE,alph=0.1){
   HZ <- rbindlist(HZ)
   names(HZ)[1:2] <- c('DALYs averted','Incremental cost')
   HZ[,algorithm:=NA]
+  ## text and locations
+  HZ[,txt:=c(as.character(round(`Incremental cost`))[-1],NA_character_),by=country]
+  HZ[,X:=c(`DALYs averted`[-1],NA_real_),by=country]
+  HZ[,Y:=c(`Incremental cost`[-1],NA_real_),by=country]
+  HZ[,X:=(X+`DALYs averted`)/2]
+  HZ[,Y:=(Y+`Incremental cost`)/2]
+  shft <- HZ[`DALYs averted`>0,mean(`DALYs averted`,na.rm=TRUE)]/10
   ## plot
   GP <- ggplot(MS,aes(`DALYs averted`,`Incremental cost`,col=algorithm))+
     ## geom_point(data=M,alpha=alph,shape=1,show.legend = FALSE)+
-    geom_errorbar(aes(ymin=`Incremental cost`-COSTsd,ymax=`Incremental cost`+COSTsd))+
-    geom_errorbarh(aes(xmin=`DALYs averted`-DALYsd,xmax=`DALYs averted`+DALYsd))+
+    geom_errorbar(aes(ymin=`Incremental cost`-COSTsd,ymax=`Incremental cost`+COSTsd),width=0)+
+    geom_errorbarh(aes(xmin=`DALYs averted`-DALYsd,xmax=`DALYs averted`+DALYsd),height=0)+
     geom_point(size=3,shape=3,stroke=2)+
     facet_wrap(~country)+
     geom_hline(yintercept = 0)+geom_vline(xintercept = 0)+
-    ylab('Incremental cost (USD)')
+    ylab('Incremental cost (USD)')+
+    theme_linedraw()
   ## return
   if(ring)
     GP <- GP +
       geom_line(data=HZ,col=1,lty=2,show.legend=FALSE) +
-      geom_point(data=HZ,shape=1,size=3,col=1,show.legend=FALSE)
+      geom_point(data=HZ,shape=1,size=3,col=1,show.legend=FALSE)+
+      geom_text(data=HZ,aes(label=txt,x=X,y=Y),
+                nudge_x = -shft, nudge_y = 0,
+                size=6,col=1,
+                show.legend = FALSE)
   GP
 }
 
