@@ -1,4 +1,5 @@
 library(ggplot2)
+library(ggpubr)
 library(scales)
 
 ## helpers
@@ -242,6 +243,41 @@ CEAplots <- function(M,ring=TRUE,alph=0.1){
                 show.legend = FALSE)
   GP
 }
+
+## function to generate a rankogram plot
+makeRankogram <- function(A) {
+  ## create ranks
+  RK <- A[,
+  {
+    icer <- c(-DC_TBS1 / DD_TBS1, -DC_TBS2 / DD_TBS2, -DC_WHO / DD_WHO)
+    der <- rank(icer) # NOTE need more thought? OK if all +ve
+    names(der) <- c("TBS1", "TBS2", "WHO")
+    names(icer) <- paste0("I_", names(der))
+    as.list(c(der, icer))
+  },
+  by = .(country, id)
+  ]
+
+  ## calculate probabilities (inelegant)
+  RKS <- list(
+    RK[, .(arm = "TBS1", p1 = mean(TBS1 == 1), p2 = mean(TBS1 == 2), p3 = mean(TBS1 == 3))],
+    RK[, .(arm = "TBS2", p1 = mean(TBS2 == 1), p2 = mean(TBS2 == 2), p3 = mean(TBS2 == 3))],
+    RK[, .(arm = "WHO", p1 = mean(WHO == 1), p2 = mean(WHO == 2), p3 = mean(WHO == 3))]
+  )
+  RKS <- rbindlist(RKS)
+  names(RKS)[2:4] <- 1:3
+  RKS <- melt(RKS, id = "arm")
+  names(RKS)[2:3] <- c("Rank", "Probability")
+
+  ## plot
+  ggplot(RKS, aes(Rank, Probability, col = arm, group = arm)) +
+    geom_point(size = 2) +
+    geom_line() +
+    scale_y_continuous(label = percent, limits = c(0, 1)) +
+    theme_linedraw()
+
+}
+
 
 
 makeTable <- function(MZ){

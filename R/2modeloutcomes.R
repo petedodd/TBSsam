@@ -367,21 +367,27 @@ keep <- c('country','id',grep('\\.',names(ALL),value = TRUE))
 keep <- keep[1:30] #don't include extras that confuse reshapeINC
 M <- reshapeINC(ALL[,..keep])
 
-#GP <- CEAplots(M[algorithm!='tbs2'],ring=TRUE,alph=0.05)
-GP <- CEAplots(M[country %in% c("Zambia","Uganda")], ring = TRUE, alph = 0.5)
+## CE plane ---------
+## GP <- CEAplots(M[algorithm!='tbs2'],ring=TRUE,alph=0.05)
+GP <- CEAplots(M[country %in% c("Zambia", "Uganda")], ring = TRUE, alph = 0.5)
 GP
 
 M[,.(`DALYs averted`=mean(`DALYs averted`),
      `Incremental cost`=mean(`Incremental cost`)),
   by=.(country,algorithm)]
 
-if(SA=="")
-  ggsave(GP, file = here("graphs/CEhull.pdf"), h = 8, w = 10)
 
+## rankogram ---------
+GQ <- makeRankogram(ALL[country %in% c("Uganda", "Zambia")])
+GQ
 
+## GP + GQ  ---------
+GB <- ggarrange(GP, GQ, ncol = 1, nrow = 2, common.legend = TRUE, heights = c(2, 1))
+
+## CEAC  ---------
 CEAC <- make.ceacs(M[country %in% c("Zambia", "Uganda")], seq(from = 0, to = 500, by = 0.5))
 
-GP <- ggplot(
+GC <- ggplot(
   CEAC,
   aes(lambda, `Probability CE`, col = country, lty = algorithm)
 ) +
@@ -389,10 +395,17 @@ GP <- ggplot(
   scale_y_continuous(label = percent) +
   xlab("Cost effectiveness threshold (US$ per DALY averted)") +
   ylab("Probability cost-effective")
-GP
-if(SA=="")
-  ggsave(GP, file = here("graphs/CEAC.pdf"), h = 8, w = 10)
+GC
 
+## saving out  ---------
+if (SA == "") {
+  ggsave(GP, file = here("graphs/CEhull.png"), h = 8, w = 10)
+  ggsave(GQ, file = here("graphs/Ranking.png"), h = 8, w = 10)
+  ggsave(GB, file = here("graphs/Figure2.pdf"), h = 10, w = 10)
+  ggsave(GB, file = here("graphs/Figure2.eps"), h = 10, w = 10)
+  ggsave(GB, file = here("graphs/Figure2.png"), h = 10, w = 10)
+  ggsave(GC, file = here("graphs/CEAC.png"), h = 8, w = 10)
+}
 
 ## ## -------- varying prevalence
 
@@ -437,3 +450,7 @@ if(SA=="")
 ## NOTE
 ## presumptive TB same w/ & w/o TB - no info on spec
 ## unc stoch vs parm
+
+
+## TODO
+## remove unnecessary countries...
