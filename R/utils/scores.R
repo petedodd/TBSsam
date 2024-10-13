@@ -203,7 +203,7 @@ SOC.algorithm <- function(D){
        soc.ptb==1 & testing.done==0,ifelse(TB=='TB',clin.sense,1-clin.spec), #clinical
        soc.ptb==1 & testing.done==1 & xray.only==1 & xpert.only==0,ifelse(TB=='TB',clin.senseX,1-clin.specX), #clin+CXR
        soc.ptb==1 & testing.done==1 & xray.only==0 & xpert.only==1,ifelse(TB=='TB',clin.senseU,1-clin.specU), #clin+Xpert
-       soc.ptb==1 & testing.done==1 & xray.only==0 & xpert.only==0,ifelse(TB=='TB',clin.senseU,1-clin.specU), #clin+CXR+Xpert
+       soc.ptb==1 & testing.done==1 & xray.only==0 & xpert.only==0,ifelse(TB=='TB',clin.senseXU,1-clin.specXU), #clin+CXR+Xpert
        default=0
      )]
   ## NOTE currently no reassessment for those not ptb TODO
