@@ -231,7 +231,11 @@ CEAplots <- function(M,ring=TRUE,alph=0.1){
     facet_wrap(~country)+
     geom_hline(yintercept = 0)+geom_vline(xintercept = 0)+
     ylab('Incremental cost (USD)')+
-    theme_linedraw()
+    theme_bw() +
+    theme(
+      strip.background = element_blank(),
+      strip.text = element_text(colour = "black")
+    )
   ## return
   if(ring)
     GP <- GP +
@@ -274,8 +278,7 @@ makeRankogram <- function(A) {
     geom_point(size = 2) +
     geom_line() +
     scale_y_continuous(label = percent, limits = c(0, 1)) +
-    theme_linedraw()
-
+    theme_bw()
 }
 
 
