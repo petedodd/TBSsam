@@ -280,47 +280,24 @@ CF <- merge(CF,LYK[,.(country,LYS)],by='country',all.x=TRUE) #undiscounted
 
 ## parm names
 
-## "Contact_TB", "itb_fat_2", "itb_fev_2", "itb_cou_2",
-## "itb_cou_3", "itb_app_2", "temp_38",
-## "itb_wgt_2", "itb_wgt.factor", "tachycardia",
-## "tachypnea", "ice_ind_bin.factor", "ice_cra.factor",
-## "Dep_csc", "ice_ade_bin.factor", "cxr_pre_mil.factor",
-## "cxr_pre_alv.factor", "cxr_pre_hil.factor", "cxr_pre_exc.factor",
-## "cxr_pre_ple.factor", "cxr_pre_eff.factor", "cxr_pre_ple_per_eff.factor",
-## "aus_sma.factor", "aus_hma.factor", "aus_effusion",
-## "aus_asc.factor", "reassessment", "hiv_res.factor",
-## "Xpert_res", "night.sweats", "haemoptysis", "who_scre",
-
-## from CF
-pnmz <- c(
-  "soc.screened","testing.done","xray.only","xpert.only",
-  "s.screen.se","s.screen.sp","clin.sense","clin.spec",
-  "clin.senseX","clin.specX","clin.senseU","clin.specU",
-  "clin.senseXU","clin.specXU",
-  "s.reassess.choice.se","s.reassess.choice.sp","s.reassess.se","s.reassess.sp",
-  "rrp","SAMmort","SAMmortTBATT","SAMmortTBnoATT",
-  names(CDW)[-c(1,2)]
-)
+## ## from CF
+## pnmz <- c(
+##   "soc.screened","testing.done","xray.only","xpert.only",
+##   "s.screen.se","s.screen.sp","clin.sense","clin.spec",
+##   "clin.senseX","clin.specX","clin.senseU","clin.specU",
+##   "clin.senseXU","clin.specXU",
+##   "s.reassess.choice.se","s.reassess.choice.sp","s.reassess.se","s.reassess.sp",
+##   "rrp","SAMmort","SAMmortTBATT","SAMmortTBnoATT",
+##   names(CDW)[-c(1,2)]
+## )
 
 
 
 ## NOTE this step resamples Npops times with popsize and calculates means
-ALL <- combineHE(CF, popsize = 1e2, Npops = 1e3) ## ,
-                 ## parnmz = pnmz) #optional argument: if included calx mean parms (eg for SAVI); SLOWER!
+ALL <- combineHE(CF, popsize = 6e2, Npops = 1e3) ## ,
+                 ## parnmz = pnmz)
+
 ## ## NOTE incrementals now included in combineHE
-
-## ## ## SAVI output: NOTE only possible if using pnmz in combineHE above, o/w skip
-## tmp <- ALL[country=='Uganda']
-## fwrite(tmp[, .(-who.DALYs, -tbs1.DALYs, -tbs2.DALYs)], file = "~/SAVI.Q.csv")
-## fwrite(tmp[, .(who.cost, tbs1.cost, tbs2.cost)], file = "~/SAVI.C.csv")
-## pnmze <- c(pnmz,'tbprev')
-## fwrite(tmp[, ..pnmze], file = "~/SAVI.P.csv")
-## ## NOTE TODO the above does not vary prevalence, which is a major shortcoming
-## ## NOTE see below for how to systematically vary prevalence
-
-## tmp2 <- tmp[, ..pnmze]
-## for(nm in names(tmp2)) print(c(nm,length(unique(tmp2[[nm]]))))
-
 
 ## quick looks
 clz <- names(ALL)
@@ -344,44 +321,58 @@ MZ[,c('tICER_TBS2'):=.(-tDC_TBS2/tDD_TBS2)]
 MZ[,c('tICER0_TBS2'):=.(-tDC_TBS2/tDD0_TBS2)]
 
 
+## prettier table
 tab <- makeTable(MZ)
 tab
-if (SA == "") {
-  fwrite(tab, file = here("data/ICERtable.csv"))
-} else{
-  fwrite(tab, file = gh("data/SA/ICERtable_{SA}_{LM}.csv"))
-}
+
 ## transposed version
 TT <- transpose(tab,make.names = TRUE)
 rownames(TT) <- names(tab)[-1]
 TT
 
+## save out
 if (SA == "") {
   write.csv(TT, file = here("data/tICERtable.csv"))
+  fwrite(tab, file = here("data/ICERtable.csv"))
 } else {
   fwrite(TT, file = gh("data/SA/tICERtable_{SA}_{LM}.csv"))
+  fwrite(tab, file = gh("data/SA/ICERtable_{SA}_{LM}.csv"))
 }
 
 ## reshape data
 keep <- c('country','id',grep('\\.',names(ALL),value = TRUE))
-keep <- keep[1:30] #don't include extras that confuse reshapeINC
-M <- reshapeINC(ALL[,..keep])
+keep <- keep[1:34] # don't include extras that confuse reshapeINC if outputting parms
+M <- ALL[, ..keep]
+## harmonize naming:
+names(M) <- gsub("s1s", "s1", names(M))
+names(M) <- gsub("s2s", "s2", names(M))
+M <- reshapeINC(M) #NOTE can also explore FN/FP/cfr/reassess from this data
 
-#GP <- CEAplots(M[algorithm!='tbs2'],ring=TRUE,alph=0.05)
-GP <- CEAplots(M[country %in% c("Zambia","Uganda")], ring = TRUE, alph = 0.5)
+## CE plane ---------
+## GP <- CEAplots(M[algorithm!='tbs2'],ring=TRUE,alph=0.05)
+GP <- CEAplots(M[country %in% c("Zambia", "Uganda")], ring = TRUE, alph = 0.5)
 GP
 
 M[,.(`DALYs averted`=mean(`DALYs averted`),
      `Incremental cost`=mean(`Incremental cost`)),
   by=.(country,algorithm)]
 
-if(SA=="")
-  ggsave(GP, file = here("graphs/CEhull.pdf"), h = 8, w = 10)
+
+## rankogram ---------
+GQ <- makeRankogram(ALL[country %in% c("Uganda", "Zambia")])
+GQ
+
+## GP + GQ  ---------
+GB <- ggarrange(GP, GQ,
+  ncol = 1, nrow = 2,
+  common.legend = TRUE, heights = c(2, 1), labels = c("A", "B")
+)
 
 
+## CEAC  ---------
 CEAC <- make.ceacs(M[country %in% c("Zambia", "Uganda")], seq(from = 0, to = 500, by = 0.5))
 
-GP <- ggplot(
+GC <- ggplot(
   CEAC,
   aes(lambda, `Probability CE`, col = country, lty = algorithm)
 ) +
@@ -389,10 +380,17 @@ GP <- ggplot(
   scale_y_continuous(label = percent) +
   xlab("Cost effectiveness threshold (US$ per DALY averted)") +
   ylab("Probability cost-effective")
-GP
-if(SA=="")
-  ggsave(GP, file = here("graphs/CEAC.pdf"), h = 8, w = 10)
+GC
 
+## saving out  ---------
+if (SA == "") {
+  ggsave(GP, file = here("graphs/CEhull.png"), h = 8, w = 10)
+  ggsave(GQ, file = here("graphs/Ranking.png"), h = 8, w = 10)
+  ggsave(GB, file = here("graphs/Figure2.pdf"), h = 10, w = 10)
+  ggsave(GB, file = here("graphs/Figure2.eps"), h = 10, w = 10)
+  ggsave(GB, file = here("graphs/Figure2.png"), h = 10, w = 10)
+  ggsave(GC, file = here("graphs/CEAC.png"), h = 8, w = 10)
+}
 
 ## ## -------- varying prevalence
 
@@ -437,3 +435,7 @@ if(SA=="")
 ## NOTE
 ## presumptive TB same w/ & w/o TB - no info on spec
 ## unc stoch vs parm
+
+
+## TODO
+## remove unnecessary countries...

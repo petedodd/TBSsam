@@ -40,8 +40,8 @@ GetLifeYears <- function(isolist,discount.rate,yearfrom){
 
 
 ## actually do work if needed
-isoz <- c("KHM", "CMR", "CIV", "MOZ", "SLE", "UGA", "ZMB")
-cnz <- c("Cambodia", "Cameroon", "Côte d'Ivoire", "Mozambique", "Sierra Leone", "Uganda", "Zambia")
+isoz <- c( "UGA", "ZMB")
+cnz <- c("Uganda", "Zambia")
 key <- data.table(iso3=isoz,country=cnz)
 fn <- here('data/LYK.Rdata')
 if(!file.exists(fn)){

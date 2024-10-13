@@ -1,4 +1,5 @@
 library(ggplot2)
+library(ggpubr)
 library(scales)
 
 ## helpers
@@ -55,28 +56,34 @@ combineHE <- function(WS,
     ## also sample across reassess
     ## ======== CEA outputs
     ## combined data
-    all.all <- WH[,.(id=n,
-                      who.cost=mean(who.cost),
-                      who.DALYs=mean(who.cfr*dLYS),
-                      who.DALYs0=mean(who.cfr*LYS),
-                      who.cfr=mean(who.cfr),
-                      who.ATT=mean(who.ATT),
-                      soc.cost=mean(soc.cost),
-                      soc.DALYs=mean(soc.cfr*dLYS),
-                      soc.DALYs0=mean(soc.cfr*LYS),
-                      soc.cfr=mean(soc.cfr),
-                      soc.ATT=mean(soc.ATT),
-                      tbs1.cost=mean(tbs1.cost),
-                      tbs1.DALYs=mean(tbs1.cfr*dLYS),
-                      tbs1.DALYs0=mean(tbs1.cfr*LYS),
-                      tbs1.cfr=mean(tbs1.cfr),
-                      tbs1.ATT=mean(tbs1.ATT),
-                      tbs2.cost=mean(tbs2.cost),
-                      tbs2.DALYs=mean(tbs2.cfr*dLYS),
-                      tbs2.DALYs0=mean(tbs2.cfr*LYS),
-                      tbs2.cfr=mean(tbs2.cfr),
-                     tbs2.ATT=mean(tbs2.ATT),
-                     tbprev=mean(TB == "TB")),
+    all.all <- WH[,
+                  .(id=n,
+                    who.cost=mean(who.cost),
+                    who.DALYs=mean(who.cfr*dLYS),
+                    who.DALYs0=mean(who.cfr*LYS),
+                    who.cfr=mean(who.cfr),
+                    who.ATT=mean(who.ATT),
+                    soc.cost=mean(soc.cost),
+                    soc.DALYs=mean(soc.cfr*dLYS),
+                    soc.DALYs0=mean(soc.cfr*LYS),
+                    soc.cfr=mean(soc.cfr),
+                    soc.ATT=mean(soc.ATT),
+                    tbs1.cost=mean(tbs1.cost),
+                    tbs1.DALYs=mean(tbs1.cfr*dLYS),
+                    tbs1.DALYs0=mean(tbs1.cfr*LYS),
+                    tbs1.cfr=mean(tbs1.cfr),
+                    tbs1.ATT=mean(tbs1.ATT),
+                    tbs2.cost=mean(tbs2.cost),
+                    tbs2.DALYs=mean(tbs2.cfr*dLYS),
+                    tbs2.DALYs0=mean(tbs2.cfr*LYS),
+                    tbs2.cfr=mean(tbs2.cfr),
+                    tbs2.ATT=mean(tbs2.ATT),
+                    tbprev=mean(TB == "TB"),
+                    who.reassess=mean(who.reassess),
+                    soc.reassess=mean(soc.reassess),
+                    tbs1.reassess=mean(tbs1s.reassess),
+                    tbs2.reassess = mean(tbs2s.reassess)
+                    ),
                   by=country]
     all.nottb <- WH[TB == "not TB", .(
       id = n,
@@ -230,7 +237,11 @@ CEAplots <- function(M,ring=TRUE,alph=0.1){
     facet_wrap(~country)+
     geom_hline(yintercept = 0)+geom_vline(xintercept = 0)+
     ylab('Incremental cost (USD)')+
-    theme_linedraw()
+    theme_bw() +
+    theme(
+      strip.background = element_blank(),
+      strip.text = element_text(colour = "black")
+    )
   ## return
   if(ring)
     GP <- GP +
@@ -242,6 +253,40 @@ CEAplots <- function(M,ring=TRUE,alph=0.1){
                 show.legend = FALSE)
   GP
 }
+
+## function to generate a rankogram plot
+makeRankogram <- function(A) {
+  ## create ranks
+  RK <- A[,
+  {
+    icer <- c(-DC_TBS1 / DD_TBS1, -DC_TBS2 / DD_TBS2, -DC_WHO / DD_WHO)
+    der <- rank(icer) # NOTE need more thought? OK if all +ve
+    names(der) <- c("TBS1", "TBS2", "WHO")
+    names(icer) <- paste0("I_", names(der))
+    as.list(c(der, icer))
+  },
+  by = .(country, id)
+  ]
+
+  ## calculate probabilities (inelegant)
+  RKS <- list(
+    RK[, .(arm = "TBS1", p1 = mean(TBS1 == 1), p2 = mean(TBS1 == 2), p3 = mean(TBS1 == 3))],
+    RK[, .(arm = "TBS2", p1 = mean(TBS2 == 1), p2 = mean(TBS2 == 2), p3 = mean(TBS2 == 3))],
+    RK[, .(arm = "WHO", p1 = mean(WHO == 1), p2 = mean(WHO == 2), p3 = mean(WHO == 3))]
+  )
+  RKS <- rbindlist(RKS)
+  names(RKS)[2:4] <- 1:3
+  RKS <- melt(RKS, id = "arm")
+  names(RKS)[2:3] <- c("Rank", "Probability")
+
+  ## plot
+  ggplot(RKS, aes(Rank, Probability, col = arm, group = arm)) +
+    geom_point(size = 2) +
+    geom_line() +
+    scale_y_continuous(label = percent, limits = c(0, 1)) +
+    theme_bw()
+}
+
 
 
 makeTable <- function(MZ){
@@ -261,6 +306,11 @@ makeTable <- function(MZ){
         `% FN, WHO`=brkt(1e2*who.FN,1e2*who.FN.lo,1e2*who.FN.hi),
         `% FN, TBS1`=brkt(1e2*tbs1.FN,1e2*tbs1.FN.lo,1e2*tbs1.FN.hi),
         `% FN, TBS2`=brkt(1e2*tbs2.FN,1e2*tbs2.FN.lo,1e2*tbs2.FN.hi),
+        ## --- reassessments
+        `% reassessed, SOC`=brkt(1e2*soc.reassess,1e2*soc.reassess.lo,1e2*soc.reassess.hi),
+        `% reassessed, WHO`=brkt(1e2*who.reassess,1e2*who.reassess.lo,1e2*who.reassess.hi),
+        `% reassessed, TBS1`=brkt(1e2*tbs1.reassess,1e2*tbs1.reassess.lo,1e2*tbs1.reassess.hi),
+        `% reassessed, TBS2`=brkt(1e2*tbs2.reassess,1e2*tbs2.reassess.lo,1e2*tbs2.reassess.hi),
         ## --- D ATT
         `100x incremental ATT, WHO v SOC`=brkt(1e2*DT_WHO,1e2*DT_WHO.lo,1e2*DT_WHO.hi),
         `100x incremental ATT, TBS1 v SOC`=brkt(1e2*DT_TBS1,1e2*DT_TBS1.lo,1e2*DT_TBS1.hi),
