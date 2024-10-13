@@ -321,28 +321,32 @@ MZ[,c('tICER_TBS2'):=.(-tDC_TBS2/tDD_TBS2)]
 MZ[,c('tICER0_TBS2'):=.(-tDC_TBS2/tDD0_TBS2)]
 
 
+## prettier table
 tab <- makeTable(MZ)
 tab
-if (SA == "") {
-  fwrite(tab, file = here("data/ICERtable.csv"))
-} else{
-  fwrite(tab, file = gh("data/SA/ICERtable_{SA}_{LM}.csv"))
-}
+
 ## transposed version
 TT <- transpose(tab,make.names = TRUE)
 rownames(TT) <- names(tab)[-1]
 TT
 
+## save out
 if (SA == "") {
   write.csv(TT, file = here("data/tICERtable.csv"))
+  fwrite(tab, file = here("data/ICERtable.csv"))
 } else {
   fwrite(TT, file = gh("data/SA/tICERtable_{SA}_{LM}.csv"))
+  fwrite(tab, file = gh("data/SA/ICERtable_{SA}_{LM}.csv"))
 }
 
 ## reshape data
 keep <- c('country','id',grep('\\.',names(ALL),value = TRUE))
-keep <- keep[1:30] #don't include extras that confuse reshapeINC
-M <- reshapeINC(ALL[,..keep])
+keep <- keep[1:34] # don't include extras that confuse reshapeINC if outputting parms
+M <- ALL[, ..keep]
+## harmonize naming:
+names(M) <- gsub("s1s", "s1", names(M))
+names(M) <- gsub("s2s", "s2", names(M))
+M <- reshapeINC(M) #NOTE can also explore FN/FP/cfr/reassess from this data
 
 ## CE plane ---------
 ## GP <- CEAplots(M[algorithm!='tbs2'],ring=TRUE,alph=0.05)
