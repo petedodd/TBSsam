@@ -131,8 +131,8 @@ WHO.algorithm <- function(D){
   D[who.reassess!=0,who.cost:=who.cost + c.s.reassessCXRxgastall]              #NOTE reassessment costs
   D[who.reassess!=0,who.ATT:=ifelse(TB=='TB',s.reassess.se,1-s.reassess.sp)]      #treatment from reassessment
   ## costs
-  D[,who.cost:=who.cost+c.s.who.scre]                                         #everyone gets
-  D[who_scre>=1 & hiv_res.factor==0,who.cost:=who.cost+c.s.who.diag]                              #if presents one of the chronic symptoms
+  D[,who.cost:=who.cost+c.s.who.scre]                           #everyone gets
+  D[who_scre>=1 & hiv_res.factor==0,who.cost:=who.cost+c.s.who.diag]  #if presents one of the chronic symptoms
   D[who_scre>=1 & hiv_res.factor==1,who.cost:=who.cost+c.s.who.hiv.diag]      #if presents one of the chronic symptoms and is HIV+, also receive urine LAM
   D[who.ATT==1,who.cost:=who.cost + c.s.ATT]                                  #ATT costs
 

@@ -79,10 +79,27 @@ combineHE <- function(WS,
                     tbs2.cfr=mean(tbs2.cfr),
                     tbs2.ATT=mean(tbs2.ATT),
                     tbprev=mean(TB == "TB"),
+                    ## reassessment
                     who.reassess=mean(who.reassess),
                     soc.reassess=mean(soc.reassess),
                     tbs1.reassess=mean(tbs1s.reassess),
-                    tbs2.reassess = mean(tbs2s.reassess)
+                    tbs2.reassess = mean(tbs2s.reassess),
+                    ## ATT without reassessment, ie from 1st assessment
+                    soc.ATTworeassess = mean(!soc.reassess * soc.ATT),
+                    who.ATTworeassess = mean(!who.reassess * who.ATT),
+                    tbs1.ATTworeassess = mean(!tbs1s.reassess * tbs1.ATT),
+                    tbs2.ATTworeassess = mean(!tbs2s.reassess * tbs2.ATT),
+                    ## ATT with reassessment, ie from reaassessment
+                    soc.ATTreassess = mean(soc.reassess * soc.ATT),
+                    who.ATTreassess = mean(who.reassess * who.ATT),
+                    tbs1.ATTreassess = mean(tbs1s.reassess * tbs1.ATT),
+                    tbs2.ATTreassess = mean(tbs2s.reassess * tbs2.ATT),
+                    ## initial assessment
+                    ## NOTE soc.screened==0/1,who_scre>=1,TBS2Sa>=1
+                    who.assess=mean(who_scre>0),
+                    soc.assess=mean(soc.screened>0),
+                    tbs1.assess=1, #NOTE everyone!
+                    tbs2.assess = mean(TBS2Sa > 0)
                     ),
                   by=country]
     all.nottb <- WH[TB == "not TB", .(
@@ -296,6 +313,24 @@ makeTable <- function(MZ){
         `100x ATT per child, WHO`=brkt(1e2*who.ATT,1e2*who.ATT.lo,1e2*who.ATT.hi),
         `100x ATT per child, TBS1`=brkt(1e2*tbs1.ATT,1e2*tbs1.ATT.lo,1e2*tbs1.ATT.hi),
         `100x ATT per child, TBS2`=brkt(1e2*tbs2.ATT,1e2*tbs2.ATT.lo,1e2*tbs2.ATT.hi),
+        ## --- ATT from 1st assessments
+        `100x ATT per child from 1st assessments, SOC`=
+          brkt(1e2*soc.ATTworeassess,1e2*soc.ATTworeassess.lo,1e2*soc.ATTworeassess.hi),
+        `100x ATT per child from 1st assessments, WHO`=
+          brkt(1e2*who.ATTworeassess,1e2*who.ATTworeassess.lo,1e2*who.ATTworeassess.hi),
+        `100x ATT per child from 1st assessments, TBS1`=
+          brkt(1e2*tbs1.ATTworeassess,1e2*tbs1.ATTworeassess.lo,1e2*tbs1.ATTworeassess.hi),
+        `100x ATT per child from 1st assessments, TBS2`=
+          brkt(1e2*tbs2.ATTworeassess,1e2*tbs2.ATTworeassess.lo,1e2*tbs2.ATTworeassess.hi),
+        ## --- ATT from reassessments
+        `100x ATT per child from reassessments, SOC`=
+          brkt(1e2*soc.ATTreassess,1e2*soc.ATTreassess.lo,1e2*soc.ATTreassess.hi),
+        `100x ATT per child from reassessments, WHO`=
+          brkt(1e2*who.ATTreassess,1e2*who.ATTreassess.lo,1e2*who.ATTreassess.hi),
+        `100x ATT per child from reassessments, TBS1`=
+          brkt(1e2*tbs1.ATTreassess,1e2*tbs1.ATTreassess.lo,1e2*tbs1.ATTreassess.hi),
+        `100x ATT per child from reassessments, TBS2`=
+          brkt(1e2*tbs2.ATTreassess,1e2*tbs2.ATTreassess.lo,1e2*tbs2.ATTreassess.hi),
         ## --- FPs
         `% FP, SOC`=brkt(1e2*soc.FP,1e2*soc.FP.lo,1e2*soc.FP.hi),
         `% FP, WHO`=brkt(1e2*who.FP,1e2*who.FP.lo,1e2*who.FP.hi),
@@ -306,11 +341,17 @@ makeTable <- function(MZ){
         `% FN, WHO`=brkt(1e2*who.FN,1e2*who.FN.lo,1e2*who.FN.hi),
         `% FN, TBS1`=brkt(1e2*tbs1.FN,1e2*tbs1.FN.lo,1e2*tbs1.FN.hi),
         `% FN, TBS2`=brkt(1e2*tbs2.FN,1e2*tbs2.FN.lo,1e2*tbs2.FN.hi),
+        ## --- 1st assessments
+        `% assessed, SOC`=brkt(1e2*soc.assess,1e2*soc.assess.lo,1e2*soc.assess.hi),
+        `% assessed, WHO`=brkt(1e2*who.assess,1e2*who.assess.lo,1e2*who.assess.hi),
+        `% assessed, TBS1`=brkt(1e2*tbs1.assess,1e2*tbs1.assess.lo,1e2*tbs1.assess.hi),
+        `% assessed, TBS2`=brkt(1e2*tbs2.assess,1e2*tbs2.assess.lo,1e2*tbs2.assess.hi),
         ## --- reassessments
         `% reassessed, SOC`=brkt(1e2*soc.reassess,1e2*soc.reassess.lo,1e2*soc.reassess.hi),
         `% reassessed, WHO`=brkt(1e2*who.reassess,1e2*who.reassess.lo,1e2*who.reassess.hi),
         `% reassessed, TBS1`=brkt(1e2*tbs1.reassess,1e2*tbs1.reassess.lo,1e2*tbs1.reassess.hi),
         `% reassessed, TBS2`=brkt(1e2*tbs2.reassess,1e2*tbs2.reassess.lo,1e2*tbs2.reassess.hi),
+        
         ## --- D ATT
         `100x incremental ATT, WHO v SOC`=brkt(1e2*DT_WHO,1e2*DT_WHO.lo,1e2*DT_WHO.hi),
         `100x incremental ATT, TBS1 v SOC`=brkt(1e2*DT_TBS1,1e2*DT_TBS1.lo,1e2*DT_TBS1.hi),

@@ -294,7 +294,8 @@ CF <- merge(CF,LYK[,.(country,LYS)],by='country',all.x=TRUE) #undiscounted
 
 
 ## NOTE this step resamples Npops times with popsize and calculates means
-ALL <- combineHE(CF, popsize = 6e2, Npops = 1e3) ## ,
+## using 300 as ~ size per country
+ALL <- combineHE(CF, popsize = 3e2, Npops = 1e3) ## ,
                  ## parnmz = pnmz)
 
 ## ## NOTE incrementals now included in combineHE
