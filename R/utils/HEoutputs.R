@@ -12,11 +12,11 @@ brkt <- function(M,L,H,ndp=0) paste0(round(M,ndp),' (',
 
 
 ## === create cost data
-CD <- parsecosts(gh('data/TB-Speed_SAM_Costs.csv'))
-CD[,c('cost.mid','cost.sd'):=.((High+Low)/2,(High-Low)/3.92)]
+CD <- parsecosts(gh("data/TB-Speed_SAM_Costs.csv"))
+CD[, c("cost.mid", "cost.sd") := .((High + Low) / 2, (High - Low) / 3.92)]
 ## model as gamma parameters
-CD[,theta:=cost.sd^2/cost.mid]
-CD[,k:=cost.mid/theta]
+CD[, theta := cost.sd^2 / cost.mid]
+CD[, k := cost.mid / theta]
 
 makeCostPSA <- function(N){
   CDL <- CD[rep(1:nrow(CD),N),.(NAME,country,k,theta)]
