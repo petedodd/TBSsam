@@ -144,7 +144,7 @@ CF[,.(mean(Xpert_res)),by=TB]
 CDW <- makeCostPSA(Nreps)
 
 ## SA if cost parameter selected
-if (substr(SA, 1, 2) == "c.") { #detect a cost parm for SA
+if (!is.na(SA) && substr(SA, 1, 2) == "c.") { #detect a cost parm for SA
   if (SA %in% names(CDW)){
      cat("SA: Overwriting cost ", SA, " with ", LM, "!\n")
   } else{
@@ -257,7 +257,7 @@ SESP[, qty := ifelse(TB == "TB", "Se", "Sp")]
 SESP[, TB := NULL]
 SESP
 
-if(SA=="")
+if(!is.na(SA) && SA=="")
   fwrite(SESP,file = here('data/SESP.csv'))
 
 
@@ -346,7 +346,7 @@ MZ[,c('tICER0_TBS2'):=.(-tDC_TBS2/tDD0_TBS2)]
 
 tab <- makeTable(MZ)
 tab
-if (SA == "") {
+if (!is.na(SA) && SA == "") {
   fwrite(tab, file = here("data/ICERtable.csv"))
 } else{
   fwrite(tab, file = gh("data/SA/ICERtable_{SA}_{LM}.csv"))
@@ -356,7 +356,7 @@ TT <- transpose(tab,make.names = TRUE)
 rownames(TT) <- names(tab)[-1]
 TT
 
-if (SA == "") {
+if (!is.na(SA) && SA == "") {
   write.csv(TT, file = here("data/tICERtable.csv"))
 } else {
   fwrite(TT, file = gh("data/SA/tICERtable_{SA}_{LM}.csv"))
@@ -375,11 +375,11 @@ M[,.(`DALYs averted`=mean(`DALYs averted`),
      `Incremental cost`=mean(`Incremental cost`)),
   by=.(country,algorithm)]
 
-if(SA=="")
+if(!is.na(SA) && SA=="")
   ggsave(GP, file = here("graphs/CEhull.pdf"), h = 8, w = 10)
 
 
-CEAC <- make.ceacs(M[country %in% c("Zambia", "Uganda")], seq(from = 0, to = 500, by = 0.5))
+CEAC <- make.ceacs(M[country %in% c("Zambia", "Uganda")], seq(from = 0, to = 200, by = 0.5))
 
 GP <- ggplot(
   CEAC,
@@ -390,7 +390,7 @@ GP <- ggplot(
   xlab("Cost effectiveness threshold (US$ per DALY averted)") +
   ylab("Probability cost-effective")
 GP
-if(SA=="")
+if(!is.na(SA) && SA=="")
   ggsave(GP, file = here("graphs/CEAC.pdf"), h = 8, w = 10)
 
 
