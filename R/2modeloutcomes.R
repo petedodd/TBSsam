@@ -324,26 +324,14 @@ MZ[,c('tICER0_TBS2'):=.(-tDC_TBS2/tDD0_TBS2)]
 ## prettier table
 tab <- makeTable(MZ)
 tab
-<<<<<<< HEAD
-if (!is.na(SA) && SA == "") {
-  fwrite(tab, file = here("data/ICERtable.csv"))
-} else{
-  fwrite(tab, file = gh("data/SA/ICERtable_{SA}_{LM}.csv"))
-}
-=======
 
->>>>>>> 38bd2ce51613a79724fc561f096b5dd242f04bdc
 ## transposed version
 TT <- transpose(tab,make.names = TRUE)
 rownames(TT) <- names(tab)[-1]
 TT
 
-<<<<<<< HEAD
-if (!is.na(SA) && SA == "") {
-=======
 ## save out
-if (SA == "") {
->>>>>>> 38bd2ce51613a79724fc561f096b5dd242f04bdc
+if (!is.na(SA) && SA == "") {
   write.csv(TT, file = here("data/tICERtable.csv"))
   fwrite(tab, file = here("data/ICERtable.csv"))
 } else {
@@ -369,13 +357,6 @@ M[,.(`DALYs averted`=mean(`DALYs averted`),
      `Incremental cost`=mean(`Incremental cost`)),
   by=.(country,algorithm)]
 
-<<<<<<< HEAD
-if(!is.na(SA) && SA=="")
-  ggsave(GP, file = here("graphs/CEhull.pdf"), h = 8, w = 10)
-
-
-CEAC <- make.ceacs(M[country %in% c("Zambia", "Uganda")], seq(from = 0, to = 200, by = 0.5))
-=======
 
 ## rankogram ---------
 GQ <- makeRankogram(ALL[country %in% c("Uganda", "Zambia")])
@@ -390,7 +371,6 @@ GB <- ggarrange(GP, GQ,
 
 ## CEAC  ---------
 CEAC <- make.ceacs(M[country %in% c("Zambia", "Uganda")], seq(from = 0, to = 500, by = 0.5))
->>>>>>> 38bd2ce51613a79724fc561f096b5dd242f04bdc
 
 GC <- ggplot(
   CEAC,
@@ -400,13 +380,7 @@ GC <- ggplot(
   scale_y_continuous(label = percent) +
   xlab("Cost effectiveness threshold (US$ per DALY averted)") +
   ylab("Probability cost-effective")
-<<<<<<< HEAD
-GP
-if(!is.na(SA) && SA=="")
-  ggsave(GP, file = here("graphs/CEAC.pdf"), h = 8, w = 10)
-=======
 GC
->>>>>>> 38bd2ce51613a79724fc561f096b5dd242f04bdc
 
 ## saving out  ---------
 if (SA == "") {
