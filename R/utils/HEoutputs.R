@@ -80,22 +80,22 @@ combineHE <- function(WS,
                     tbs2.ATT=mean(tbs2.ATT),
                     tbprev=mean(TB == "TB"),
                     ## reassessment (among those initially screened, identified as presumptive TB but not TB diagnosed at initial exam)
-                    who.reassessTB=mean(who.reassess[who_scre > 0]), 
-                    soc.reassessTB=mean(soc.reassess[soc.screened == 1 & soc.ptb > 0]),
+                    soc.reassessTB=mean(soc.reassess*soc.ptb),
+                    who.reassessTB=mean((who.reassess==1)*(who_scre>0)), 
                     tbs1.reassessTB=mean(tbs1s.reassess), 
-                    tbs2.reassessTB= mean(tbs2s.reassess[TBS2Sa > 0]), 
+                    tbs2.reassessTB= mean((tbs2s.reassess==1)*(TBS2Sa>0)), 
                     
                     ## ATT without reassessment, ie from 1st assessment (among those initially screened and identified as presumptive TB)
-                    soc.ATTworeassess = mean(!soc.reassess[soc.screened == 1 & soc.ptb > 0] * soc.ATT[soc.screened == 1 & soc.ptb > 0], na.rm = TRUE),
-                    who.ATTworeassess = mean(!who.reassess[who_scre > 0] * who.ATT[who_scre > 0], na.rm = TRUE),
-                    tbs1.ATTworeassess = mean(!tbs1s.reassess * tbs1.ATT, na.rm = TRUE),
-                    tbs2.ATTworeassess = mean(!tbs2s.reassess[TBS2Sa > 0] * tbs2.ATT[TBS2Sa > 0], na.rm = TRUE),
+                    soc.ATTworeassess = mean(!soc.reassess*soc.ptb*soc.ATT),
+                    who.ATTworeassess = mean(!who.reassess*(who_scre>0)*(who.ATT==1)),
+                    tbs1.ATTworeassess = mean(!tbs1s.reassess * tbs1.ATT),
+                    tbs2.ATTworeassess = mean(!tbs2s.reassess*(TBS2Sa>0)*(tbs2.ATT==1)),
                     
                     ## ATT with reassessment, ie from reassessment (among those initially screened and identified as presumptive TB)
-                    soc.ATTreassess = mean(soc.reassess[soc.screened == 1 & soc.ptb > 0] * soc.ATT[soc.screened == 1 & soc.ptb > 0], na.rm = TRUE),
-                    who.ATTreassess = mean(who.reassess[who_scre > 0] * who.ATT[who_scre > 0], na.rm = TRUE),
-                    tbs1.ATTreassess = mean(tbs1s.reassess * tbs1.ATT, na.rm = TRUE),
-                    tbs2.ATTreassess = mean(tbs2s.reassess[TBS2Sa > 0] * tbs2.ATT[TBS2Sa > 0], na.rm = TRUE),
+                    soc.ATTreassess = mean(soc.reassess*soc.ptb*soc.ATT),
+                    who.ATTreassess = mean((who.reassess==1)*(who_scre>0)*(who.ATT==1)),
+                    tbs1.ATTreassess = mean(tbs1s.reassess * tbs1.ATT),
+                    tbs2.ATTreassess = mean((tbs2s.reassess==1)*(TBS2Sa>0)*(tbs2.ATT==1)),
                     
                     ## initial assessment
                     who.assess=mean(who_scre>0),
