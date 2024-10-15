@@ -97,7 +97,7 @@ combineHE <- function(WS,
                     ## initial assessment
                     ## NOTE soc.screened==0/1,who_scre>=1,TBS2Sa>=1
                     who.assess=mean(who_scre>0),
-                    soc.assess=mean(soc.screened>0),
+                    soc.assess=mean(soc.ptb>0),
                     tbs1.assess=1, #NOTE everyone!
                     tbs2.assess = mean(TBS2Sa > 0)
                     ),
