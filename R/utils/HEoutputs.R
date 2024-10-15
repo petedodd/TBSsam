@@ -312,106 +312,106 @@ makeTable <- function(MZ){
   MZ[,.(country,
         ## --- ATT
         `100x ATT per child, SOC`=brkt(1e2*soc.ATT,1e2*soc.ATT.lo,1e2*soc.ATT.hi),
-        `100x ATT per child, WHO`=brkt(1e2*who.ATT,1e2*who.ATT.lo,1e2*who.ATT.hi),
         `100x ATT per child, TBS1`=brkt(1e2*tbs1.ATT,1e2*tbs1.ATT.lo,1e2*tbs1.ATT.hi),
         `100x ATT per child, TBS2`=brkt(1e2*tbs2.ATT,1e2*tbs2.ATT.lo,1e2*tbs2.ATT.hi),
+        `100x ATT per child, WHO`=brkt(1e2*who.ATT,1e2*who.ATT.lo,1e2*who.ATT.hi),
         ## --- ATT from 1st assessments
         `100x ATT per child from 1st assessments, SOC`=
           brkt(1e2*soc.ATTworeassess,1e2*soc.ATTworeassess.lo,1e2*soc.ATTworeassess.hi),
-        `100x ATT per child from 1st assessments, WHO`=
-          brkt(1e2*who.ATTworeassess,1e2*who.ATTworeassess.lo,1e2*who.ATTworeassess.hi),
         `100x ATT per child from 1st assessments, TBS1`=
           brkt(1e2*tbs1.ATTworeassess,1e2*tbs1.ATTworeassess.lo,1e2*tbs1.ATTworeassess.hi),
         `100x ATT per child from 1st assessments, TBS2`=
           brkt(1e2*tbs2.ATTworeassess,1e2*tbs2.ATTworeassess.lo,1e2*tbs2.ATTworeassess.hi),
+        `100x ATT per child from 1st assessments, WHO`=
+          brkt(1e2*who.ATTworeassess,1e2*who.ATTworeassess.lo,1e2*who.ATTworeassess.hi),
         ## --- ATT from reassessments
         `100x ATT per child from reassessments, SOC`=
           brkt(1e2*soc.ATTreassess,1e2*soc.ATTreassess.lo,1e2*soc.ATTreassess.hi),
-        `100x ATT per child from reassessments, WHO`=
-          brkt(1e2*who.ATTreassess,1e2*who.ATTreassess.lo,1e2*who.ATTreassess.hi),
         `100x ATT per child from reassessments, TBS1`=
           brkt(1e2*tbs1.ATTreassess,1e2*tbs1.ATTreassess.lo,1e2*tbs1.ATTreassess.hi),
         `100x ATT per child from reassessments, TBS2`=
           brkt(1e2*tbs2.ATTreassess,1e2*tbs2.ATTreassess.lo,1e2*tbs2.ATTreassess.hi),
+        `100x ATT per child from reassessments, WHO`=
+          brkt(1e2*who.ATTreassess,1e2*who.ATTreassess.lo,1e2*who.ATTreassess.hi),
         ## --- FPs
         `% FP, SOC`=brkt(1e2*soc.FP,1e2*soc.FP.lo,1e2*soc.FP.hi),
-        `% FP, WHO`=brkt(1e2*who.FP,1e2*who.FP.lo,1e2*who.FP.hi),
         `% FP, TBS1`=brkt(1e2*tbs1.FP,1e2*tbs1.FP.lo,1e2*tbs1.FP.hi),
         `% FP, TBS2`=brkt(1e2*tbs2.FP,1e2*tbs2.FP.lo,1e2*tbs2.FP.hi),
+        `% FP, WHO`=brkt(1e2*who.FP,1e2*who.FP.lo,1e2*who.FP.hi),
         ## --- FNs
         `% FN, SOC`=brkt(1e2*soc.FN,1e2*soc.FN.lo,1e2*soc.FN.hi),
-        `% FN, WHO`=brkt(1e2*who.FN,1e2*who.FN.lo,1e2*who.FN.hi),
         `% FN, TBS1`=brkt(1e2*tbs1.FN,1e2*tbs1.FN.lo,1e2*tbs1.FN.hi),
         `% FN, TBS2`=brkt(1e2*tbs2.FN,1e2*tbs2.FN.lo,1e2*tbs2.FN.hi),
+        `% FN, WHO`=brkt(1e2*who.FN,1e2*who.FN.lo,1e2*who.FN.hi),
         ## --- 1st assessments
         `% assessed, SOC`=brkt(1e2*soc.assess,1e2*soc.assess.lo,1e2*soc.assess.hi),
-        `% assessed, WHO`=brkt(1e2*who.assess,1e2*who.assess.lo,1e2*who.assess.hi),
         `% assessed, TBS1`=brkt(1e2*tbs1.assess,1e2*tbs1.assess.lo,1e2*tbs1.assess.hi),
         `% assessed, TBS2`=brkt(1e2*tbs2.assess,1e2*tbs2.assess.lo,1e2*tbs2.assess.hi),
+        `% assessed, WHO`=brkt(1e2*who.assess,1e2*who.assess.lo,1e2*who.assess.hi),
         ## --- reassessments (among those initially screened and identified as presumptive TB)
         `% reassessed, SOC`=brkt(1e2*soc.reassessTB,1e2*soc.reassessTB.lo,1e2*soc.reassessTB.hi),
-        `% reassessed, WHO`=brkt(1e2*who.reassessTB,1e2*who.reassessTB.lo,1e2*who.reassessTB.hi),
         `% reassessed, TBS1`=brkt(1e2*tbs1.reassessTB,1e2*tbs1.reassessTB.lo,1e2*tbs1.reassessTB.hi),
         `% reassessed, TBS2`=brkt(1e2*tbs2.reassessTB,1e2*tbs2.reassessTB.lo,1e2*tbs2.reassessTB.hi),
+        `% reassessed, WHO`=brkt(1e2*who.reassessTB,1e2*who.reassessTB.lo,1e2*who.reassessTB.hi),
         
         ## --- D ATT
-        `100x incremental ATT, WHO v SOC`=brkt(1e2*DT_WHO,1e2*DT_WHO.lo,1e2*DT_WHO.hi),
         `100x incremental ATT, TBS1 v SOC`=brkt(1e2*DT_TBS1,1e2*DT_TBS1.lo,1e2*DT_TBS1.hi),
         `100x incremental ATT, TBS2 v SOC`=brkt(1e2*DT_TBS2,1e2*DT_TBS2.lo,1e2*DT_TBS2.hi),
+        `100x incremental ATT, WHO v SOC`=brkt(1e2*DT_WHO,1e2*DT_WHO.lo,1e2*DT_WHO.hi),
+        `100x incremental ATT, TBS2 v TBS1`=brkt(1e2*tDT_TBS2,1e2*tDT_TBS2.lo,1e2*tDT_TBS2.hi),
         `100x incremental ATT, TBS1 v WHO`=brkt(1e2*wDT_TBS1,1e2*wDT_TBS1.lo,1e2*wDT_TBS1.hi),
         `100x incremental ATT, TBS2 v WHO`=brkt(1e2*wDT_TBS2,1e2*wDT_TBS2.lo,1e2*wDT_TBS2.hi),
-        `100x incremental ATT, TBS2 v TBS1`=brkt(1e2*tDT_TBS2,1e2*tDT_TBS2.lo,1e2*tDT_TBS2.hi),
         ## --- deaths
         `100x deaths per child, SOC`=brkt(1e2*soc.cfr,1e2*soc.cfr.lo,1e2*soc.cfr.hi),
-        `100x deaths per child, WHO`=brkt(1e2*who.cfr,1e2*who.cfr.lo,1e2*who.cfr.hi),
         `100x deaths per child, TBS1`=brkt(1e2*tbs1.cfr,1e2*tbs1.cfr.lo,1e2*tbs1.cfr.hi),
         `100x deaths per child, TBS2`=brkt(1e2*tbs2.cfr,1e2*tbs2.cfr.lo,1e2*tbs2.cfr.hi),
+        `100x deaths per child, WHO`=brkt(1e2*who.cfr,1e2*who.cfr.lo,1e2*who.cfr.hi),
         ## --- D deaths
-        `100x incremental deaths, WHO v SOC`=brkt(1e2*DM_WHO,1e2*DM_WHO.lo,1e2*DM_WHO.hi),
         `100x incremental deaths, TBS1 v SOC`=brkt(1e2*DM_TBS1,1e2*DM_TBS1.lo,1e2*DM_TBS1.hi),
         `100x incremental deaths, TBS2 v SOC`=brkt(1e2*DM_TBS2,1e2*DM_TBS2.lo,1e2*DM_TBS2.hi),
+        `100x incremental deaths, WHO v SOC`=brkt(1e2*DM_WHO,1e2*DM_WHO.lo,1e2*DM_WHO.hi),
+        `100x incremental deaths, TBS2 v TBS1`=brkt(1e2*tDM_TBS2,1e2*tDM_TBS2.lo,1e2*tDM_TBS2.hi),
         `100x incremental deaths, TBS1 v WHO`=brkt(1e2*wDM_TBS1,1e2*wDM_TBS1.lo,1e2*wDM_TBS1.hi),
         `100x incremental deaths, TBS2 v WHO`=brkt(1e2*wDM_TBS2,1e2*wDM_TBS2.lo,1e2*wDM_TBS2.hi),
-        `100x incremental deaths, TBS2 v TBS1`=brkt(1e2*tDM_TBS2,1e2*tDM_TBS2.lo,1e2*tDM_TBS2.hi),
         ## --- D undiscounted dalys
-        `100x undiscounted LYS, WHO v SOC`=brkt(-1e2*DD0_WHO,-1e2*DD0_WHO.hi,-1e2*DD0_WHO.lo),
         `100x undiscounted LYS, TBS1 v SOC`=brkt(-1e2*DD0_TBS1,-1e2*DD0_TBS1.hi,-1e2*DD0_TBS1.lo),
         `100x undiscounted LYS, TBS2 v SOC`=brkt(-1e2*DD0_TBS2,-1e2*DD0_TBS2.hi,-1e2*DD0_TBS2.lo),
+        `100x undiscounted LYS, WHO v SOC`=brkt(-1e2*DD0_WHO,-1e2*DD0_WHO.hi,-1e2*DD0_WHO.lo),
+        `100x undiscounted LYS, TBS2 v TBS1`=brkt(-1e2*tDD0_TBS2,-1e2*tDD0_TBS2.hi,-1e2*tDD0_TBS2.lo),
         `100x undiscounted LYS, TBS1 v WHO`=brkt(-1e2*wDD0_TBS1,-1e2*wDD0_TBS1.hi,-1e2*wDD0_TBS1.lo),
         `100x undiscounted LYS, TBS2 v WHO`=brkt(-1e2*wDD0_TBS2,-1e2*wDD0_TBS2.hi,-1e2*wDD0_TBS2.lo),
-        `100x undiscounted LYS, TBS2 v TBS1`=brkt(-1e2*tDD0_TBS2,-1e2*tDD0_TBS2.hi,-1e2*tDD0_TBS2.lo),
         ## --- D dalys
-        `100x DALYs averted, WHO v SOC`=brkt(-1e2*DD_WHO,-1e2*DD_WHO.hi,-1e2*DD_WHO.lo),
         `100x DALYs averted, TBS1 v SOC`=brkt(-1e2*DD_TBS1,-1e2*DD_TBS1.hi,-1e2*DD_TBS1.lo),
         `100x DALYs averted, TBS2 v SOC`=brkt(-1e2*DD_TBS2,-1e2*DD_TBS2.hi,-1e2*DD_TBS2.lo),
+        `100x DALYs averted, WHO v SOC`=brkt(-1e2*DD_WHO,-1e2*DD_WHO.hi,-1e2*DD_WHO.lo),
+        `100x DALYs averted, TBS2 v TBS1`=brkt(-1e2*tDD_TBS2,-1e2*tDD_TBS2.hi,-1e2*tDD_TBS2.lo),
         `100x DALYs averted, TBS1 v WHO`=brkt(-1e2*wDD_TBS1,-1e2*wDD_TBS1.hi,-1e2*wDD_TBS1.lo),
         `100x DALYs averted, TBS2 v WHO`=brkt(-1e2*wDD_TBS2,-1e2*wDD_TBS2.hi,-1e2*wDD_TBS2.lo),
-        `100x DALYs averted, TBS2 v TBS1`=brkt(-1e2*tDD_TBS2,-1e2*tDD_TBS2.hi,-1e2*tDD_TBS2.lo),
         ## --- C
         `cost per child, SOC`=brkt(soc.cost,soc.cost.lo,soc.cost.hi),
-        `cost per child, WHO`=brkt(who.cost,who.cost.lo,who.cost.hi),
         `cost per child, TBS1`=brkt(tbs1.cost,tbs1.cost.lo,tbs1.cost.hi),
         `cost per child, TBS2`=brkt(tbs2.cost,tbs2.cost.lo,tbs2.cost.hi),
+        `cost per child, WHO`=brkt(who.cost,who.cost.lo,who.cost.hi),
         ## --- DC
-        `incremental cost, WHO v SOC`=brkt(DC_WHO,DC_WHO.lo,DC_WHO.hi),
         `incremental cost, TBS1 v SOC`=brkt(DC_TBS1,DC_TBS1.lo,DC_TBS1.hi),
         `incremental cost, TBS2 v SOC`=brkt(DC_TBS2,DC_TBS2.lo,DC_TBS2.hi),
+        `incremental cost, WHO v SOC`=brkt(DC_WHO,DC_WHO.lo,DC_WHO.hi),
+        `incremental cost, TBS2 v TBS1`=brkt(tDC_TBS2,tDC_TBS2.lo,tDC_TBS2.hi),
         `incremental cost, TBS1 v WHO`=brkt(wDC_TBS1,wDC_TBS1.lo,wDC_TBS1.hi),
         `incremental cost, TBS2 v WHO`=brkt(wDC_TBS2,wDC_TBS2.lo,wDC_TBS2.hi),
-        `incremental cost, TBS2 v TBS1`=brkt(tDC_TBS2,tDC_TBS2.lo,tDC_TBS2.hi),
         ## --- undiscounted ICERS
-        `ICER (no discounting), WHO v SOC`=round(ICER0_WHO,2),
         `ICER (no discounting), TBS1 v SOC`=round(ICER0_TBS1,2),
         `ICER (no discounting), TBS2 v SOC`=round(ICER0_TBS2,2),
+        `ICER (no discounting), WHO v SOC`=round(ICER0_WHO,2),
+        `ICER (no discounting), TBS2 v TBS1`=round(tICER0_TBS2,2),
         `ICER (no discounting), TBS1 v WHO`=round(wICER0_TBS1,2),
         `ICER (no discounting), TBS2 v WHO`=round(wICER0_TBS2,2),
-        `ICER (no discounting), TBS2 v TBS1`=round(tICER0_TBS2,2),
         ## --- ICERS
-        `ICER, WHO v SOC`=round(ICER_WHO,2),
         `ICER, TBS1 v SOC`=round(ICER_TBS1,2),
         `ICER, TBS2 v SOC`=round(ICER_TBS2,2),
+        `ICER, WHO v SOC`=round(ICER_WHO,2),
+        `ICER, TBS2 v TBS1`=round(tICER_TBS2,2),
         `ICER, TBS1 v WHO`=round(wICER_TBS1,2),
-        `ICER, TBS2 v WHO`=round(wICER_TBS2,2),
-        `ICER, TBS2 v TBS1`=round(tICER_TBS2,2)
+        `ICER, TBS2 v WHO`=round(wICER_TBS2,2)
         )]
 }
