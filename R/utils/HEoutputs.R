@@ -3,8 +3,8 @@ library(ggpubr)
 library(scales)
 
 ## helpers
-lo <- function(x) quantile(x,probs = 0.025)
-hi <- function(x) quantile(x,probs = 1-0.025)
+lo <- function(x) quantile(x,probs = 0.025, na.rm = TRUE)
+hi <- function(x) quantile(x,probs = 1-0.025, na.rm = TRUE)
 ## rot45 <- theme(axis.text.x = element_text(angle = 45, hjust = 1))
 brkt <- function(M,L,H,ndp=0) paste0(round(M,ndp),' (',
                                      round(L,ndp),' to ',
@@ -79,23 +79,25 @@ combineHE <- function(WS,
                     tbs2.cfr=mean(tbs2.cfr),
                     tbs2.ATT=mean(tbs2.ATT),
                     tbprev=mean(TB == "TB"),
-                    ## reassessment
-                    who.reassess=mean(who.reassess),
-                    soc.reassess=mean(soc.reassess),
-                    tbs1.reassess=mean(tbs1s.reassess),
-                    tbs2.reassess = mean(tbs2s.reassess),
-                    ## ATT without reassessment, ie from 1st assessment
-                    soc.ATTworeassess = mean(!soc.reassess * soc.ATT),
-                    who.ATTworeassess = mean(!who.reassess * who.ATT),
-                    tbs1.ATTworeassess = mean(!tbs1s.reassess * tbs1.ATT),
-                    tbs2.ATTworeassess = mean(!tbs2s.reassess * tbs2.ATT),
-                    ## ATT with reassessment, ie from reaassessment
-                    soc.ATTreassess = mean(soc.reassess * soc.ATT),
-                    who.ATTreassess = mean(who.reassess * who.ATT),
-                    tbs1.ATTreassess = mean(tbs1s.reassess * tbs1.ATT),
-                    tbs2.ATTreassess = mean(tbs2s.reassess * tbs2.ATT),
+                    ## reassessment (among those initially screened and identified as presumptive TB)
+                    who.reassessTB=mean(who.reassess[who_scre > 0]), 
+                    soc.reassessTB=mean(soc.reassess[soc.screened == 1 & soc.ptb > 0]),
+                    tbs1.reassessTB=mean(tbs1s.reassess), 
+                    tbs2.reassessTB= mean(tbs2s.reassess[TBS2Sa > 0]), 
+                    
+                    ## ATT without reassessment, ie from 1st assessment (among those initially screened and identified as presumptive TB)
+                    soc.ATTworeassess = mean(!soc.reassess[soc.screened == 1 & soc.ptb > 0] * soc.ATT[soc.screened == 1 & soc.ptb > 0], na.rm = TRUE),
+                    who.ATTworeassess = mean(!who.reassess[who_scre > 0] * who.ATT[who_scre > 0], na.rm = TRUE),
+                    tbs1.ATTworeassess = mean(!tbs1s.reassess * tbs1.ATT, na.rm = TRUE),
+                    tbs2.ATTworeassess = mean(!tbs2s.reassess[TBS2Sa > 0] * tbs2.ATT[TBS2Sa > 0], na.rm = TRUE),
+                    
+                    ## ATT with reassessment, ie from reassessment (among those initially screened and identified as presumptive TB)
+                    soc.ATTreassess = mean(soc.reassess[soc.screened == 1 & soc.ptb > 0] * soc.ATT[soc.screened == 1 & soc.ptb > 0], na.rm = TRUE),
+                    who.ATTreassess = mean(who.reassess[who_scre > 0] * who.ATT[who_scre > 0], na.rm = TRUE),
+                    tbs1.ATTreassess = mean(tbs1s.reassess * tbs1.ATT, na.rm = TRUE),
+                    tbs2.ATTreassess = mean(tbs2s.reassess[TBS2Sa > 0] * tbs2.ATT[TBS2Sa > 0], na.rm = TRUE),
+                    
                     ## initial assessment
-                    ## NOTE soc.screened==0/1,who_scre>=1,TBS2Sa>=1
                     who.assess=mean(who_scre>0),
                     soc.assess=mean(soc.ptb>0),
                     tbs1.assess=1, #NOTE everyone!
@@ -346,11 +348,11 @@ makeTable <- function(MZ){
         `% assessed, WHO`=brkt(1e2*who.assess,1e2*who.assess.lo,1e2*who.assess.hi),
         `% assessed, TBS1`=brkt(1e2*tbs1.assess,1e2*tbs1.assess.lo,1e2*tbs1.assess.hi),
         `% assessed, TBS2`=brkt(1e2*tbs2.assess,1e2*tbs2.assess.lo,1e2*tbs2.assess.hi),
-        ## --- reassessments
-        `% reassessed, SOC`=brkt(1e2*soc.reassess,1e2*soc.reassess.lo,1e2*soc.reassess.hi),
-        `% reassessed, WHO`=brkt(1e2*who.reassess,1e2*who.reassess.lo,1e2*who.reassess.hi),
-        `% reassessed, TBS1`=brkt(1e2*tbs1.reassess,1e2*tbs1.reassess.lo,1e2*tbs1.reassess.hi),
-        `% reassessed, TBS2`=brkt(1e2*tbs2.reassess,1e2*tbs2.reassess.lo,1e2*tbs2.reassess.hi),
+        ## --- reassessments (among those initially screened and identified as presumptive TB)
+        `% reassessed, SOC`=brkt(1e2*soc.reassessTB,1e2*soc.reassessTB.lo,1e2*soc.reassessTB.hi),
+        `% reassessed, WHO`=brkt(1e2*who.reassessTB,1e2*who.reassessTB.lo,1e2*who.reassessTB.hi),
+        `% reassessed, TBS1`=brkt(1e2*tbs1.reassessTB,1e2*tbs1.reassessTB.lo,1e2*tbs1.reassessTB.hi),
+        `% reassessed, TBS2`=brkt(1e2*tbs2.reassessTB,1e2*tbs2.reassessTB.lo,1e2*tbs2.reassessTB.hi),
         
         ## --- D ATT
         `100x incremental ATT, WHO v SOC`=brkt(1e2*DT_WHO,1e2*DT_WHO.lo,1e2*DT_WHO.hi),
