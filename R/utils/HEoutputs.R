@@ -79,7 +79,7 @@ combineHE <- function(WS,
                     tbs2.cfr=mean(tbs2.cfr),
                     tbs2.ATT=mean(tbs2.ATT),
                     tbprev=mean(TB == "TB"),
-                    ## reassessment (among those initially screened and identified as presumptive TB)
+                    ## reassessment (among those initially screened, identified as presumptive TB but not TB diagnosed at initial exam)
                     who.reassessTB=mean(who.reassess[who_scre > 0]), 
                     soc.reassessTB=mean(soc.reassess[soc.screened == 1 & soc.ptb > 0]),
                     tbs1.reassessTB=mean(tbs1s.reassess), 
