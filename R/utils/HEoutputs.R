@@ -373,6 +373,11 @@ makeTable <- function(MZ){
         `100x incremental deaths, TBS2 v TBS1`=brkt(1e2*tDM_TBS2,1e2*tDM_TBS2.lo,1e2*tDM_TBS2.hi),
         `100x incremental deaths, TBS1 v WHO`=brkt(1e2*wDM_TBS1,1e2*wDM_TBS1.lo,1e2*wDM_TBS1.hi),
         `100x incremental deaths, TBS2 v WHO`=brkt(1e2*wDM_TBS2,1e2*wDM_TBS2.lo,1e2*wDM_TBS2.hi),
+        ## --- undiscounted dalys
+        `100x undiscounted LYS, SOC`=brkt(-1e2*soc.DALYs0,-1e2*soc.DALYs0.hi,-1e2*soc.DALYs0.lo),
+        `100x undiscounted LYS, TBS1`=brkt(-1e2*tbs1.DALYs0,-1e2*tbs1.DALYs0.hi,-1e2*tbs1.DALYs0.lo),
+        `100x undiscounted LYS, TBS2`=brkt(-1e2*tbs2.DALYs0,-1e2*tbs2.DALYs0.hi,-1e2*tbs2.DALYs0.lo),
+        `100x undiscounted LYS, WHO`=brkt(-1e2*who.DALYs0,-1e2*who.DALYs0.hi,-1e2*who.DALYs0.lo),
         ## --- D undiscounted dalys
         `100x undiscounted LYS, TBS1 v SOC`=brkt(-1e2*DD0_TBS1,-1e2*DD0_TBS1.hi,-1e2*DD0_TBS1.lo),
         `100x undiscounted LYS, TBS2 v SOC`=brkt(-1e2*DD0_TBS2,-1e2*DD0_TBS2.hi,-1e2*DD0_TBS2.lo),
@@ -380,6 +385,11 @@ makeTable <- function(MZ){
         `100x undiscounted LYS, TBS2 v TBS1`=brkt(-1e2*tDD0_TBS2,-1e2*tDD0_TBS2.hi,-1e2*tDD0_TBS2.lo),
         `100x undiscounted LYS, TBS1 v WHO`=brkt(-1e2*wDD0_TBS1,-1e2*wDD0_TBS1.hi,-1e2*wDD0_TBS1.lo),
         `100x undiscounted LYS, TBS2 v WHO`=brkt(-1e2*wDD0_TBS2,-1e2*wDD0_TBS2.hi,-1e2*wDD0_TBS2.lo),
+        ## --- dalys
+        `100x DALYs averted, SOC`=brkt(-1e2*soc.DALYs,-1e2*soc.DALYs.hi,-1e2*soc.DALYs.lo),
+        `100x DALYs averted, TBS1`=brkt(-1e2*tbs1.DALYs,-1e2*tbs1.DALYs.hi,-1e2*tbs1.DALYs.lo),
+        `100x DALYs averted, TBS2`=brkt(-1e2*tbs2.DALYs,-1e2*tbs2.DALYs.hi,-1e2*tbs2.DALYs.lo),
+        `100x DALYs averted, WHO`=brkt(-1e2*who.DALYs,-1e2*who.DALYs.hi,-1e2*who.DALYs.lo),
         ## --- D dalys
         `100x DALYs averted, TBS1 v SOC`=brkt(-1e2*DD_TBS1,-1e2*DD_TBS1.hi,-1e2*DD_TBS1.lo),
         `100x DALYs averted, TBS2 v SOC`=brkt(-1e2*DD_TBS2,-1e2*DD_TBS2.hi,-1e2*DD_TBS2.lo),
