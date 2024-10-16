@@ -371,7 +371,7 @@ GB <- ggarrange(GP, GQ,
 
 
 ## CEAC  ---------
-CEAC <- make.ceacs(M[country %in% c("Zambia", "Uganda")], seq(from = 0, to = 500, by = 0.5))
+CEAC <- make.ceacs(M[country %in% c("Zambia", "Uganda")], seq(from = 0, to = 100, by = 0.5))
 
 GC <- ggplot(
   CEAC,
@@ -380,7 +380,9 @@ GC <- ggplot(
   geom_line(lwd = 1) +
   scale_y_continuous(label = percent) +
   xlab("Cost effectiveness threshold (US$ per DALY averted)") +
-  ylab("Probability cost-effective")
+  ylab("Probability cost-effective")+
+  scale_linetype_manual(values = c("tbs1" = "dashed", "tbs2" = "dotdash", "who" = "solid")) +
+  scale_color_manual(values = c("Uganda" = "darkorange3", "Zambia" = "deepskyblue3"))
 GC
 
 ## saving out  ---------
