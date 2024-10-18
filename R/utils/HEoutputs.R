@@ -101,22 +101,34 @@ combineHE <- function(WS,
                     tbs2.assess = mean(TBS2Sa > 0)
                     ),
                   by=country]
+    
+    # FP and TN 
     all.nottb <- WH[TB == "not TB", .(
       id = n,
       who.FP = mean(who.ATT),
       soc.FP = mean(soc.ATT),
       tbs1.FP = mean(tbs1.ATT),
-      tbs2.FP = mean(tbs2.ATT)
+      tbs2.FP = mean(tbs2.ATT),
+      who.TN = mean(!who.ATT),
+      soc.TN = mean(!soc.ATT),
+      tbs1.TN = mean(!tbs1.ATT),
+      tbs2.TN = mean(!tbs2.ATT)
     ),
     by = country
     ]
     result <- merge(all.all, all.nottb, by = c("country", "id"))
+    
+    # FN and TP
     all.tb <- WH[TB == "TB", .(
       id = n,
-      who.FN = 1 - mean(who.ATT),
-      soc.FN = 1 - mean(soc.ATT),
-      tbs1.FN = 1 - mean(tbs1.ATT),
-      tbs2.FN = 1 - mean(tbs2.ATT)
+      who.TP = mean(who.ATT),
+      soc.TP = mean(soc.ATT),
+      tbs1.TP = mean(tbs1.ATT),
+      tbs2.TP = mean(tbs2.ATT),
+      who.FN = mean(!who.ATT),
+      soc.FN = mean(!soc.ATT),
+      tbs1.FN = mean(!tbs1.ATT),
+      tbs2.FN = mean(!tbs2.ATT)
     ),
     by = country
     ]
@@ -349,6 +361,16 @@ makeTable <- function(MZ){
         `% FP, TBS1`=brkt(1e2*tbs1.FP,1e2*tbs1.FP.lo,1e2*tbs1.FP.hi),
         `% FP, TBS2`=brkt(1e2*tbs2.FP,1e2*tbs2.FP.lo,1e2*tbs2.FP.hi),
         `% FP, WHO`=brkt(1e2*who.FP,1e2*who.FP.lo,1e2*who.FP.hi),
+        ## --- TPs
+        `% TP, SOC`=brkt(1e2*soc.TP,1e2*soc.TP.lo,1e2*soc.TP.hi),
+        `% TP, TBS1`=brkt(1e2*tbs1.TP,1e2*tbs1.TP.lo,1e2*tbs1.TP.hi),
+        `% TP, TBS2`=brkt(1e2*tbs2.TP,1e2*tbs2.TP.lo,1e2*tbs2.TP.hi),
+        `% TP, WHO`=brkt(1e2*who.TP,1e2*who.TP.lo,1e2*who.TP.hi),
+        ## --- TNs
+        `% TN, SOC`=brkt(1e2*soc.TN,1e2*soc.TN.lo,1e2*soc.TN.hi),
+        `% TN, TBS1`=brkt(1e2*tbs1.TN,1e2*tbs1.TN.lo,1e2*tbs1.TN.hi),
+        `% TN, TBS2`=brkt(1e2*tbs2.TN,1e2*tbs2.TN.lo,1e2*tbs2.TN.hi),
+        `% TN, WHO`=brkt(1e2*who.TN,1e2*who.TN.lo,1e2*who.TN.hi),
         ## --- FNs
         `% FN, SOC`=brkt(1e2*soc.FN,1e2*soc.FN.lo,1e2*soc.FN.hi),
         `% FN, TBS1`=brkt(1e2*tbs1.FN,1e2*tbs1.FN.lo,1e2*tbs1.FN.hi),
