@@ -241,11 +241,13 @@ CEAplots <- function(M,ring=TRUE,alph=0.1){
   HZ[,algorithm:=NA]
   ## text and locations
   HZ[,txt:=c(as.character(round(`Incremental cost`))[-1],NA_character_),by=country]
-  HZ[,txt:=c(as.character(round(`Incremental cost`/`DALYs averted`))[-1],NA_character_),by=country]
+  HZ[, txt := c(as.character(round(diff(`Incremental cost`) / diff(`DALYs averted`))), NA_character_),
+     by = country]
   HZ[,X:=c(`DALYs averted`[-1],NA_real_),by=country]
   HZ[,Y:=c(`Incremental cost`[-1],NA_real_),by=country]
   HZ[,X:=(X+`DALYs averted`)/2]
   HZ[,Y:=(Y+`Incremental cost`)/2]
+  ## print(HZ)
   shft <- HZ[`DALYs averted`>0,mean(`DALYs averted`,na.rm=TRUE)]/10
   ## plot
   GP <- ggplot(MS,aes(`DALYs averted`,`Incremental cost`,col=algorithm))+
