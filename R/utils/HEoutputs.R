@@ -79,24 +79,21 @@ combineHE <- function(WS,
                     tbs2.cfr=mean(tbs2.cfr),
                     tbs2.ATT=mean(tbs2.ATT),
                     tbprev=mean(TB == "TB"),
-                    ## reassessment (among those initially screened, identified as presumptive TB but not TB diagnosed at initial exam)
-                    soc.reassessTB=mean(soc.reassess*soc.ptb),
-                    who.reassessTB=mean((who.reassess==1)*(who_scre>0)), 
-                    tbs1.reassessTB=mean(tbs1s.reassess), 
-                    tbs2.reassessTB= mean((tbs2s.reassess==1)*(TBS2Sa>0)), 
-                    
-                    ## ATT without reassessment, ie from 1st assessment (among those initially screened and identified as presumptive TB)
-                    soc.ATTworeassess = mean(!soc.reassess*soc.ptb*soc.ATT),
-                    who.ATTworeassess = mean(!who.reassess*(who_scre>0)*(who.ATT==1)),
+                    ## reassessment 
+                    soc.reassess=mean(soc.reassess),
+                    tbs1.reassess=mean(tbs1s.reassess),
+                    tbs2.reassess = mean(tbs2s.reassess),
+                    who.reassess=mean(who.reassess),
+                    ## ATT without reassessment, ie from 1st assessment
+                    soc.ATTworeassess = mean(!soc.reassess * soc.ATT),
+                    who.ATTworeassess = mean(!who.reassess * who.ATT),
                     tbs1.ATTworeassess = mean(!tbs1s.reassess * tbs1.ATT),
-                    tbs2.ATTworeassess = mean(!tbs2s.reassess*(TBS2Sa>0)*(tbs2.ATT==1)),
-                    
-                    ## ATT with reassessment, ie from reassessment (among those initially screened and identified as presumptive TB)
-                    soc.ATTreassess = mean(soc.reassess*soc.ptb*soc.ATT),
-                    who.ATTreassess = mean((who.reassess==1)*(who_scre>0)*(who.ATT==1)),
+                    tbs2.ATTworeassess = mean(!tbs2s.reassess * tbs2.ATT),
+                    ## ATT with reassessment, ie from reassessment
+                    soc.ATTreassess = mean(soc.reassess * soc.ATT),
+                    who.ATTreassess = mean(who.reassess * who.ATT),
                     tbs1.ATTreassess = mean(tbs1s.reassess * tbs1.ATT),
-                    tbs2.ATTreassess = mean((tbs2s.reassess==1)*(TBS2Sa>0)*(tbs2.ATT==1)),
-                    
+                    tbs2.ATTreassess = mean(tbs2s.reassess * tbs2.ATT),
                     ## initial assessment
                     who.assess=mean(who_scre>0),
                     soc.assess=mean(soc.ptb>0),
@@ -350,11 +347,11 @@ makeTable <- function(MZ){
         `% assessed, TBS1`=brkt(1e2*tbs1.assess,1e2*tbs1.assess.lo,1e2*tbs1.assess.hi),
         `% assessed, TBS2`=brkt(1e2*tbs2.assess,1e2*tbs2.assess.lo,1e2*tbs2.assess.hi),
         `% assessed, WHO`=brkt(1e2*who.assess,1e2*who.assess.lo,1e2*who.assess.hi),
-        ## --- reassessments (among those initially screened and identified as presumptive TB)
-        `% reassessed, SOC`=brkt(1e2*soc.reassessTB,1e2*soc.reassessTB.lo,1e2*soc.reassessTB.hi),
-        `% reassessed, TBS1`=brkt(1e2*tbs1.reassessTB,1e2*tbs1.reassessTB.lo,1e2*tbs1.reassessTB.hi),
-        `% reassessed, TBS2`=brkt(1e2*tbs2.reassessTB,1e2*tbs2.reassessTB.lo,1e2*tbs2.reassessTB.hi),
-        `% reassessed, WHO`=brkt(1e2*who.reassessTB,1e2*who.reassessTB.lo,1e2*who.reassessTB.hi),
+        ## --- reassessments
+        `% reassessed, SOC`=brkt(1e2*soc.reassess,1e2*soc.reassess.lo,1e2*soc.reassess.hi),
+        `% reassessed, TBS1`=brkt(1e2*tbs1.reassess,1e2*tbs1.reassess.lo,1e2*tbs1.reassess.hi),
+        `% reassessed, TBS2`=brkt(1e2*tbs2.reassess,1e2*tbs2.reassess.lo,1e2*tbs2.reassess.hi),
+        `% reassessed, WHO`=brkt(1e2*who.reassess,1e2*who.reassess.lo,1e2*who.reassess.hi),
         
         ## --- D ATT
         `100x incremental ATT, TBS1 v SOC`=brkt(1e2*DT_TBS1,1e2*DT_TBS1.lo,1e2*DT_TBS1.hi),
