@@ -44,3 +44,7 @@ vignettes/*.pdf
 
 # any plot output from script-run analyses
 Rplots.pdf
+
+
+# extras that have appeared
+.RDataTmp
