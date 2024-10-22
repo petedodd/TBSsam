@@ -10,7 +10,7 @@ if (shell) {
   print(args)
   SA <- args[1] # none,parameter name
   LM <- args[2] # LQ or UQ
-  if (SA != "none" & !LM %in% c("UQ", "LQ")) {
+  if (!is.na(SA) && !is.na(LM) && SA != "none" && !LM %in% c("UQ", "LQ")) {
     stop(paste0("LM supplied as ", LM, " but must be UQ or LQ!"))
   }
   cat("*** Running SA analysis for ",SA,"!***\n")
@@ -20,7 +20,7 @@ if (shell) {
   shell <- FALSE # whether running from shell script or not
   SA <- "none"
 }
-if (SA == "none") {
+if (!is.na(SA) && SA == "none") {
   SA <- ""
   LM <- ""
 }
@@ -386,7 +386,7 @@ GC <- ggplot(
 GC
 
 ## saving out  ---------
-if (SA == "") {
+if (!is.na(SA) && SA == "") {
   ggsave(GP, file = here("graphs/CEhull.png"), h = 8, w = 10)
   ggsave(GQ, file = here("graphs/Ranking.png"), h = 8, w = 10)
   ggsave(GB, file = here("graphs/Figure2.pdf"), h = 10, w = 10)
