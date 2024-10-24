@@ -342,36 +342,27 @@ if (!is.na(SA) && SA == "") {
 
 ## reshape data
 keep <- c('country','id',grep('\\.',names(ALL),value = TRUE))
-keep <- keep[1:34] # don't include extras that confuse reshapeINC if outputting parms
+keep <- keep[1:24] # don't include extras that confuse reshapeINC if outputting parms
 M <- ALL[, ..keep]
 ## harmonize naming:
 names(M) <- gsub("s1s", "s1", names(M))
 names(M) <- gsub("s2s", "s2", names(M))
-M <- reshapeINC(M) #NOTE can also explore FN/FP/cfr/reassess from this data
+
+MM <- reshapeINC(M) #NOTE can also explore FN/FP/cfr/reassess from this data
 
 ## CE plane ---------
 ## GP <- CEAplots(M[algorithm!='tbs2'],ring=TRUE,alph=0.05)
-GP <- CEAplots(M[country %in% c("Zambia", "Uganda")], ring = TRUE, alph = 0.5)
+GP <- CEAplots(MM[country %in% c("Zambia", "Uganda")], ring = TRUE, alph = 0.5)
 GP
 
-M[,.(`DALYs averted`=mean(`DALYs averted`),
+MM[,.(`DALYs averted`=mean(`DALYs averted`),
      `Incremental cost`=mean(`Incremental cost`)),
   by=.(country,algorithm)]
 
 
-## rankogram ---------
-GQ <- makeRankogram(ALL[country %in% c("Uganda", "Zambia")])
-GQ
-
-## GP + GQ  ---------
-GB <- ggarrange(GP, GQ,
-  ncol = 1, nrow = 2,
-  common.legend = TRUE, heights = c(2, 1), labels = c("A", "B")
-)
-
 
 ## CEAC  ---------
-CEAC <- make.ceacs(M[country %in% c("Zambia", "Uganda")], seq(from = 0, to = 100, by = 0.5))
+CEAC <- make.ceacs(MM[country %in% c("Zambia", "Uganda")], seq(from = 0, to = 100, by = 0.5))
 
 GC <- ggplot(
   CEAC,
@@ -385,13 +376,44 @@ GC <- ggplot(
   scale_color_manual(values = c("Uganda" = "darkorange3", "Zambia" = "deepskyblue3"))
 GC
 
+## ====================================
+
+## CEAF  ---------
+HZ <- getHZ(MN[,.(`DALYs averted`=mean(`DALYs averted`),
+                 `Incremental cost`=mean(`Incremental cost`),
+                 DALYsd=sd(`DALYs averted`),
+                 COSTsd=sd(`Incremental cost`)),
+               by=.(country,algorithm)])
+HZ[,icer0:=c(0,icer[1:3]),by=country]
+HZ[,icer1:=c(icer[1:3],300),by=country]
+HZ[,algorithm:=rep(c('soc','tbs2','who','tbs1'),2)] #NOTE this is by hand
+MN <- reshapeINC(M,exclude.soc=FALSE) #this is vs a comparator of no intervention
+CEAF <- make.ceafs(MN, seq(from = 0, to = 300, by = 0.5))
+
+GF <- ggplot(
+  CEAF,
+  aes(L,P, col = algorithm)
+) +
+  geom_segment(data=HZ,aes(y=1,yend=1,x=icer0,xend=icer1,col=algorithm),
+               lwd=2,alpha=0.5)+
+  geom_vline(data=HZ,aes(xintercept=icer),col=2,lty=2)+
+  geom_text(data=HZ,aes(x=icer,y=0.95,label=txt),col=2,nudge_x=10)+
+  geom_line() +
+  facet_wrap(~country,ncol=1)+
+  scale_y_continuous(label = percent,limits=c(0,1)) +
+  xlab("Cost effectiveness threshold (US$ per DALY averted)") +
+  ylab("Probability highest net benefit")+
+  theme_bw()+
+  theme(legend.title=element_blank())
+GF
+
+ggsave(GF,file=here('graphs/CEAF3.png'),w=6,h=7)
+
+## =======================================
+
 ## saving out  ---------
 if (!is.na(SA) && SA == "") {
   ggsave(GP, file = here("graphs/CEhull.png"), h = 8, w = 10)
-  ggsave(GQ, file = here("graphs/Ranking.png"), h = 8, w = 10)
-  ggsave(GB, file = here("graphs/Figure2.pdf"), h = 10, w = 10)
-  ggsave(GB, file = here("graphs/Figure2.eps"), h = 10, w = 10)
-  ggsave(GB, file = here("graphs/Figure2.png"), h = 10, w = 10)
   ggsave(GC, file = here("graphs/CEAC.png"), h = 8, w = 10)
 }
 

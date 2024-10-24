@@ -79,6 +79,9 @@ combineHE <- function(WS,
                     tbs2.cfr=mean(tbs2.cfr),
                     tbs2.ATT=mean(tbs2.ATT),
                     tbprev=mean(TB == "TB"),
+                    ## null comparator
+                    nothing.DALYs=mean(nothing.cfr*dLYS),
+                    nothing.cost=0.0,
                     ## reassessment 
                     soc.reassess=mean(soc.reassess),
                     tbs1.reassess=mean(tbs1s.reassess),
@@ -176,9 +179,8 @@ combineHE <- function(WS,
   return(ALL)
 }
 
-
 ## reshape and compute incrementals
-reshapeINC <- function(A){
+reshapeINC <- function(A,exclude.soc=TRUE){
   M <- melt(A,id=c('country','id'))
   M[,c('algorithm','quantity'):=tstrsplit(variable,split='\\.')]
   M[,variable:=NULL]
@@ -186,7 +188,10 @@ reshapeINC <- function(A){
   MR <- M[algorithm=='soc']
   M <- merge(M,MR[,.(country,id,soc.DALYs=DALYs,soc.cost=cost)],by=c('country','id'),all.x=TRUE)
   M[,c('DALYs averted','Incremental cost'):=.(soc.DALYs-DALYs,cost-soc.cost)]
-  M <- M[algorithm!='soc']
+  M <- M[algorithm!='nothing']
+  if(exclude.soc){
+    M <- M[algorithm!='soc']
+  }
   M
 }
 
@@ -198,7 +203,15 @@ make.ceac <- function(CEA,lamz){
   crv
 }
 
+make.enb <- function(CEA,lamz){
+  crv <- lamz
+  for(i in 1:length(crv)) crv[i] <- CEA[,mean(lamz[i]*Q-P)]
+  crv
+}
+
+
 ## across all countries
+## NOTE could be faster (see below for pattern)
 make.ceacs <- function(M,lmz){
   CEAC <- list()
   for( cn in M[,unique(country)]){
@@ -207,20 +220,29 @@ make.ceacs <- function(M,lmz){
       pz <- make.ceac(M[country==cn & algorithm==alg,
                         .(Q=`DALYs averted`,P=`Incremental cost`)],lmz)
       pz <- unlist(pz)
-      CEAC[[paste(cn,alg)]] <- data.table(country=cn,algorithm=alg,lambda=lmz,`Probability CE`=pz)
+      enb <- make.enb(M[country==cn & algorithm==alg,
+                        .(Q=`DALYs averted`,P=`Incremental cost`)],lmz)
+      enb <- unlist(enb)
+      CEAC[[paste(cn,alg)]] <- data.table(country=cn,
+                                          algorithm=alg,
+                                          lambda=lmz,
+                                          `Probability CE`=pz,
+                                          ENB = enb
+                                          )
     }
   }
   rbindlist(CEAC)
 }
 
 
-
-
-
-## ggplot(M[sample(nrow(M),size=1e2)],
-##        aes(`DALYs averted`,`Incremental cost`,col=algorithm))+
-##   geom_point()+
-##   facet_wrap(~country)
+## CEAF data
+make.ceafs <- function(D,lamz){
+  addon <- data.table(L=lamz,id=rep(1:max(D$id),each=length(lamz)))
+  B <- merge(D,addon,by='id',allow.cartesian=TRUE)
+  B[,enb:=L*(-DALYs)-cost]
+  B[,max.enb:=max(enb),by=.(country,L,id)]
+  B[,.(P=mean(enb==max.enb),ENB=mean(enb)),by=.(country,L,algorithm)]
+}
 
 
 ## ----- CE plane
@@ -241,14 +263,9 @@ getHull <- function(dQ,dC){
   as.data.table(X[1:turn,])
 }
 
-## plots of mean CEAC
 
-CEAplots <- function(M,ring=TRUE,alph=0.1){
-  MS <- M[,.(`DALYs averted`=mean(`DALYs averted`),
-             `Incremental cost`=mean(`Incremental cost`),
-             DALYsd=sd(`DALYs averted`),
-             COSTsd=sd(`Incremental cost`)),
-          by=.(country,algorithm)]
+## more hull utilities
+getHZ <- function(MS){
   ## mean CEAs
   HZ <- list()
   for(cn in MS[,unique(country)]){
@@ -262,13 +279,25 @@ CEAplots <- function(M,ring=TRUE,alph=0.1){
   HZ[,algorithm:=NA]
   ## text and locations
   HZ[,txt:=c(as.character(round(`Incremental cost`))[-1],NA_character_),by=country]
-  HZ[, txt := c(as.character(round(diff(`Incremental cost`) / diff(`DALYs averted`))), NA_character_),
-     by = country]
+  HZ[,icer:=c(diff(`Incremental cost`) / diff(`DALYs averted`),NA_real_),by=country]
+  HZ[,txt:=as.character(round(icer))]
   HZ[,X:=c(`DALYs averted`[-1],NA_real_),by=country]
   HZ[,Y:=c(`Incremental cost`[-1],NA_real_),by=country]
   HZ[,X:=(X+`DALYs averted`)/2]
   HZ[,Y:=(Y+`Incremental cost`)/2]
-  ## print(HZ)
+  HZ
+}
+
+## plots of mean CEAC
+
+CEAplots <- function(M,ring=TRUE,alph=0.1){
+  MS <- M[,.(`DALYs averted`=mean(`DALYs averted`),
+             `Incremental cost`=mean(`Incremental cost`),
+             DALYsd=sd(`DALYs averted`),
+             COSTsd=sd(`Incremental cost`)),
+          by=.(country,algorithm)]
+  ## mean CEAs
+  HZ <- getHZ(MS)
   shft <- HZ[`DALYs averted`>0,mean(`DALYs averted`,na.rm=TRUE)]/10
   ## plot
   GP <- ggplot(MS,aes(`DALYs averted`,`Incremental cost`,col=algorithm))+
@@ -386,7 +415,7 @@ makeTable <- function(MZ){
         `% reassessed, TBS1`=brkt(1e2*tbs1.reassess,1e2*tbs1.reassess.lo,1e2*tbs1.reassess.hi),
         `% reassessed, TBS2`=brkt(1e2*tbs2.reassess,1e2*tbs2.reassess.lo,1e2*tbs2.reassess.hi),
         `% reassessed, WHO`=brkt(1e2*who.reassess,1e2*who.reassess.lo,1e2*who.reassess.hi),
-        
+
         ## --- D ATT
         `100x incremental ATT, TBS1 v SOC`=brkt(1e2*DT_TBS1,1e2*DT_TBS1.lo,1e2*DT_TBS1.hi),
         `100x incremental ATT, TBS2 v SOC`=brkt(1e2*DT_TBS2,1e2*DT_TBS2.lo,1e2*DT_TBS2.hi),
@@ -394,7 +423,7 @@ makeTable <- function(MZ){
         `100x incremental ATT, TBS2 v TBS1`=brkt(1e2*tDT_TBS2,1e2*tDT_TBS2.lo,1e2*tDT_TBS2.hi),
         `100x incremental ATT, WHO v TBS1`=brkt(1e2*t1DT_WHO,1e2*t1DT_WHO.lo,1e2*t1DT_WHO.hi),
         `100x incremental ATT, WHO v TBS2`=brkt(1e2*t2DT_WHO,1e2*t2DT_WHO.lo,1e2*t2DT_WHO.hi),
-        
+
         ## --- deaths
         `100x deaths per child, SOC`=brkt(1e2*soc.cfr,1e2*soc.cfr.lo,1e2*soc.cfr.hi),
         `100x deaths per child, TBS1`=brkt(1e2*tbs1.cfr,1e2*tbs1.cfr.lo,1e2*tbs1.cfr.hi),
@@ -407,7 +436,7 @@ makeTable <- function(MZ){
         `100x incremental deaths, TBS2 v TBS1`=brkt(1e2*tDM_TBS2,1e2*tDM_TBS2.lo,1e2*tDM_TBS2.hi),
         `100x incremental deaths, WHO v TBS1`=brkt(1e2*t1DM_WHO,1e2*t1DM_WHO.lo,1e2*t1DM_WHO.hi),
         `100x incremental deaths, WHO v TBS2`=brkt(1e2*t2DM_WHO,1e2*t2DM_WHO.lo,1e2*t2DM_WHO.hi),
-        
+
         ## --- undiscounted dalys
         `100x undiscounted LYS, SOC`=brkt(-1e2*soc.DALYs0,-1e2*soc.DALYs0.hi,-1e2*soc.DALYs0.lo),
         `100x undiscounted LYS, TBS1`=brkt(-1e2*tbs1.DALYs0,-1e2*tbs1.DALYs0.hi,-1e2*tbs1.DALYs0.lo),
@@ -420,7 +449,7 @@ makeTable <- function(MZ){
         `100x undiscounted LYS, TBS2 v TBS1`=brkt(-1e2*tDD0_TBS2,-1e2*tDD0_TBS2.hi,-1e2*tDD0_TBS2.lo),
         `100x undiscounted LYS, WHO v TBS1`=brkt(-1e2*t1DD0_WHO,-1e2*t1DD0_WHO.hi,-1e2*t1DD0_WHO.lo),
         `100x undiscounted LYS, WHO v TBS2`=brkt(-1e2*t2DD0_WHO,-1e2*t2DD0_WHO.hi,-1e2*t2DD0_WHO.lo),
-        
+
         ## --- dalys
         `100x DALYs averted, SOC`=brkt(-1e2*soc.DALYs,-1e2*soc.DALYs.hi,-1e2*soc.DALYs.lo),
         `100x DALYs averted, TBS1`=brkt(-1e2*tbs1.DALYs,-1e2*tbs1.DALYs.hi,-1e2*tbs1.DALYs.lo),
@@ -433,7 +462,7 @@ makeTable <- function(MZ){
         `100x DALYs averted, TBS2 v TBS1`=brkt(-1e2*tDD_TBS2,-1e2*tDD_TBS2.hi,-1e2*tDD_TBS2.lo),
         `100x DALYs averted, WHO v TBS1`=brkt(-1e2*t1DD_WHO,-1e2*t1DD_WHO.hi,-1e2*t1DD_WHO.lo),
         `100x DALYs averted, WHO v TBS2`=brkt(-1e2*t2DD_WHO,-1e2*t2DD_WHO.hi,-1e2*t2DD_WHO.lo),
-        
+
         ## --- C
         `cost per child, SOC`=brkt(soc.cost,soc.cost.lo,soc.cost.hi),
         `cost per child, TBS1`=brkt(tbs1.cost,tbs1.cost.lo,tbs1.cost.hi),
@@ -446,7 +475,7 @@ makeTable <- function(MZ){
         `incremental cost, TBS2 v TBS1`=brkt(tDC_TBS2,tDC_TBS2.lo,tDC_TBS2.hi),
         `incremental cost, WHO v TBS1`=brkt(t1DC_WHO,t1DC_WHO.lo,t1DC_WHO.hi),
         `incremental cost, WHO v TBS2`=brkt(t2DC_WHO,t2DC_WHO.lo,t2DC_WHO.hi),
-        
+
         ## --- undiscounted ICERS
         `ICER (no discounting), TBS1 v SOC`=round(ICER0_TBS1,2),
         `ICER (no discounting), TBS2 v SOC`=round(ICER0_TBS2,2),

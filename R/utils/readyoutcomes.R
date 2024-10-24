@@ -109,8 +109,11 @@ AddCFRs <- function(D){
   D[TB == "not TB" & tbs2.ATT == 1, tbs2.cfr := SAMmort]
   D[TB == "TB" & tbs2.ATT == 0, tbs2.cfr := SAMmortTBnoATT]
   D[TB == "TB" & tbs2.ATT == 1, tbs2.cfr := SAMmortTBATT]
+  ## no ATT
+  D[TB == "not TB", nothing.cfr := SAMmort]
+  D[TB == "TB", nothing.cfr := SAMmortTBnoATT]
   ## cap
-  cap <- c("who.cfr", "soc.cfr", "tbs1.cfr", "tbs2.cfr")
+  cap <- c("who.cfr", "soc.cfr", "tbs1.cfr", "tbs2.cfr","nothing.cfr")
   D[, (cap) := lapply(.SD, function(x) pmin(1, x)), .SDcols = cap]
 }
 
