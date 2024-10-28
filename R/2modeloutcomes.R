@@ -379,7 +379,7 @@ GC
 ## ====================================
 
 ## CEAF  ---------
-HZ <- getHZ(MN[,.(`DALYs averted`=mean(`DALYs averted`),
+HZ <- getHZ(MM[,.(`DALYs averted`=mean(`DALYs averted`),
                  `Incremental cost`=mean(`Incremental cost`),
                  DALYsd=sd(`DALYs averted`),
                  COSTsd=sd(`Incremental cost`)),
@@ -387,8 +387,8 @@ HZ <- getHZ(MN[,.(`DALYs averted`=mean(`DALYs averted`),
 HZ[,icer0:=c(0,icer[1:3]),by=country]
 HZ[,icer1:=c(icer[1:3],300),by=country]
 HZ[,algorithm:=rep(c('soc','tbs2','who','tbs1'),2)] #NOTE this is by hand
-MN <- reshapeINC(M,exclude.soc=FALSE) #this is vs a comparator of no intervention
-CEAF <- make.ceafs(MN, seq(from = 0, to = 300, by = 0.5))
+MM <- reshapeINC(M,exclude.soc=FALSE) #this is vs a comparator of no intervention
+CEAF <- make.ceafs(MM, seq(from = 0, to = 300, by = 0.5))
 
 GF <- ggplot(
   CEAF,
@@ -403,6 +403,7 @@ GF <- ggplot(
   scale_y_continuous(label = percent,limits=c(0,1)) +
   xlab("Cost effectiveness threshold (US$ per DALY averted)") +
   ylab("Probability highest net benefit")+
+  scale_color_manual(values = c("who" = "royalblue3", "tbs1" = "orangered2", "tbs2" = "seagreen", "soc" = "black")) +  # Custom colors
   theme_bw()+
   theme(legend.title=element_blank())
 GF
