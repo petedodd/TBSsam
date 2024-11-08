@@ -143,6 +143,8 @@ getAlgoParms <- function(N,hiv=NULL){
   ## reassessment etc
   D[, s.reassess.choice.se := ifelse(P$s.reassess.choice.se$r(nrow(D)) > runif(nrow(D)), 1, 0)]
   D[, s.reassess.choice.sp := ifelse(P$s.reassess.choice.sp$r(nrow(D)) > runif(nrow(D)), 1, 0)]
+  D[, s.nonsocreassess.se := ifelse(P$s.nonsocreassess.se$r(nrow(D)) > runif(nrow(D)), 1, 0)]
+  D[, s.nonsocreassess.sp := ifelse(P$s.nonsocreassess.sp$r(nrow(D)) > runif(nrow(D)), 1, 0)]
   D[, s.reassess.se := fcase(
         testing.done==0, #clinical
         ifelse(1-P$s.soc.reassessafterclin.sebar$r(nrow(D)) > runif(nrow(D)),1,0), #NOTE sebar
