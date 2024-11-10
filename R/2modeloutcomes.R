@@ -273,10 +273,10 @@ CF[,.(who=mean(who.cost),soc=mean(soc.cost),
 CF <- merge(CF,LYKc[,.(country,dLYS=LYS)],by='country',all.x=TRUE)
 CF <- merge(CF,LYK[,.(country,LYS)],by='country',all.x=TRUE) #undiscounted
 
-## ## NOTE CHECK with TB prevalence set to close to 1 if run (P object will need correcting afterwards)
-## P$s.TBprev$r <- function(n) rbeta(n,500,2) #overwrite
-## summary(P$s.TBprev$r(1e4))                 #check
-## # P <- parse.parmtable(PD0[, 1:2]) # correct afterwards
+## NOTE CHECK with TB prevalence set to close to 1 if run (P object will need correcting afterwards)
+# P$s.TBprev$r <- function(n) rbeta(n,101,434) #overwrite
+# summary(P$s.TBprev$r(1e4))                 #check
+# P <- parse.parmtable(PD0[, 1:2]) # correct afterwards
 
 ## parm names
 
@@ -409,9 +409,9 @@ GF <- ggplot(
     labels = c("who" = "WHO TDA", "tbs1" = "One-step TDA", "tbs2" = "Two-step TDA", "soc" = "SOC")) +
   theme_bw()+
   theme(legend.title = element_text(face = "bold", size = 10),
-        legend.text = element_text(size = 8),    
-        axis.title.x = element_text(size = 10),                     
-        axis.title.y = element_text(size = 10),                     
+        legend.text = element_text(size = 8),
+        axis.title.x = element_text(size = 10),
+        axis.title.y = element_text(size = 10),
         strip.background = element_blank(),
         strip.text = element_text(colour = "black")
         )
