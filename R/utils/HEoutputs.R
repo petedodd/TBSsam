@@ -319,7 +319,7 @@ CEAplots <- function(M,ring=TRUE,alph=0.1){
           ) +
     theme(
       strip.background = element_blank(),
-      strip.text = element_text(colour = "black")
+      strip.text = element_text(colour = "black", size = 14)
       ) +
     scale_color_manual(name = "Diagnostic approach",
                        values = c("who" = "royalblue3", "tbs1" = "orangered2", "tbs2" = "seagreen", "soc" = "black"),
