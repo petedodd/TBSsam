@@ -385,10 +385,10 @@ HZ <- getHZ(MM[,.(`DALYs averted`=mean(`DALYs averted`),
                  COSTsd=sd(`Incremental cost`)),
                by=.(country,algorithm)])
 HZ[,icer0:=c(0,icer[1:3]),by=country]
-HZ[,icer1:=c(icer[1:3],300),by=country]
+HZ[,icer1:=c(icer[1:3],500),by=country]
 HZ[,algorithm:=rep(c('soc','tbs2','who','tbs1'),2)] #NOTE this is by hand
 MM <- reshapeINC(M,exclude.soc=FALSE) #this is vs a comparator of no intervention
-CEAF <- make.ceafs(MM, seq(from = 0, to = 300, by = 0.5))
+CEAF <- make.ceafs(MM, seq(from = 0, to = 500, by = 0.5))
 
 GF <- ggplot(
   CEAF,
@@ -397,15 +397,24 @@ GF <- ggplot(
   geom_segment(data=HZ,aes(y=1,yend=1,x=icer0,xend=icer1,col=algorithm),
                lwd=2,alpha=0.5)+
   geom_vline(data=HZ,aes(xintercept=icer),col=2,lty=2)+
-  geom_text(data=HZ,aes(x=icer,y=0.95,label=txt),col=2,nudge_x=10)+
+  geom_text(data=HZ,aes(x=icer,y=0.95,label=txt),col=2,nudge_x=20)+
   geom_line() +
   facet_wrap(~country,ncol=1)+
   scale_y_continuous(label = percent,limits=c(0,1)) +
   xlab("Cost effectiveness threshold (US$ per DALY averted)") +
   ylab("Probability highest net benefit")+
-  scale_color_manual(values = c("who" = "royalblue3", "tbs1" = "orangered2", "tbs2" = "seagreen", "soc" = "black")) +  # Custom colors
+  scale_color_manual(
+    name = "Diagnostic approach",
+    values = c("who" = "royalblue3", "tbs1" = "orangered2", "tbs2" = "seagreen", "soc" = "black"),
+    labels = c("who" = "WHO TDA", "tbs1" = "One-step TDA", "tbs2" = "Two-step TDA", "soc" = "SOC")) +
   theme_bw()+
-  theme(legend.title=element_blank())
+  theme(legend.title = element_text(face = "bold", size = 12),
+        legend.text = element_text(size = 10),    
+        axis.title.x = element_text(size = 12),                     
+        axis.title.y = element_text(size = 12),                     
+        strip.background = element_blank(),
+        strip.text = element_text(colour = "black")
+        )
 GF
 
 ggsave(GF,file=here('graphs/CEAF3.png'),w=6,h=7)
