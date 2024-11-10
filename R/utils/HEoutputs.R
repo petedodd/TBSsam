@@ -310,10 +310,20 @@ CEAplots <- function(M,ring=TRUE,alph=0.1){
     ylab('Incremental cost (USD)')+
     theme_bw() +
     theme(
+      legend.title = element_text(face = "bold", size = 14),
+      legend.text = element_text(size = 12),    
+      axis.title.x = element_text(size = 14),                     
+      axis.title.y = element_text(size = 14),                     
+      strip.background = element_blank(),
+      strip.text = element_text(colour = "black")   
+          ) +
+    theme(
       strip.background = element_blank(),
       strip.text = element_text(colour = "black")
       ) +
-    scale_color_manual(values = c("who" = "royalblue3", "tbs1" = "orangered2", "tbs2" = "seagreen", "soc" = "black"))  # Custom colors
+    scale_color_manual(name = "Diagnostic approach",
+                       values = c("who" = "royalblue3", "tbs1" = "orangered2", "tbs2" = "seagreen", "soc" = "black"),
+                       labels = c("who" = "WHO TDA", "tbs1" = "One-step TDA", "tbs2" = "Two-step TDA"))
     
   ## return
   if(ring)
