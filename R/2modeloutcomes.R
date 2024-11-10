@@ -385,10 +385,10 @@ HZ <- getHZ(MM[,.(`DALYs averted`=mean(`DALYs averted`),
                  COSTsd=sd(`Incremental cost`)),
                by=.(country,algorithm)])
 HZ[,icer0:=c(0,icer[1:3]),by=country]
-HZ[,icer1:=c(icer[1:3],500),by=country]
+HZ[,icer1:=c(icer[1:3],400),by=country]
 HZ[,algorithm:=rep(c('soc','tbs2','who','tbs1'),2)] #NOTE this is by hand
 MM <- reshapeINC(M,exclude.soc=FALSE) #this is vs a comparator of no intervention
-CEAF <- make.ceafs(MM, seq(from = 0, to = 500, by = 0.5))
+CEAF <- make.ceafs(MM, seq(from = 0, to = 400, by = 0.5))
 
 GF <- ggplot(
   CEAF,
@@ -408,10 +408,10 @@ GF <- ggplot(
     values = c("who" = "royalblue3", "tbs1" = "orangered2", "tbs2" = "seagreen", "soc" = "black"),
     labels = c("who" = "WHO TDA", "tbs1" = "One-step TDA", "tbs2" = "Two-step TDA", "soc" = "SOC")) +
   theme_bw()+
-  theme(legend.title = element_text(face = "bold", size = 12),
-        legend.text = element_text(size = 10),    
-        axis.title.x = element_text(size = 12),                     
-        axis.title.y = element_text(size = 12),                     
+  theme(legend.title = element_text(face = "bold", size = 10),
+        legend.text = element_text(size = 8),    
+        axis.title.x = element_text(size = 10),                     
+        axis.title.y = element_text(size = 10),                     
         strip.background = element_blank(),
         strip.text = element_text(colour = "black")
         )
