@@ -25,3 +25,5 @@ s.soc.reassessafterclinCXR.sebar,"B(1,2)",0.293 (0.134 - 0.500),SOC: 1-sensitivi
 s.soc.reassessafterclinCXR.sp,"B(15,1)",0.955 (0.912 - 0.981),SOC: specificity of reassessment after clinical assessment with CXR,TB-Speed SAM cohort data,,,,
 s.soc.reassessafterclinGA.sebar,"B(1,4)",0.159 (0.069 - 0.293),SOC: 1-sensitivity of reassessment after clinical assessment with Xpert on GA,TB-Speed SAM cohort data,,,,
 s.soc.reassessafterclinGA.sp,"B(15,12)",0.557 (0.491 - 0.621),SOC: specificity of reassessment after clinical assessment with Xpert on GA,TB-Speed SAM cohort data,,,,
+s.nonsocreassess.sp,"B(126,10)",TODO,Non-SOC: specificity of reassessment ,TB-Speed SAM cohort data,,,,
+s.nonsocreassess.se,"B(28,15)",TODO,Non-SOC: sensitivity of reassessment ,TB-Speed SAM cohort data,,,,
