@@ -397,7 +397,19 @@ GF <- ggplot(
   geom_segment(data=HZ,aes(y=1,yend=1,x=icer0,xend=icer1,col=algorithm),
                lwd=2,alpha=0.5)+
   geom_vline(data=HZ,aes(xintercept=icer),col=2,lty=2)+
-  geom_text(data=HZ,aes(x=icer,y=0.95,label=txt),col=2,nudge_x=20)+
+  #geom_text(data=HZ,aes(x=icer,y=0.95,label=txt),col=2,nudge_x=20)+
+  # Adjust geom_text with conditional nudges for "130" specifically
+  geom_text(data = subset(HZ, txt == "130" & country == "Uganda"),
+            aes(x = icer, y = 0.95, label = txt),
+            col = 2, 
+            nudge_x = -30  # Move "130" to the left
+            ) +  
+  # Add other labels without specific nudges
+  geom_text(data = subset(HZ, !(txt == "130" & country == "Uganda")),
+            aes(x = icer, y = 0.95, label = txt),
+            col = 2, 
+            nudge_x = 20) +
+  
   geom_line() +
   facet_wrap(~country,ncol=1)+
   scale_y_continuous(label = percent,limits=c(0,1)) +
