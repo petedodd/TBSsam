@@ -32,6 +32,8 @@ params=(
   "s.soc.reassessafterclinCXR.sp"
   "s.soc.reassessafterclinGA.sebar"
   "s.soc.reassessafterclinGA.sp"
+  "s.nonsocreassess.sp"
+  "s.nonsocreassess.se"
   "c.s.soc.scre"
   "c.s.soc.exam"
   "c.s.soc.CXR"
