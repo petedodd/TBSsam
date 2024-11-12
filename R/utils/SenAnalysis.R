@@ -58,6 +58,14 @@ output_types <- c("100x ATT per child, SOC",
                   "% FP, TBS1",
                   "% FP, TBS2",
                   "% FP, WHO",
+                  "% TP, SOC",
+                  "% TP, TBS1",
+                  "% TP, TBS2",
+                  "% TP, WHO",
+                  "% TN, SOC",
+                  "% TN, TBS1",
+                  "% TN, TBS2",
+                  "% TN, WHO",
                   "% FN, SOC",
                   "% FN, TBS1",
                   "% FN, TBS2",
@@ -74,8 +82,8 @@ output_types <- c("100x ATT per child, SOC",
                   "100x incremental ATT, TBS2 v SOC",
                   "100x incremental ATT, WHO v SOC",
                   "100x incremental ATT, TBS2 v TBS1",
-                  "100x incremental ATT, TBS1 v WHO",
-                  "100x incremental ATT, TBS2 v WHO",
+                  "100x incremental ATT, WHO v TBS1",
+                  "100x incremental ATT, WHO v TBS2",
                   "100x deaths per child, SOC",
                   "100x deaths per child, TBS1",
                   "100x deaths per child, TBS2",
@@ -84,8 +92,8 @@ output_types <- c("100x ATT per child, SOC",
                   "100x incremental deaths, TBS2 v SOC",
                   "100x incremental deaths, WHO v SOC",
                   "100x incremental deaths, TBS2 v TBS1",
-                  "100x incremental deaths, TBS1 v WHO",
-                  "100x incremental deaths, TBS2 v WHO",
+                  "100x incremental deaths, WHO v TBS1",
+                  "100x incremental deaths, WHO v TBS2",
                   "100x undiscounted LYS, SOC",
                   "100x undiscounted LYS, TBS1",
                   "100x undiscounted LYS, TBS2",
@@ -94,8 +102,8 @@ output_types <- c("100x ATT per child, SOC",
                   "100x undiscounted LYS, TBS2 v SOC",
                   "100x undiscounted LYS, WHO v SOC",
                   "100x undiscounted LYS, TBS2 v TBS1",
-                  "100x undiscounted LYS, TBS1 v WHO",
-                  "100x undiscounted LYS, TBS2 v WHO",
+                  "100x undiscounted LYS, WHO v TBS1",
+                  "100x undiscounted LYS, WHO v TBS2",
                   "100x DALYs averted, SOC",
                   "100x DALYs averted, TBS1",
                   "100x DALYs averted, TBS2",
@@ -104,8 +112,8 @@ output_types <- c("100x ATT per child, SOC",
                   "100x DALYs averted, TBS2 v SOC",
                   "100x DALYs averted, WHO v SOC",
                   "100x DALYs averted, TBS2 v TBS1",
-                  "100x DALYs averted, TBS1 v WHO",
-                  "100x DALYs averted, TBS2 v WHO",
+                  "100x DALYs averted, WHO v TBS1",
+                  "100x DALYs averted, WHO v TBS2",
                   "cost per child, SOC",
                   "cost per child, TBS1",
                   "cost per child, TBS2",
@@ -114,8 +122,8 @@ output_types <- c("100x ATT per child, SOC",
                   "incremental cost, TBS2 v SOC",
                   "incremental cost, WHO v SOC",
                   "incremental cost, TBS2 v TBS1",
-                  "incremental cost, TBS1 v WHO",
-                  "incremental cost, TBS2 v WHO",
+                  "incremental cost, WHO v TBS1",
+                  "incremental cost, WHO v TBS2",
                   "ICER (no discounting), TBS1 v SOC",
                   "ICER (no discounting), TBS2 v SOC",
                   "ICER (no discounting), WHO v SOC",
@@ -128,6 +136,7 @@ output_types <- c("100x ATT per child, SOC",
                   "ICER, TBS2 v TBS1",
                   "ICER, TBS1 v WHO",
                   "ICER, TBS2 v WHO")
+
 
 
 # Create a data frame for output types
@@ -182,7 +191,8 @@ merged_data <- read.csv("SAnoncosts_merged_output.csv")
 
 # Filter the data to only keep the specified output_type values
 filtered_data <- merged_data %>%
-  filter(output_type %in% c('ICER, WHO v SOC', 'ICER, TBS1 v SOC', 'ICER, TBS2 v SOC'))
+  filter(output_type %in% c('ICER, TBS1 v SOC', 'ICER, TBS2 v SOC', 'ICER, WHO v SOC'))
+  #filter(output_type %in% c('ICER, TBS2 v SOC', 'ICER, TBS2 v WHO', 'ICER, TBS1 v WHO'))
 
 # View the filtered data
 head(filtered_data)
@@ -223,9 +233,14 @@ data <- read.csv("SAnoncosts_ICER_reshaped.csv")
 # Rename the values in the 'output_type' column
 data <- data %>%
   mutate(output_type = recode(output_type,
-                              'ICER, WHO v SOC' = 'WHO',
-                              'ICER, TBS1 v SOC' = 'TBS1',
-                              'ICER, TBS2 v SOC' = 'TBS2'))
+                               'ICER, TBS1 v SOC' = 'TBS1 vs SOC',
+                               'ICER, TBS2 v SOC' = 'TBS2 vs SOC',
+                               'ICER, WHO v SOC' = 'WHO vs SOC'))
+  
+  # mutate(output_type = recode(output_type,
+  #                             'ICER, TBS2 v WHO' = 'WHO vs TBS2',
+  #                             'ICER, TBS1 v WHO' = 'TBS1 vs WHO',
+  #                             'ICER, TBS2 v SOC' = 'TBS2 vs SOC'))
 
 # Create Uganda_mean and Zambia_mean as the mean of LQ and UQ values
 data <- data %>%
@@ -270,10 +285,16 @@ data <- read.csv("SAnoncosts_ICER_reshaped_ready.csv")
 
 # List of parameters to exclude for each output_type
 exclusions <- list(
-  "WHO" = c("baseline", "c.s.tbs1step.diag.clin", "c.s.tbs1step.diag.test", "c.s.tbs2step.diag", "c.s.tbs2step.scre"), # Exclude "parm1" and "parm2" for output_type_1
-  "TBS1" = c("baseline", "c.s.who.scre", "c.s.who.hiv.diag", "c.s.who.diag", "c.s.tbs2step.diag", "c.s.tbs2step.scre"), 
-  "TBS2" = c("baseline", "c.s.who.scre", "c.s.who.hiv.diag", "c.s.who.diag", "c.s.tbs1step.diag.clin", "c.s.tbs1step.diag.test") 
+  "WHO vs SOC" = c("baseline", "c.s.tbs1step.diag.clin", "c.s.tbs1step.diag.test", "c.s.tbs2step.diag", "c.s.tbs2step.scre"), # Exclude "parm1" and "parm2" for output_type_1
+  "TBS1 vs SOC" = c("baseline", "c.s.who.scre", "c.s.who.hiv.diag", "c.s.who.diag", "c.s.tbs2step.diag", "c.s.tbs2step.scre"), 
+  "TBS2 vs SOC" = c("baseline", "c.s.who.scre", "c.s.who.hiv.diag", "c.s.who.diag", "c.s.tbs1step.diag.clin", "c.s.tbs1step.diag.test") 
 )
+
+# exclusions <- list(
+#   "WHO vs TBS2" = c("baseline", "c.s.tbs1step.diag.clin", "c.s.tbs1step.diag.test", "c.s.tbs2step.diag", "c.s.tbs2step.scre"), # Exclude "parm1" and "parm2" for output_type_1
+#   "TBS1 vs WHO" = c("baseline", "c.s.who.scre", "c.s.who.hiv.diag", "c.s.who.diag", "c.s.tbs2step.diag", "c.s.tbs2step.scre"), 
+#   "TBS2 vs SOC" = c("baseline", "c.s.who.scre", "c.s.who.hiv.diag", "c.s.who.diag", "c.s.tbs1step.diag.clin", "c.s.tbs1step.diag.test") 
+# )
 
 # Function to create tornado diagram for a given country and output_type
 create_tornado_plot <- function(df, country_prefix, country_name, output_type_value) {
@@ -285,19 +306,20 @@ create_tornado_plot <- function(df, country_prefix, country_name, output_type_va
     mutate(LQ = get(paste0(country_prefix, "_LQ")),
            UQ = get(paste0(country_prefix, "_UQ")),
            baseline = get(paste0(country_prefix, "_mean_baseline")),
-           range_width = abs(UQ - LQ)) %>% # Calculate the range width
+           range_width = abs(UQ-LQ)) %>% # Calculate the range width
     arrange(range_width) %>% # Sort by range width in descending order
+    slice((n() - 9):n()) %>% # Select the top 10 parameters based on range_width
     mutate(parm = factor(parm, levels = parm)) # Reorder the factor levels for parm
   
   # Plot tornado diagram 
   p <- ggplot(df_plot, aes(x = parm)) +
-    geom_segment(aes(x = parm, xend = parm, y = LQ, yend = baseline, color = "Lower quartile"), size = 2) +
-    geom_segment(aes(x = parm, xend = parm, y = baseline, yend = UQ, color = "Upper quartile"), size = 2) +
+    geom_segment(aes(x = parm, xend = parm, y = LQ, yend = baseline, color = "Lower quartile"), size = 4) +
+    geom_segment(aes(x = parm, xend = parm, y = baseline, yend = UQ, color = "Upper quartile"), size = 4) +
     geom_hline(aes(yintercept = baseline), linetype = "dashed", color = "red") +
-    annotate("text", x = 1, y = unique(df_plot$baseline), label = "Baseline ICER", color = "red", hjust = -0.1, size = 3) +
+    annotate("text", x = 1, y = unique(df_plot$baseline), label = "Baseline ICER", color = "red", hjust = -0.1, size = 7) +
     coord_flip() +
     scale_color_manual(values = c("Lower quartile" = "rosybrown1", "Upper quartile" = "rosybrown4")) +
-    labs(title = paste("Tornado Diagram for", country_name, "-", output_type_value, "vs SOC"),
+    labs(title = paste("Tornado Diagram for", country_name, "-", output_type_value),
          x = "Parameters",
          y = "ICER",
          color = "Legend") + # Add legend title
@@ -307,7 +329,12 @@ create_tornado_plot <- function(df, country_prefix, country_name, output_type_va
       panel.background = element_rect(fill = "white", color = NA), # Set panel background to white
       plot.background = element_rect(fill = "white", color = NA),  # Set plot background to white
       panel.grid.major = element_line(color = "gray90"), # Optional: lighten the grid lines
-      panel.grid.minor = element_line(color = "gray95")  # Optional: lighten minor grid lines
+      panel.grid.minor = element_line(color = "gray95"),  # Optional: lighten minor grid lines
+      axis.text = element_text(size = 18),                # Increased font size for x and y axis numbers
+      axis.title = element_text(size = 20, face = "bold"),               # Increased font size for x and y axis titles
+      legend.title = element_text(size = 20, face = "bold"),             # Increased font size for legend title
+      legend.text = element_text(size = 18), 
+      plot.title = element_text(size = 26, face = "bold", hjust = 0.5) # Increased font size for main title
     )
   
   return(p)
