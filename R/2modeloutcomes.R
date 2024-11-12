@@ -403,7 +403,7 @@ GF <- ggplot(
             aes(x = icer, y = 0.95, label = txt),
             col = 2, 
             nudge_x = -30  # Move "130" to the left
-            ) +  
+            ) +
   # Add other labels without specific nudges
   geom_text(data = subset(HZ, !(txt == "130" & country == "Uganda")),
             aes(x = icer, y = 0.95, label = txt),
