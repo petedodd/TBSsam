@@ -6,7 +6,7 @@ appendWHOscores <- function(D){
   D[, c('who_scre','score_noX','score_X'):={
     who_scre <- A <- B <- C <- 0;
     ## screening step
-    #if(Contact_TB==1) who_scre <- who_scre + 0;
+    #if(Contact_TB==1) who_scre <- who_scre + 0;    # History of contact TB
     if(itb_cou_2==1) who_scre <- who_scre + 1;      #cough
     if(itb_fev_2==1) who_scre <- who_scre + 1;      #fever
     if(itb_fat_2==1) who_scre <- who_scre + 1;      #lethargy (fatigue, reduced playfulness, decreased activity)
@@ -237,21 +237,3 @@ SOC.algorithm <- function(D){
 
   return(data.table(soc.ATT=D$soc.ATT,soc.cost=D$soc.cost))
 }
-
-
-## c.s.soc.exam	SOC: initial clinical assessment
-## c.s.soc.CXR	SOC: CXR
-## c.s.soc.CXRxga	SOC: CXR + Xpert Ultra on GA [for all] + urine LAM
-## c.s.soc.reassessCXRxga	SOC: reassessment exam + CXR + Xpert Ultra on GA [for all] + urine LAM
-
-## c.s.who.examCXR	INT: WHO algo: clinical exam + CXR
-## c.s.who.exam	INT: WHO algo: clinical exam + HIV test 
-## c.s.who.xns	INT: WHO algo: Xpert Ultra on NPA & stool
-## c.s.who.hist	INT: WHO algo: assessment of TB contacts in the previous 12 months
-
-## c.s.tbs2step.scre	INT: TB-Speed two-steps algo: screening: clinical exam + HIV test 
-## c.s.tbs1step.diag	INT: TB-Speed one-step algo: clinical exam + HIV test + CXR + Xpert on NPA and stool + abdo US
-## c.s.tbs2step.diag	INT: TB-Speed two-steps algo: diagnostic: CXR + Xpert on NPA and stool + abdo US
-
-## c.s.rsATT	Rifampicin-sensitive anti-TB treatment in SAM children
-## c.s.rrATT	Rifampicin-resistant anti-TB treatment in SAM children

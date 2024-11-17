@@ -169,22 +169,6 @@ getAlgoParms <- function(N,hiv=NULL){
 }
 
 
-## ## parameter notes
-## ## s.soc.ptbcov - based on expert opinion @ 80%, take +/-10
-## (tpz <- getAB(0.8,(10/196)^2))
-## curve(dbeta(x,tpz$a,tpz$b),n=500)
-## ## s.soc.testingcov
-## (tpz <- getAB((0.8+0.95)/2,(0.95-0.8)^2))
-## curve(dbeta(x,tpz$a,tpz$b),n=500) #NOTE mode @ 1 but concords with description from experts
-## ## s.soc.CXRonly
-## (tpz <- getAB(0.75,(50/392)^2))
-## curve(dbeta(x,tpz$a,tpz$b),n=500) #NOTE 1-frac with GA done as well
-## s.reassess - 10,70,50 
-## (tpz <- getAB(0.5,((70-10)/392)^2))
-## curve(dbeta(x,tpz$a,tpz$b),n=500)
-
-
-
 RRD <- fread(here('data/MDR_RR_TB_burden_estimates_2020-10-15.csv'))
 RRD[,c('rr.mid','rr.sd'):=.(e_rr_pct_new/100,(e_rr_pct_new_hi-e_rr_pct_new_lo)/392)]
 ## model as gamma parameters

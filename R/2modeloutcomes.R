@@ -473,16 +473,3 @@ if (!is.na(SA) && SA == "") {
 ## ##at 2% prev, ICERs WHO < TBS2 < TBS1
 
 
-## NOTE
-## docs
-## https://tbksp.org/en/node/2032
-## https://docs.google.com/presentation/d/1dTrmzyfHa0KAja2ODXiQvRnpTYj1xmD2/edit#slide=id.p8
-
-
-## NOTE
-## presumptive TB same w/ & w/o TB - no info on spec
-## unc stoch vs parm
-
-
-## TODO
-## remove unnecessary countries...
