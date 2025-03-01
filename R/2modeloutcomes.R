@@ -3,7 +3,7 @@ rm(list=ls())
 
 args <- commandArgs(trailingOnly = TRUE)
 ## flags for sensitivity analyses
-shell <- TRUE # whether running from shell script or not
+shell <- FALSE # whether running from shell script or not
 if (shell) {
   ## running from shell
   args <- commandArgs(trailingOnly = TRUE)
@@ -36,6 +36,15 @@ library(ggplot2)
 library(readxl)
 gh <- function(x) glue(here(x))
 
+
+# install.packages("remotes")
+# remotes::install_github("petedodd/Hedtree", ref="master")
+# install.packages("devtools")
+# devtools::install_github("petedodd/discly")
+
+library(HEdtree)
+library(discly)
+
 ## load dependencies
 source(gh('R/utils/scores.R')) #scores are coded in here
 source(gh('R/utils/costutils.R')) #cost data parser
@@ -55,30 +64,6 @@ pop0 <- POPS0[["SAM_notTB"]]
 popt <- POPS[["SAM_TB"]]
 popt0 <- POPS0[["SAM_TB"]]
 
-## --- WHO
-pop <- appendWHOscores(pop)
-pop0 <- appendWHOscores(pop0)
-popt <- appendWHOscores(popt)
-popt0 <- appendWHOscores(popt0)
-
-## --- TB Speed
-pop <- appendTBSscores(pop)
-pop0 <- appendTBSscores(pop0)
-popt <- appendTBSscores(popt)
-popt0 <- appendTBSscores(popt0)
-
-## check se/sp
-pop[,1-mean(score_X>10)] #specificity =46%
-pop[,1-mean(score_noX>10)] #specificity =83%
-popt[,mean(score_X>10)] #sensitivity =75%
-popt[,mean(score_noX>10)] #sensitivity =46%
-
-## check se/sp
-pop[,1-mean(TBS1Sb>=10)] #specificity =79%
-pop[,1-mean(TBS2Sa>=1 & TBS2Sb>=10, na.rm = TRUE)] #specificity =84%
-popt[,mean(TBS1Sb>=10)] #sensitivity =83%
-popt[,mean(TBS2Sa>=1 & TBS2Sb>=10, na.rm = TRUE)] #sensitivity =76%
-
 
 ## NOTE see popchecks.R around here
 
@@ -92,6 +77,219 @@ pop[,TB:='not TB']
 popt0[,TB:='TB']
 popt[,TB:='TB']
 CF <- rbindlist(list(pop,popt,pop0,popt0)) #all
+
+#fwrite(CF, "data/CF.csv")
+
+
+### Variable resampling from the TB-Speed SAM cohort
+
+## No resampling - screening var
+
+# SOC
+CF[TB=="TB", mean(itb_cou_2 | itb_fev_2 | Contact_TB)] # se: 52% (vs se: 37% in cohort)
+CF[TB!="TB", mean(itb_cou_2 == 0 & itb_fev_2== 0 & Contact_TB== 0)] # sp: 75% (vs sp: 79% in cohort)
+
+# TBS2
+CF[TB=="TB", mean(Contact_TB | itb_cou_3 | temp_38 | tachycardia | ice_ind_bin.factor |
+                    ice_cra.factor | Dep_csc | ice_ade_bin.factor | hiv_res.factor)] # se: 93% (vs se: 88% in cohort)
+
+CF[TB!="TB", mean(Contact_TB == 0 & itb_cou_3 == 0 & temp_38 == 0 & tachycardia == 0 & ice_ind_bin.factor == 0 &
+                    ice_cra.factor == 0 & Dep_csc == 0 & ice_ade_bin.factor == 0 & hiv_res.factor == 0)] # sp: 32% (vs sp: 34% in cohort)
+
+# WHO
+CF[TB=="TB", mean(itb_cou_2 | itb_fev_2 | itb_fat_2 | itb_wgt_2 | itb_app_2)] # se: 97% (vs se: 79% in cohort)
+CF[TB!="TB", mean(itb_cou_2 == 0 & itb_fev_2 == 0 & itb_fat_2 == 0 & itb_wgt_2 == 0 & itb_app_2 == 0)] # sp: 10% (vs sp: 28% in cohort)
+
+CF[, lapply(.SD, mean), by = TB, .SDcols = c("itb_cou_2", "itb_fev_2", "itb_fat_2", "itb_wgt_2", "itb_app_2")]
+
+# WHO wo weight loss
+CF[TB=="TB", mean(itb_cou_2 | itb_fev_2 | itb_fat_2 | itb_app_2)] # se: 92%
+CF[TB!="TB", mean(itb_cou_2 == 0 & itb_fev_2 == 0 & itb_fat_2 == 0 & itb_app_2 == 0)] # sp: 26%
+
+# WHO wo loss appetite
+CF[TB=="TB", mean(itb_cou_2 | itb_fev_2 | itb_fat_2 | itb_wgt_2)] # se: 93%
+CF[TB!="TB", mean(itb_cou_2 == 0 & itb_fev_2 == 0 & itb_fat_2 == 0 & itb_wgt_2 == 0)] # sp: 17%
+
+# WHO wo weight loss & wo loss appetite
+CF[TB=="TB", mean(itb_cou_2 | itb_fev_2 | itb_fat_2)] # se: 79%
+CF[TB!="TB", mean(itb_cou_2 == 0 & itb_fev_2 == 0 & itb_fat_2 == 0)] # sp: 46%
+
+## read in
+C <- as.data.table(read_excel("data/data_mod.xlsx")) #cohort data
+#getwd()
+
+# ### Resampling of all var
+# 
+# ## restrict & reform
+# 
+# C <- C[,.(Contact_TB, itb_fat_2, itb_fev_2, itb_cou_2, itb_cou_3, itb_app_2, temp_38, itb_wgt_2, itb_wgt.factor, tachycardia, tachypnea,
+#           ice_ind_bin.factor, ice_cra.factor, Dep_csc, ice_ade_bin.factor, cxr_pre_mil.factor, cxr_pre_alv.factor, cxr_pre_hil.factor,
+#           cxr_pre_exc.factor, cxr_pre_ple.factor, cxr_pre_eff.factor, cxr_pre_ple_per_eff.factor, aus_sma.factor, aus_hma.factor,
+#           aus_effusion, aus_asc.factor, reassessment, hiv_res.factor, Xpert_res, TB_stt_bin)]
+# 
+# # Apply transformation
+# C <- C %>%
+#   mutate(across(c(Contact_TB, itb_fat_2, itb_fev_2, itb_cou_2, itb_cou_3, itb_app_2, temp_38, itb_wgt_2, itb_wgt.factor, tachycardia, tachypnea,
+#                   ice_ind_bin.factor, ice_cra.factor, Dep_csc, ice_ade_bin.factor, cxr_pre_mil.factor, cxr_pre_alv.factor, cxr_pre_hil.factor,
+#                   cxr_pre_exc.factor, cxr_pre_ple.factor, cxr_pre_eff.factor, cxr_pre_ple_per_eff.factor, aus_sma.factor, aus_hma.factor,
+#                   aus_effusion, aus_asc.factor, reassessment),
+#                 ~ ifelse(. == "Yes", 1, 0)))
+# 
+# C <- C %>%
+#   mutate(across(c(hiv_res.factor, Xpert_res),
+#                 ~ ifelse(. == "Positive", 1, 0)))
+# 
+# C[TB_stt_bin == "NotTB", TB_stt_bin := "not TB"]
+# 
+# Y <- C[TB_stt_bin=="TB", .(Contact_TB, itb_fat_2, itb_fev_2, itb_cou_2, itb_cou_3, itb_app_2, temp_38, itb_wgt_2, itb_wgt.factor, tachycardia, tachypnea,
+#                            ice_ind_bin.factor, ice_cra.factor, Dep_csc, ice_ade_bin.factor, cxr_pre_mil.factor, cxr_pre_alv.factor, cxr_pre_hil.factor,
+#                            cxr_pre_exc.factor, cxr_pre_ple.factor, cxr_pre_eff.factor, cxr_pre_ple_per_eff.factor, aus_sma.factor, aus_hma.factor,
+#                            aus_effusion, aus_asc.factor, reassessment, hiv_res.factor, Xpert_res, TB_stt_bin)]
+# X <- C[TB_stt_bin!="TB", .(Contact_TB, itb_fat_2, itb_fev_2, itb_cou_2, itb_cou_3, itb_app_2, temp_38, itb_wgt_2, itb_wgt.factor, tachycardia, tachypnea,
+#                            ice_ind_bin.factor, ice_cra.factor, Dep_csc, ice_ade_bin.factor, cxr_pre_mil.factor, cxr_pre_alv.factor, cxr_pre_hil.factor,
+#                            cxr_pre_exc.factor, cxr_pre_ple.factor, cxr_pre_eff.factor, cxr_pre_ple_per_eff.factor, aus_sma.factor, aus_hma.factor,
+#                            aus_effusion, aus_asc.factor, reassessment, hiv_res.factor, Xpert_res, TB_stt_bin)]
+# 
+# names(X) <- names(Y) <- c("cont", "fat", "fev", "cou2", "cou3", "app", "temp", "wgt2",  "wgtf", "tachc", "tachp",
+#                           "ind", "cra", "csc", "ade", "mil", "alv", "hil", "exc", "ple", "eff", "ple_eff", "sma",
+#                           "hma", "aus_eff", "asc", "rea", "hiv", "xpe", "TB")
+# 
+# ## Resampling
+# 
+# Ytmp <- Y[sample(1:nrow(Y),nrow(CF[TB=="TB"]),replace=TRUE)]
+# Xtmp <- X[sample(1:nrow(X),nrow(CF[TB!="TB"]),replace=TRUE)]
+# 
+# Xtmp[,id:=1:nrow(Xtmp)]
+# Ytmp[,id:=1:nrow(Ytmp)]
+# 
+# XY <- rbind(Xtmp,Ytmp)
+# 
+# CF <- merge(CF,XY,by=c("id","TB"),all.x=TRUE)
+# 
+# CF[,c("Contact_TB", "itb_fat_2", "itb_fev_2", "itb_cou_2", "itb_cou_3", "itb_app_2",
+#       "temp_38", "itb_wgt_2", "itb_wgt.factor", "tachycardia", "tachypnea",
+#       "ice_ind_bin.factor", "ice_cra.factor", "Dep_csc", "ice_ade_bin.factor",
+#       "cxr_pre_mil.factor", "cxr_pre_alv.factor", "cxr_pre_hil.factor",
+#       "cxr_pre_exc.factor", "cxr_pre_ple.factor", "cxr_pre_eff.factor",
+#       "cxr_pre_ple_per_eff.factor", "aus_sma.factor", "aus_hma.factor",
+#       "aus_effusion", "aus_asc.factor", "reassessment", "hiv_res.factor",
+#       "Xpert_res"):=.(cont, fat, fev, cou2, cou3, app, temp, wgt2, wgtf, tachc, tachp,
+#                       ind, cra, csc, ade, mil, alv, hil, exc, ple, eff, ple_eff, sma,
+#                       hma, aus_eff, asc, rea, hiv, xpe)]
+# 
+
+
+### Resampling of screening var
+
+## restrict & reform
+C <- C[,.(itb_cou_2,itb_fev_2,itb_fat_2,itb_wgt_2,itb_app_2, Contact_TB, itb_cou_3,
+          temp_38, tachycardia, ice_ind_bin.factor, ice_cra.factor, Dep_csc, ice_ade_bin.factor, hiv_res.factor ,TB_stt_bin)]
+
+# Apply transformation
+C <- C %>%
+  mutate(across(c(itb_cou_2,itb_fev_2,itb_fat_2,itb_wgt_2,itb_app_2, Contact_TB, itb_cou_3,
+                  temp_38, tachycardia, ice_ind_bin.factor, ice_cra.factor, Dep_csc, ice_ade_bin.factor),
+                ~ ifelse(. == "Yes", 1, 0)))
+
+C <- C %>%
+  mutate(across(c(hiv_res.factor),
+                ~ ifelse(. == "Positive", 1, 0)))
+
+C[TB_stt_bin == "NotTB", TB_stt_bin := "not TB"]
+
+
+#C[, lapply(.SD, mean), by = TB_stt_bin, .SDcols = c("itb_cou_2_bi", "itb_fev_2_bi", "itb_fat_2_bi", "itb_wgt_2_bi", "itb_app_2_bi")]
+
+Y <- C[TB_stt_bin=="TB", .(itb_cou_2,itb_fev_2,itb_fat_2,itb_wgt_2,itb_app_2, Contact_TB, itb_cou_3,
+                           temp_38, tachycardia, ice_ind_bin.factor, ice_cra.factor, Dep_csc, ice_ade_bin.factor, hiv_res.factor ,TB_stt_bin)]
+X <- C[TB_stt_bin!="TB", .(itb_cou_2,itb_fev_2,itb_fat_2,itb_wgt_2,itb_app_2, Contact_TB, itb_cou_3,
+                           temp_38, tachycardia, ice_ind_bin.factor, ice_cra.factor, Dep_csc, ice_ade_bin.factor, hiv_res.factor ,TB_stt_bin)]
+
+names(X) <- names(Y) <- c("cou2", "fev", "fat", "wgt", "app", "cont", "cou3", "temp", "tach","cind", "cra", "csc", "ade", "hiv", "TB")
+
+
+## Resampling
+
+# Read CSV into a data.table
+# CF <- fread("CF.csv")
+# set.seed(2345)
+
+Ytmp <- Y[sample(1:nrow(Y),nrow(CF[TB=="TB"]),replace=TRUE)]
+Xtmp <- X[sample(1:nrow(X),nrow(CF[TB!="TB"]),replace=TRUE)]
+
+Xtmp[,id:=1:nrow(Xtmp)]
+Ytmp[,id:=1:nrow(Ytmp)]
+
+XY <- rbind(Xtmp,Ytmp)
+
+CF <- merge(CF,XY,by=c("id","TB"),all.x=TRUE)
+
+CF[,c("itb_cou_2", "itb_fev_2", "itb_fat_2", "itb_wgt_2", "itb_app_2",
+      "Contact_TB", "itb_cou_3", "temp_38", "tachycardia", "ice_ind_bin.factor",
+      "ice_cra.factor", "Dep_csc", "ice_ade_bin.factor", "hiv_res.factor", "TB_stt_bin"
+      ):=.(cou2, fev, fat, wgt, app, cont, cou3, temp, tach, cind, cra, csc, ade, hiv, TB)]
+
+
+## Check se/sp are matching between TBS and synthetic cohort - screening var
+
+# SOC
+Y[, mean(cou2 | fev | cont)] # se: 38%
+Ytmp[, mean(cou2 | fev | cont)] # se: 38%
+X[, mean(cou2 == 0 & fev == 0 & cont == 0)] # sp: 79%
+Xtmp[, mean(cou2 == 0 & fev == 0 & cont == 0)] # sp: 79%
+
+CF[TB=="TB", mean(cou2 | fev | cont)] # se: 37%
+CF[TB=="TB", mean(itb_cou_2 | itb_fev_2 | Contact_TB)] # se: 37%
+CF[TB!="TB", mean(cou2 == 0 & fev == 0 & cont == 0)] # sp: 79%
+CF[TB!="TB", mean(itb_cou_2 == 0 & itb_fev_2 == 0 & Contact_TB == 0)] # sp: 79%
+
+# TBS2
+Y[, mean(cont | cou3 | temp | tach | cind | cra | csc | ade | hiv)] # se: 89%
+Ytmp[, mean(cont | cou3 | temp | tach | cind | cra | csc | ade | hiv)] # se: 89%
+X[, mean(cont == 0 & cou3 == 0 & temp == 0 & tach == 0 & cind == 0 & cra == 0 & csc == 0 & ade == 0 & hiv== 0)] # sp: 35%
+Xtmp[, mean(cont == 0 & cou3 == 0 & temp == 0 & tach == 0 & cind == 0 & cra == 0 & csc == 0 & ade == 0 & hiv== 0)] # sp: 35%
+
+CF[TB=="TB", mean(cont | cou3 | temp | tach | cind | cra | csc | ade | hiv)] # se: 89%
+CF[TB=="TB", mean(Contact_TB | itb_cou_3 | temp_38 | tachycardia | ice_ind_bin.factor |
+                    ice_cra.factor | Dep_csc | ice_ade_bin.factor | hiv_res.factor)] # se: 89%
+CF[TB!="TB", mean(cont == 0 & cou3 == 0 & temp == 0 & tach == 0 & cind == 0 & cra == 0 & csc == 0 & ade == 0 & hiv== 0)] # sp: 35%
+CF[TB!="TB", mean(Contact_TB == 0 & itb_cou_3 == 0 & temp_38 == 0 & tachycardia == 0 & ice_ind_bin.factor == 0 &
+                    ice_cra.factor == 0 & Dep_csc == 0 & ice_ade_bin.factor == 0 & hiv_res.factor== 0)] # sp: 35%
+
+# WHO
+Y[, mean(cou2 | fev | fat | wgt | app)] # se: 80%
+Ytmp[, mean(cou2 | fev | fat | wgt | app)] # se: 80%
+X[, mean(cou2 == 0 & fev == 0 & fat == 0 & wgt == 0 & app == 0)] # sp: 27%
+Xtmp[, mean(cou2 == 0 & fev == 0 & fat == 0 & wgt == 0 & app == 0)] # sp: 27%
+
+CF[TB=="TB", mean(cou2 | fev | fat | wgt | app)] # se: 80%
+CF[TB=="TB", mean(itb_cou_2 | itb_fev_2 | itb_fat_2 | itb_wgt_2 | itb_app_2)] # se: 80%
+CF[TB!="TB", mean(cou2 == 0 & fev == 0 & fat == 0 & wgt == 0 & app == 0)] # sp: 28%
+CF[TB!="TB", mean(itb_cou_2 == 0 & itb_fev_2 == 0 & itb_fat_2 == 0 & itb_wgt_2 == 0 & itb_app_2 == 0)] # sp: 28%
+
+CF[, lapply(.SD, mean), by = TB, .SDcols = c("itb_cou_2", "itb_fev_2", "itb_fat_2", "itb_wgt_2", "itb_app_2")]
+
+
+## Append scores
+
+setDT(CF)  # Ensure CF is a data.table
+CF[, id := .I]
+
+CF <- appendWHOscores(CF)
+CF <- appendTBSscores(CF)
+
+## check se/sp
+CF[TB!="TB",1-mean(score_X>10)] #specificity =46%
+CF[TB!="TB",1-mean(score_noX>10)] #specificity =82%
+CF[TB=="TB",mean(score_X>10)] #sensitivity =74%
+CF[TB=="TB",mean(score_noX>10)] #sensitivity =37%
+
+## check se/sp
+CF[TB!="TB",1-mean(TBS1Sb>=10)] #specificity =80%
+CF[TB!="TB",1-mean(TBS2Sa>=1 & TBS2Sb>=10, na.rm = TRUE)] #specificity =85%
+CF[TB=="TB",mean(TBS1Sb>=10)] #sensitivity =81%
+CF[TB=="TB",mean(TBS2Sa>=1 & TBS2Sb>=10, na.rm = TRUE)] #sensitivity =72%
+
 
 ## NOTE in TBS2Sb==NA when TBS2Sa==0
 
@@ -384,9 +582,9 @@ HZ <- getHZ(MM[,.(`DALYs averted`=mean(`DALYs averted`),
                  DALYsd=sd(`DALYs averted`),
                  COSTsd=sd(`Incremental cost`)),
                by=.(country,algorithm)])
-HZ[,icer0:=c(0,icer[1:3]),by=country]
-HZ[,icer1:=c(icer[1:3],400),by=country]
-HZ[,algorithm:=rep(c('soc','tbs2','who','tbs1'),2)] #NOTE this is by hand
+HZ[,icer0:=c(0,icer[1:2]),by=country]
+HZ[,icer1:=c(icer[1:2],400),by=country]
+HZ[,algorithm:=rep(c('soc','tbs2','tbs1'),2)] #NOTE this is by hand - 'who',
 MM <- reshapeINC(M,exclude.soc=FALSE) #this is vs a comparator of no intervention
 CEAF <- make.ceafs(MM, seq(from = 0, to = 400, by = 0.5))
 
@@ -401,15 +599,15 @@ GF <- ggplot(
   # Adjust geom_text with conditional nudges for "130" specifically
   geom_text(data = subset(HZ, txt == "130" & country == "Uganda"),
             aes(x = icer, y = 0.95, label = txt),
-            col = 2, 
+            col = 2,
             nudge_x = -30  # Move "130" to the left
             ) +
   # Add other labels without specific nudges
   geom_text(data = subset(HZ, !(txt == "130" & country == "Uganda")),
             aes(x = icer, y = 0.95, label = txt),
-            col = 2, 
+            col = 2,
             nudge_x = 20) +
-  
+
   geom_line() +
   facet_wrap(~country,ncol=1)+
   scale_y_continuous(label = percent,limits=c(0,1)) +
@@ -417,8 +615,8 @@ GF <- ggplot(
   ylab("Probability highest net benefit")+
   scale_color_manual(
     name = "Diagnostic approach",
-    values = c("who" = "royalblue3", "tbs1" = "orangered2", "tbs2" = "seagreen", "soc" = "black"),
-    labels = c("who" = "WHO TDA", "tbs1" = "One-step TDA", "tbs2" = "Two-step TDA", "soc" = "SOC")) +
+    values = c("who" = "royalblue3", "tbs1" = "orangered2", "tbs2" = "seagreen", "soc" = "black"), 
+    labels = c("who" = "WHO TDA", "tbs1" = "One-step TDA", "tbs2" = "Two-step TDA", "soc" = "SOC")) + 
   theme_bw()+
   theme(legend.title = element_text(face = "bold", size = 10),
         legend.text = element_text(size = 8),
