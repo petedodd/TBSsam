@@ -42,6 +42,10 @@ gh <- function(x) glue(here(x))
 # install.packages("devtools")
 # devtools::install_github("petedodd/discly")
 
+install.packages("binom", dependencies=TRUE)
+library(binom)
+
+
 library(HEdtree)
 library(discly)
 
@@ -268,6 +272,20 @@ CF[TB!="TB", mean(cou2 == 0 & fev == 0 & fat == 0 & wgt == 0 & app == 0)] # sp: 
 CF[TB!="TB", mean(itb_cou_2 == 0 & itb_fev_2 == 0 & itb_fat_2 == 0 & itb_wgt_2 == 0 & itb_app_2 == 0)] # sp: 28%
 
 CF[, lapply(.SD, mean), by = TB, .SDcols = c("itb_cou_2", "itb_fev_2", "itb_fat_2", "itb_wgt_2", "itb_app_2")]
+
+
+#Exact binomial CI for screening se/sp - redo for each arm and for se and for sp - estimate from X (not TB) and Y (TB)
+# Given data
+n_TB <- 434  # Total cases - change to 101 (TB) or 434 (not TB)
+p_TB <- 0.2741935  # change value here
+
+# Calculate number of successes (X)
+X_TB <- round(p_TB * n_TB)  # Convert proportion to count
+
+# Compute exact binomial confidence interval (Clopper-Pearson method)
+ci <- binom.confint(X_TB, n_TB, conf.level = 0.95, methods = "exact")
+
+
 
 
 ## Append scores
