@@ -114,114 +114,121 @@ CF[TB!="TB", mean(itb_cou_2 == 0 & itb_fev_2 == 0 & itb_fat_2 == 0 & itb_wgt_2 =
 CF[TB=="TB", mean(itb_cou_2 | itb_fev_2 | itb_fat_2)] # se: 79%
 CF[TB!="TB", mean(itb_cou_2 == 0 & itb_fev_2 == 0 & itb_fat_2 == 0)] # sp: 46%
 
-## read in
-C <- as.data.table(read_excel("data/data_mod.xlsx")) #cohort data
-#getwd()
+## NOTE full cohort data are excluded from repo
+## this commented section is retained to show how the resampled restricted data were generated:
 
-# ### Resampling of all var
-# 
-# ## restrict & reform
-# 
-# C <- C[,.(Contact_TB, itb_fat_2, itb_fev_2, itb_cou_2, itb_cou_3, itb_app_2, temp_38, itb_wgt_2, itb_wgt.factor, tachycardia, tachypnea,
-#           ice_ind_bin.factor, ice_cra.factor, Dep_csc, ice_ade_bin.factor, cxr_pre_mil.factor, cxr_pre_alv.factor, cxr_pre_hil.factor,
-#           cxr_pre_exc.factor, cxr_pre_ple.factor, cxr_pre_eff.factor, cxr_pre_ple_per_eff.factor, aus_sma.factor, aus_hma.factor,
-#           aus_effusion, aus_asc.factor, reassessment, hiv_res.factor, Xpert_res, TB_stt_bin)]
-# 
-# # Apply transformation
-# C <- C %>%
-#   mutate(across(c(Contact_TB, itb_fat_2, itb_fev_2, itb_cou_2, itb_cou_3, itb_app_2, temp_38, itb_wgt_2, itb_wgt.factor, tachycardia, tachypnea,
-#                   ice_ind_bin.factor, ice_cra.factor, Dep_csc, ice_ade_bin.factor, cxr_pre_mil.factor, cxr_pre_alv.factor, cxr_pre_hil.factor,
-#                   cxr_pre_exc.factor, cxr_pre_ple.factor, cxr_pre_eff.factor, cxr_pre_ple_per_eff.factor, aus_sma.factor, aus_hma.factor,
-#                   aus_effusion, aus_asc.factor, reassessment),
-#                 ~ ifelse(. == "Yes", 1, 0)))
-# 
-# C <- C %>%
-#   mutate(across(c(hiv_res.factor, Xpert_res),
-#                 ~ ifelse(. == "Positive", 1, 0)))
-# 
-# C[TB_stt_bin == "NotTB", TB_stt_bin := "not TB"]
-# 
-# Y <- C[TB_stt_bin=="TB", .(Contact_TB, itb_fat_2, itb_fev_2, itb_cou_2, itb_cou_3, itb_app_2, temp_38, itb_wgt_2, itb_wgt.factor, tachycardia, tachypnea,
-#                            ice_ind_bin.factor, ice_cra.factor, Dep_csc, ice_ade_bin.factor, cxr_pre_mil.factor, cxr_pre_alv.factor, cxr_pre_hil.factor,
-#                            cxr_pre_exc.factor, cxr_pre_ple.factor, cxr_pre_eff.factor, cxr_pre_ple_per_eff.factor, aus_sma.factor, aus_hma.factor,
-#                            aus_effusion, aus_asc.factor, reassessment, hiv_res.factor, Xpert_res, TB_stt_bin)]
-# X <- C[TB_stt_bin!="TB", .(Contact_TB, itb_fat_2, itb_fev_2, itb_cou_2, itb_cou_3, itb_app_2, temp_38, itb_wgt_2, itb_wgt.factor, tachycardia, tachypnea,
-#                            ice_ind_bin.factor, ice_cra.factor, Dep_csc, ice_ade_bin.factor, cxr_pre_mil.factor, cxr_pre_alv.factor, cxr_pre_hil.factor,
-#                            cxr_pre_exc.factor, cxr_pre_ple.factor, cxr_pre_eff.factor, cxr_pre_ple_per_eff.factor, aus_sma.factor, aus_hma.factor,
-#                            aus_effusion, aus_asc.factor, reassessment, hiv_res.factor, Xpert_res, TB_stt_bin)]
-# 
-# names(X) <- names(Y) <- c("cont", "fat", "fev", "cou2", "cou3", "app", "temp", "wgt2",  "wgtf", "tachc", "tachp",
-#                           "ind", "cra", "csc", "ade", "mil", "alv", "hil", "exc", "ple", "eff", "ple_eff", "sma",
-#                           "hma", "aus_eff", "asc", "rea", "hiv", "xpe", "TB")
-# 
-# ## Resampling
-# 
-# Ytmp <- Y[sample(1:nrow(Y),nrow(CF[TB=="TB"]),replace=TRUE)]
-# Xtmp <- X[sample(1:nrow(X),nrow(CF[TB!="TB"]),replace=TRUE)]
-# 
-# Xtmp[,id:=1:nrow(Xtmp)]
-# Ytmp[,id:=1:nrow(Ytmp)]
-# 
-# XY <- rbind(Xtmp,Ytmp)
-# 
-# CF <- merge(CF,XY,by=c("id","TB"),all.x=TRUE)
-# 
-# CF[,c("Contact_TB", "itb_fat_2", "itb_fev_2", "itb_cou_2", "itb_cou_3", "itb_app_2",
-#       "temp_38", "itb_wgt_2", "itb_wgt.factor", "tachycardia", "tachypnea",
-#       "ice_ind_bin.factor", "ice_cra.factor", "Dep_csc", "ice_ade_bin.factor",
-#       "cxr_pre_mil.factor", "cxr_pre_alv.factor", "cxr_pre_hil.factor",
-#       "cxr_pre_exc.factor", "cxr_pre_ple.factor", "cxr_pre_eff.factor",
-#       "cxr_pre_ple_per_eff.factor", "aus_sma.factor", "aus_hma.factor",
-#       "aus_effusion", "aus_asc.factor", "reassessment", "hiv_res.factor",
-#       "Xpert_res"):=.(cont, fat, fev, cou2, cou3, app, temp, wgt2, wgtf, tachc, tachp,
-#                       ind, cra, csc, ade, mil, alv, hil, exc, ple, eff, ple_eff, sma,
-#                       hma, aus_eff, asc, rea, hiv, xpe)]
-# 
+## ## read in
+## C <- as.data.table(read_excel("data/data_mod.xlsx")) #cohort data
 
-
-### Resampling of screening var
-
-## restrict & reform
-C <- C[,.(itb_cou_2,itb_fev_2,itb_fat_2,itb_wgt_2,itb_app_2, Contact_TB, itb_cou_3,
-          temp_38, tachycardia, ice_ind_bin.factor, ice_cra.factor, Dep_csc, ice_ade_bin.factor, hiv_res.factor ,TB_stt_bin)]
-
-# Apply transformation
-C <- C %>%
-  mutate(across(c(itb_cou_2,itb_fev_2,itb_fat_2,itb_wgt_2,itb_app_2, Contact_TB, itb_cou_3,
-                  temp_38, tachycardia, ice_ind_bin.factor, ice_cra.factor, Dep_csc, ice_ade_bin.factor),
-                ~ ifelse(. == "Yes", 1, 0)))
-
-C <- C %>%
-  mutate(across(c(hiv_res.factor),
-                ~ ifelse(. == "Positive", 1, 0)))
-
-C[TB_stt_bin == "NotTB", TB_stt_bin := "not TB"]
+## # ### Resampling of all var
+## # 
+## # ## restrict & reform
+## # 
+## # C <- C[,.(Contact_TB, itb_fat_2, itb_fev_2, itb_cou_2, itb_cou_3, itb_app_2, temp_38, itb_wgt_2, itb_wgt.factor, tachycardia, tachypnea,
+## #           ice_ind_bin.factor, ice_cra.factor, Dep_csc, ice_ade_bin.factor, cxr_pre_mil.factor, cxr_pre_alv.factor, cxr_pre_hil.factor,
+## #           cxr_pre_exc.factor, cxr_pre_ple.factor, cxr_pre_eff.factor, cxr_pre_ple_per_eff.factor, aus_sma.factor, aus_hma.factor,
+## #           aus_effusion, aus_asc.factor, reassessment, hiv_res.factor, Xpert_res, TB_stt_bin)]
+## # 
+## # # Apply transformation
+## # C <- C %>%
+## #   mutate(across(c(Contact_TB, itb_fat_2, itb_fev_2, itb_cou_2, itb_cou_3, itb_app_2, temp_38, itb_wgt_2, itb_wgt.factor, tachycardia, tachypnea,
+## #                   ice_ind_bin.factor, ice_cra.factor, Dep_csc, ice_ade_bin.factor, cxr_pre_mil.factor, cxr_pre_alv.factor, cxr_pre_hil.factor,
+## #                   cxr_pre_exc.factor, cxr_pre_ple.factor, cxr_pre_eff.factor, cxr_pre_ple_per_eff.factor, aus_sma.factor, aus_hma.factor,
+## #                   aus_effusion, aus_asc.factor, reassessment),
+## #                 ~ ifelse(. == "Yes", 1, 0)))
+## # 
+## # C <- C %>%
+## #   mutate(across(c(hiv_res.factor, Xpert_res),
+## #                 ~ ifelse(. == "Positive", 1, 0)))
+## # 
+## # C[TB_stt_bin == "NotTB", TB_stt_bin := "not TB"]
+## # 
+## # Y <- C[TB_stt_bin=="TB", .(Contact_TB, itb_fat_2, itb_fev_2, itb_cou_2, itb_cou_3, itb_app_2, temp_38, itb_wgt_2, itb_wgt.factor, tachycardia, tachypnea,
+## #                            ice_ind_bin.factor, ice_cra.factor, Dep_csc, ice_ade_bin.factor, cxr_pre_mil.factor, cxr_pre_alv.factor, cxr_pre_hil.factor,
+## #                            cxr_pre_exc.factor, cxr_pre_ple.factor, cxr_pre_eff.factor, cxr_pre_ple_per_eff.factor, aus_sma.factor, aus_hma.factor,
+## #                            aus_effusion, aus_asc.factor, reassessment, hiv_res.factor, Xpert_res, TB_stt_bin)]
+## # X <- C[TB_stt_bin!="TB", .(Contact_TB, itb_fat_2, itb_fev_2, itb_cou_2, itb_cou_3, itb_app_2, temp_38, itb_wgt_2, itb_wgt.factor, tachycardia, tachypnea,
+## #                            ice_ind_bin.factor, ice_cra.factor, Dep_csc, ice_ade_bin.factor, cxr_pre_mil.factor, cxr_pre_alv.factor, cxr_pre_hil.factor,
+## #                            cxr_pre_exc.factor, cxr_pre_ple.factor, cxr_pre_eff.factor, cxr_pre_ple_per_eff.factor, aus_sma.factor, aus_hma.factor,
+## #                            aus_effusion, aus_asc.factor, reassessment, hiv_res.factor, Xpert_res, TB_stt_bin)]
+## # 
+## # names(X) <- names(Y) <- c("cont", "fat", "fev", "cou2", "cou3", "app", "temp", "wgt2",  "wgtf", "tachc", "tachp",
+## #                           "ind", "cra", "csc", "ade", "mil", "alv", "hil", "exc", "ple", "eff", "ple_eff", "sma",
+## #                           "hma", "aus_eff", "asc", "rea", "hiv", "xpe", "TB")
+## # 
+## # ## Resampling
+## # 
+## # Ytmp <- Y[sample(1:nrow(Y),nrow(CF[TB=="TB"]),replace=TRUE)]
+## # Xtmp <- X[sample(1:nrow(X),nrow(CF[TB!="TB"]),replace=TRUE)]
+## # 
+## # Xtmp[,id:=1:nrow(Xtmp)]
+## # Ytmp[,id:=1:nrow(Ytmp)]
+## # 
+## # XY <- rbind(Xtmp,Ytmp)
+## # 
+## # CF <- merge(CF,XY,by=c("id","TB"),all.x=TRUE)
+## # 
+## # CF[,c("Contact_TB", "itb_fat_2", "itb_fev_2", "itb_cou_2", "itb_cou_3", "itb_app_2",
+## #       "temp_38", "itb_wgt_2", "itb_wgt.factor", "tachycardia", "tachypnea",
+## #       "ice_ind_bin.factor", "ice_cra.factor", "Dep_csc", "ice_ade_bin.factor",
+## #       "cxr_pre_mil.factor", "cxr_pre_alv.factor", "cxr_pre_hil.factor",
+## #       "cxr_pre_exc.factor", "cxr_pre_ple.factor", "cxr_pre_eff.factor",
+## #       "cxr_pre_ple_per_eff.factor", "aus_sma.factor", "aus_hma.factor",
+## #       "aus_effusion", "aus_asc.factor", "reassessment", "hiv_res.factor",
+## #       "Xpert_res"):=.(cont, fat, fev, cou2, cou3, app, temp, wgt2, wgtf, tachc, tachp,
+## #                       ind, cra, csc, ade, mil, alv, hil, exc, ple, eff, ple_eff, sma,
+## #                       hma, aus_eff, asc, rea, hiv, xpe)]
+## # 
 
 
-#C[, lapply(.SD, mean), by = TB_stt_bin, .SDcols = c("itb_cou_2_bi", "itb_fev_2_bi", "itb_fat_2_bi", "itb_wgt_2_bi", "itb_app_2_bi")]
+## ### Resampling of screening var
 
-Y <- C[TB_stt_bin=="TB", .(itb_cou_2,itb_fev_2,itb_fat_2,itb_wgt_2,itb_app_2, Contact_TB, itb_cou_3,
-                           temp_38, tachycardia, ice_ind_bin.factor, ice_cra.factor, Dep_csc, ice_ade_bin.factor, hiv_res.factor ,TB_stt_bin)]
-X <- C[TB_stt_bin!="TB", .(itb_cou_2,itb_fev_2,itb_fat_2,itb_wgt_2,itb_app_2, Contact_TB, itb_cou_3,
-                           temp_38, tachycardia, ice_ind_bin.factor, ice_cra.factor, Dep_csc, ice_ade_bin.factor, hiv_res.factor ,TB_stt_bin)]
+## ## restrict & reform
+## C <- C[,.(itb_cou_2,itb_fev_2,itb_fat_2,itb_wgt_2,itb_app_2, Contact_TB, itb_cou_3,
+##           temp_38, tachycardia, ice_ind_bin.factor, ice_cra.factor, Dep_csc, ice_ade_bin.factor, hiv_res.factor ,TB_stt_bin)]
 
-names(X) <- names(Y) <- c("cou2", "fev", "fat", "wgt", "app", "cont", "cou3", "temp", "tach","cind", "cra", "csc", "ade", "hiv", "TB")
+## # Apply transformation
+## C <- C %>%
+##   mutate(across(c(itb_cou_2,itb_fev_2,itb_fat_2,itb_wgt_2,itb_app_2, Contact_TB, itb_cou_3,
+##                   temp_38, tachycardia, ice_ind_bin.factor, ice_cra.factor, Dep_csc, ice_ade_bin.factor),
+##                 ~ ifelse(. == "Yes", 1, 0)))
+
+## C <- C %>%
+##   mutate(across(c(hiv_res.factor),
+##                 ~ ifelse(. == "Positive", 1, 0)))
+
+## C[TB_stt_bin == "NotTB", TB_stt_bin := "not TB"]
 
 
-## Resampling
+## #C[, lapply(.SD, mean), by = TB_stt_bin, .SDcols = c("itb_cou_2_bi", "itb_fev_2_bi", "itb_fat_2_bi", "itb_wgt_2_bi", "itb_app_2_bi")]
 
-# Read CSV into a data.table
-# CF <- fread("CF.csv")
-# set.seed(2345)
+## Y <- C[TB_stt_bin=="TB", .(itb_cou_2,itb_fev_2,itb_fat_2,itb_wgt_2,itb_app_2, Contact_TB, itb_cou_3,
+##                            temp_38, tachycardia, ice_ind_bin.factor, ice_cra.factor, Dep_csc, ice_ade_bin.factor, hiv_res.factor ,TB_stt_bin)]
+## X <- C[TB_stt_bin!="TB", .(itb_cou_2,itb_fev_2,itb_fat_2,itb_wgt_2,itb_app_2, Contact_TB, itb_cou_3,
+##                            temp_38, tachycardia, ice_ind_bin.factor, ice_cra.factor, Dep_csc, ice_ade_bin.factor, hiv_res.factor ,TB_stt_bin)]
 
-Ytmp <- Y[sample(1:nrow(Y),nrow(CF[TB=="TB"]),replace=TRUE)]
-Xtmp <- X[sample(1:nrow(X),nrow(CF[TB!="TB"]),replace=TRUE)]
+## names(X) <- names(Y) <- c("cou2", "fev", "fat", "wgt", "app", "cont", "cou3", "temp", "tach","cind", "cra", "csc", "ade", "hiv", "TB")
 
-Xtmp[,id:=1:nrow(Xtmp)]
-Ytmp[,id:=1:nrow(Ytmp)]
 
-XY <- rbind(Xtmp,Ytmp)
+## ## Resampling
 
+## # Read CSV into a data.table
+## # CF <- fread("CF.csv")
+## # set.seed(2345)
+
+## Ytmp <- Y[sample(1:nrow(Y),nrow(CF[TB=="TB"]),replace=TRUE)]
+## Xtmp <- X[sample(1:nrow(X),nrow(CF[TB!="TB"]),replace=TRUE)]
+
+## Xtmp[,id:=1:nrow(Xtmp)]
+## Ytmp[,id:=1:nrow(Ytmp)]
+
+## XY <- rbind(Xtmp,Ytmp)
+
+## ## save for onward used:
+## save(XY,file=here("data/XY.Rdata"))
+
+## load and merge restricted resampled data:
+load(file=here("data/XY.Rdata"))
 CF <- merge(CF,XY,by=c("id","TB"),all.x=TRUE)
 
 CF[,c("itb_cou_2", "itb_fev_2", "itb_fat_2", "itb_wgt_2", "itb_app_2",
@@ -233,10 +240,10 @@ CF[,c("itb_cou_2", "itb_fev_2", "itb_fat_2", "itb_wgt_2", "itb_app_2",
 ## Check se/sp are matching between TBS and synthetic cohort - screening var
 
 # SOC
-Y[, mean(cou2 | fev | cont)] # se: 38%
-Ytmp[, mean(cou2 | fev | cont)] # se: 38%
-X[, mean(cou2 == 0 & fev == 0 & cont == 0)] # sp: 79%
-Xtmp[, mean(cou2 == 0 & fev == 0 & cont == 0)] # sp: 79%
+## Y[, mean(cou2 | fev | cont)] # se: 38%
+XY[TB=="TB", mean(cou2 | fev | cont)] # se: 38%
+## X[, mean(cou2 == 0 & fev == 0 & cont == 0)] # sp: 79%
+XY[TB!="TB", mean(cou2 == 0 & fev == 0 & cont == 0)] # sp: 79%
 
 CF[TB=="TB", mean(cou2 | fev | cont)] # se: 37%
 CF[TB=="TB", mean(itb_cou_2 | itb_fev_2 | Contact_TB)] # se: 37%
@@ -244,10 +251,10 @@ CF[TB!="TB", mean(cou2 == 0 & fev == 0 & cont == 0)] # sp: 79%
 CF[TB!="TB", mean(itb_cou_2 == 0 & itb_fev_2 == 0 & Contact_TB == 0)] # sp: 79%
 
 # TBS2
-Y[, mean(cont | cou3 | temp | tach | cind | cra | csc | ade | hiv)] # se: 89%
-Ytmp[, mean(cont | cou3 | temp | tach | cind | cra | csc | ade | hiv)] # se: 89%
-X[, mean(cont == 0 & cou3 == 0 & temp == 0 & tach == 0 & cind == 0 & cra == 0 & csc == 0 & ade == 0 & hiv== 0)] # sp: 35%
-Xtmp[, mean(cont == 0 & cou3 == 0 & temp == 0 & tach == 0 & cind == 0 & cra == 0 & csc == 0 & ade == 0 & hiv== 0)] # sp: 35%
+## Y[, mean(cont | cou3 | temp | tach | cind | cra | csc | ade | hiv)] # se: 89%
+XY[TB=="TB", mean(cont | cou3 | temp | tach | cind | cra | csc | ade | hiv)] # se: 89%
+## X[, mean(cont == 0 & cou3 == 0 & temp == 0 & tach == 0 & cind == 0 & cra == 0 & csc == 0 & ade == 0 & hiv== 0)] # sp: 35%
+XY[TB!="TB", mean(cont == 0 & cou3 == 0 & temp == 0 & tach == 0 & cind == 0 & cra == 0 & csc == 0 & ade == 0 & hiv== 0)] # sp: 35%
 
 CF[TB=="TB", mean(cont | cou3 | temp | tach | cind | cra | csc | ade | hiv)] # se: 89%
 CF[TB=="TB", mean(Contact_TB | itb_cou_3 | temp_38 | tachycardia | ice_ind_bin.factor |
@@ -257,10 +264,10 @@ CF[TB!="TB", mean(Contact_TB == 0 & itb_cou_3 == 0 & temp_38 == 0 & tachycardia 
                     ice_cra.factor == 0 & Dep_csc == 0 & ice_ade_bin.factor == 0 & hiv_res.factor== 0)] # sp: 35%
 
 # WHO
-Y[, mean(cou2 | fev | fat | wgt | app)] # se: 80%
-Ytmp[, mean(cou2 | fev | fat | wgt | app)] # se: 80%
-X[, mean(cou2 == 0 & fev == 0 & fat == 0 & wgt == 0 & app == 0)] # sp: 27%
-Xtmp[, mean(cou2 == 0 & fev == 0 & fat == 0 & wgt == 0 & app == 0)] # sp: 27%
+## Y[, mean(cou2 | fev | fat | wgt | app)] # se: 80%
+XY[TB=="TB", mean(cou2 | fev | fat | wgt | app)] # se: 80%
+## X[, mean(cou2 == 0 & fev == 0 & fat == 0 & wgt == 0 & app == 0)] # sp: 27%
+XY[TB!="TB", mean(cou2 == 0 & fev == 0 & fat == 0 & wgt == 0 & app == 0)] # sp: 27%
 
 CF[TB=="TB", mean(cou2 | fev | fat | wgt | app)] # se: 80%
 CF[TB=="TB", mean(itb_cou_2 | itb_fev_2 | itb_fat_2 | itb_wgt_2 | itb_app_2)] # se: 80%
