@@ -8,6 +8,8 @@ library(here)
 
 gh <- function(x) glue(here(x))
 
+setwd("C:/Users/md21/Dropbox/UBx/TB-SPEED/Modelling/O3SAM/TBSsam")
+
 ## =================== combined pop version ===============
 
 ## gathering a few reused things togther:
