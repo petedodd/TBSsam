@@ -276,7 +276,6 @@ CF[TB!="TB", mean(itb_cou_2 == 0 & itb_fev_2 == 0 & itb_fat_2 == 0 & itb_wgt_2 =
 
 CF[, lapply(.SD, mean), by = TB, .SDcols = c("itb_cou_2", "itb_fev_2", "itb_fat_2", "itb_wgt_2", "itb_app_2")]
 
-
 ## Append scores
 
 setDT(CF)  # Ensure CF is a data.table
@@ -634,14 +633,16 @@ GF <- ggplot(
         )
 GF
 
-ggsave(GF,file=here('graphs/CEAF3.png'),w=6,h=7)
-
 ## =======================================
 
 ## saving out  ---------
 if (!is.na(SA) && SA == "") {
   ggsave(GP, file = here("graphs/CEhull.png"), h = 8, w = 10)
   ggsave(GC, file = here("graphs/CEAC.png"), h = 8, w = 10)
+  ggsave(GP, file = here("graphs/CEhull.pdf"), h = 8, w = 10)
+  ggsave(GC, file = here("graphs/CEAC.pdf"), h = 8, w = 10)
+  ggsave(GF,file=here('graphs/CEAF3.png'),w=6,h=7)
+  ggsave(GF,file=here('graphs/CEAF3.pdf'),w=6,h=7)
 }
 
 ## ## -------- varying prevalence
