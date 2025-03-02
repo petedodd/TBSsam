@@ -42,7 +42,7 @@ gh <- function(x) glue(here(x))
 # install.packages("devtools")
 # devtools::install_github("petedodd/discly")
 
-install.packages("binom", dependencies=TRUE)
+#install.packages("binom", dependencies=TRUE)
 library(binom)
 
 
