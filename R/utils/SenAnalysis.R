@@ -8,6 +8,8 @@ library(dplyr)
 library(tidyr)
 
 
+## Before running this file - make sure you run the shell file of for SA and generated tICERtable_XXX_LQ.csv tICERtable_XXX_UQ.csv files
+
 ## Copy tICERtable.csv as our baseline ICER data
 
 # Define the path of the source file (the file you want to copy)
@@ -36,7 +38,7 @@ if (file.exists(destination_file_LQ) & file.exists(destination_file_UQ)) {
 
 
 # Set working directory to your specified path
-setwd("C:/Users/md21/Dropbox/UBx/TB-SPEED/Modelling/O3SAM/TBSsam/data/SA")
+setwd("C:/Users/md21/Dropbox/UBx/TB-SPEED/Modelling/O3SAM/TBSsam/data/SA")  # do not forget to change back for main analysis
 
 # List all CSV files that contain "tICERtable_" in their name
 csv_files <- list.files(pattern = "tICERtable_.*\\.csv")
