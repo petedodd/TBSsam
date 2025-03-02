@@ -7,7 +7,7 @@ lo <- function(x) quantile(x,probs = 0.025, na.rm = TRUE)
 hi <- function(x) quantile(x,probs = 1-0.025, na.rm = TRUE)
 ## rot45 <- theme(axis.text.x = element_text(angle = 45, hjust = 1))
 brkt <- function(M,L,H,ndp=0) paste0(round(M,ndp),' (',
-                                     round(L,ndp),' - ',
+                                     round(L,ndp),' to ',
                                      round(H,ndp),')')
 
 
